@@ -1,0 +1,42 @@
+# .NET
+bin/
+obj/
+.vscode/
+.vs/
+.idea/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# Windows Installer generated files
+Installers/
+
+# JetBrains Rider
+.idea/
+
+# macOS Finder files
+.DS_Store
+
+# Thumbs.db
+Thumbs.db
+
+# Log files
+*.log
+
+# VS Code
+.vscode/
+.history/
+
+# ASP.NET Core development certificate
+# (Uncomment if you plan to use HTTPS locally and have certs to ignore)
+# https://aka.ms/dotnet-https-linux
+# .aspnet/https/
