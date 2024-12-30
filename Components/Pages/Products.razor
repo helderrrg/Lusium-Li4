@@ -1,0 +1,53 @@
+﻿@page "/products"
+@rendermode InteractiveServer
+
+<PageTitle>Produtos</PageTitle>
+
+<h1>Produtos</h1>
+
+@if (productList == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Descrição</th>
+                <th>Custo</th>
+                <th>Idade Mínima</th>
+                <th>Imagem Alusiva</th>
+                <th>Manual Associado</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in productList)
+            {
+                <tr>
+                    <td>@product.ID</td>
+                    <td>@product.Nome</td>
+                    <td>@product.Descricao</td>
+                    <td>@product.Custo</td>
+                    <td>@product.IdadeMinima</td>
+                    <td>@product.ImagemAlusiva</td>
+                    <td>@product.ManualAssociado</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Product> productList = new();
+
+    [Inject]
+    public required LusiumService LusiumService { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        productList = await LusiumService.GetProducts();
+    }
+}

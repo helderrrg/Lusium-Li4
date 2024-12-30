@@ -2,8 +2,12 @@ namespace Models
 {
     public class Product
     {
-        public int Id { get; set; }      // Chave primária
-        public required string Name { get; set; } // Nome do produto
-        public decimal Price { get; set; } // Preço do produto
+        public int ID { get; set; }
+        public required string Nome { get; set; }
+        public required string Descricao { get; set; }
+        public int Custo { get; set; }
+        public int IdadeMinima { get; set; }
+        public string? ImagemAlusiva { get; set; }
+        public int ManualAssociado { get; set; }
     }
 }

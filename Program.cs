@@ -1,43 +1,39 @@
-using Data; // Referência para o LusiumDbContext
-using Microsoft.EntityFrameworkCore;
 using Lusium.Components;
 using Services;
+using Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Adicionar serviços ao contêiner
+// Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// Configuração do banco de dados SQL Server usando Entity Framework Core
+// Database configuration.
 builder.Services.AddDbContext<LusiumDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Registrar o LusiumService
+// Register services.
 builder.Services.AddScoped<LusiumService>();
-
-// Registrar outros serviços necessários (por exemplo, para injeção de dependência)
-builder.Services.AddScoped<LusiumService>(); // Caso tenha outros serviços a serem injetados
 
 var app = builder.Build();
 
-// Configurar o pipeline de requisição HTTP
+// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    // Configurações específicas para produção
+    // Scope the error handler to the request
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-app.UseRouting(); // Certifique-se de que o UseRouting está presente
+app.UseRouting();
+app.UseAntiforgery();
 
-// Configurar os componentes do Blazor
+// Setup razor components.
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-// Executar a aplicação
+// Execute the application.
 app.Run();
-
-
