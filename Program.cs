@@ -2,6 +2,7 @@ using Lusium.Components;
 using Services;
 using Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,18 @@ builder.Services.AddDbContext<LusiumDbContext>(options =>
 
 // Register services.
 builder.Services.AddScoped<LusiumService>();
+
+//Login Service
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.Cookie.Name = "auth_token";
+        options.Cookie.MaxAge = TimeSpan.FromMinutes(30);
+        options.LoginPath = "/login";
+        options.AccessDeniedPath = "/";
+    });
+builder.Services.AddAuthorization();
+builder.Services.AddCascadingAuthenticationState();
 
 var app = builder.Build();
 
@@ -30,6 +43,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAntiforgery();
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Setup razor components.
 app.MapRazorComponents<App>()

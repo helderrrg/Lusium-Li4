@@ -1,5 +1,6 @@
 ﻿@page "/products"
 @rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
 
 <PageTitle>Produtos</PageTitle>
 
