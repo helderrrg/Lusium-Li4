@@ -16,8 +16,31 @@ namespace Services
             _context = context;
         }
 
+        private bool IsNameValid(string name)
+        {
+            if (name == "")
+            {
+                return false;
+            }
+
+            foreach (char c in name)
+            {
+                if (!char.IsLetter(c))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         private bool IsEmailValid(string email)
         {
+            if (email == "")
+            {
+                return false;
+            }
+
             var emailAttribute = new EmailAddressAttribute();
             if (!emailAttribute.IsValid(email))
             {
@@ -63,18 +86,10 @@ namespace Services
 
         public async Task<bool> ValidaDadosAdministrador(string nome, string email, string pp)
         {
-            if (nome == "" || email == "" || pp == "")
+            // name validation
+            if (!IsNameValid(nome))
             {
                 return false;
-            }
-
-            // name validation
-            foreach (char c in nome)
-            {
-                if (!char.IsLetter(c))
-                {
-                    return false;
-                }
             }
 
             // email validation
@@ -109,18 +124,15 @@ namespace Services
 
         public async Task<bool> ValidaDadosInstituicao(string nome, string nif, string numAssoc, string email, string morada, string pp)
         {
-            if (nome == "" || nif == "" || numAssoc == "" || email == "" || morada == "" || pp == "")
+            if (nif == "" || numAssoc == "" || morada == "")
             {
                 return false;
             }
 
             // name validation
-            foreach (char c in nome)
+            if (!IsNameValid(nome))
             {
-                if (!char.IsLetter(c))
-                {
-                    return false;
-                }
+                return false;
             }
 
             // NIF validation
@@ -181,18 +193,15 @@ namespace Services
         
         public async Task<bool> ValidaDadosColaborador(string nome, string email, DateOnly dataDeNascimento, string codInstituicaoAssociada, string pp)
         {
-            if (nome == "" || email == "" || codInstituicaoAssociada == "" || pp == "")
+            if (codInstituicaoAssociada == "")
             {
                 return false;
             }
 
             // name validation
-            foreach (char c in nome)
+            if (!IsNameValid(nome))
             {
-                if (!char.IsLetter(c))
-                {
-                    return false;
-                }
+                return false;
             }
 
             // email validation
@@ -270,18 +279,208 @@ namespace Services
             }
 
             // the new password is different from the current one
-            var codUtilizadorInt = int.Parse(codUtilizador);
-            return !await _context.Administrador.AnyAsync(a => a.ID == codUtilizadorInt && a.PalavraPasse == novaPP);
+            return !await _context.Administrador.AnyAsync(a => a.ID == int.Parse(codUtilizador) && a.PalavraPasse == novaPP);
         }
 
         public async void AtualizaPP(string codUtilizador, string novaPP)
         {
             var admin = await _context.Administrador.FirstOrDefaultAsync(a => a.ID == int.Parse(codUtilizador));
-            if (admin != null)
+            if (admin == null)
+            {
+                return;
+            }
+            
+            admin.PalavraPasse = novaPP;
+            await _context.SaveChangesAsync();
+        }
+
+        public async void RemoverAutenticacao(string codUtilizador)
+        {}
+
+        public async Task<bool> ValidaNovosDadosAdministrador(string codAdministrador, string novoNome, string novaPP)
+        {
+            var administrador = await _context.Administrador.FirstOrDefaultAsync(a => a.ID == int.Parse(codAdministrador));
+            
+            // no administrator found
+            if (administrador == null)
+            {
+                return false;
+            }
+
+            if (administrador.Nome != novoNome && !IsNameValid(novoNome))
+            {
+                return false;
+            
+            }
+
+            if (administrador.PalavraPasse != novaPP && !IsPasswordValid(novaPP))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public async Task<bool> ValidaPP(string codUtilizador, string pp)
+        {
+            if (!IsPasswordValid(pp))
+            {
+                return false;
+            }
+
+            return await _context.Administrador.AnyAsync(a => a.ID == int.Parse(codUtilizador) && a.PalavraPasse == pp);
+        }
+
+        public async void AtualizaDadosAdministrador(string codAdministrador, string novoNome, string novaPP)
+        {
+            var admin = await _context.Administrador.FirstOrDefaultAsync(a => a.ID == int.Parse(codAdministrador));
+            if (admin == null)
+            {
+                return;
+            }
+            // removes the need to call SaveChangesAsync on the DB
+            if (admin.Nome != novoNome && admin.PalavraPasse != novaPP)
+            {
+                return;
+            }
+            
+            if (admin.Nome != novoNome)
+            {
+                admin.Nome = novoNome;
+            }
+            
+            if (admin.PalavraPasse != novaPP)
             {
                 admin.PalavraPasse = novaPP;
-                await _context.SaveChangesAsync();
             }
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<bool> ValidaNovosDadosInstituicao(string codInstituicao, string novoNome, string novaMorada, string novaPP)
+        {
+            var instituicao = await _context.Instituicao.FirstOrDefaultAsync(i => i.ID == int.Parse(codInstituicao));
+            // no institution found
+            if (instituicao == null)
+            {
+                return false;
+            }
+
+            if (instituicao.Nome != novoNome && !IsNameValid(novoNome))
+            {
+                return false;
+            }
+
+            if (instituicao.Morada != novaMorada && novaMorada == "")
+            {
+                return false;
+            }
+
+            if (instituicao.PalavraPasse != novaPP && !IsPasswordValid(novaPP))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public async void AtualizaDadosInstituicao(string codInstituicao, string novoNome, string novaMorada, string novaPP)
+        {
+            var inst = await _context.Instituicao.FirstOrDefaultAsync(i => i.ID == int.Parse(codInstituicao));
+            if (inst == null)
+            {
+                return;
+            }
+            // removes the need to call SaveChangesAsync on the DB
+            if (inst.Nome != novoNome && inst.Morada != novaMorada && inst.PalavraPasse != novaPP)
+            {
+                return;
+            }
+
+            if (inst.Nome != novoNome)
+            {
+                inst.Nome = novoNome;
+            }
+
+            if (inst.Morada != novaMorada)
+            {
+                inst.Morada = novaMorada;
+            }
+
+            if (inst.PalavraPasse != novaPP)
+            {
+                inst.PalavraPasse = novaPP;
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<bool> ValidaNovosDadosColaborador(string codColaborador, string novoNome, DateOnly novaDataNascimento, string codNovaInstituicao, string novaPP)
+        {
+            var colab = await _context.Colaborador.FirstOrDefaultAsync(c => c.ID == int.Parse(codColaborador));
+            // no collaborator found
+            if (colab == null)
+            {
+                return false;
+            }
+
+            if (colab.Nome != novoNome && !IsNameValid(novoNome))
+            {
+                return false;
+            }
+
+            if (colab.DataDeNascimento != novaDataNascimento && (novaDataNascimento.Day < 1 || novaDataNascimento.Day > 31 || novaDataNascimento.Month < 1 || novaDataNascimento.Month > 12 || novaDataNascimento.Year < 1900 || novaDataNascimento.Year > DateTime.Now.Year - 18))
+            {
+                return false;
+            }
+
+            if (colab.Instituicao != int.Parse(codNovaInstituicao) && !await _context.Instituicao.AnyAsync(i => i.NumeroDeAssociacao == int.Parse(codNovaInstituicao)))
+            {
+                return false;
+            }
+
+            if (colab.PalavraPasse != novaPP && !IsPasswordValid(novaPP))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public async void AtualizaDadosColaborador(string codColaborador, string novoNome, DateOnly novaDataNascimento, string codNovaInstituicao, string novaPP)
+        {
+            var colab = await _context.Colaborador.FirstOrDefaultAsync(c => c.ID == int.Parse(codColaborador));
+            if (colab == null)
+            {
+                return;
+            }
+            // removes the need to call SaveChangesAsync on the DB
+            if (colab.Nome != novoNome && colab.DataDeNascimento != novaDataNascimento && colab.Instituicao != int.Parse(codNovaInstituicao) && colab.PalavraPasse != novaPP)
+            {
+                return;
+            }
+
+            if (colab.Nome != novoNome)
+            {
+                colab.Nome = novoNome;
+            }
+
+            if (colab.DataDeNascimento != novaDataNascimento)
+            {
+                colab.DataDeNascimento = novaDataNascimento;
+            }
+
+            if (colab.Instituicao != int.Parse(codNovaInstituicao))
+            {
+                colab.Instituicao = int.Parse(codNovaInstituicao);
+            }
+
+            if (colab.PalavraPasse != novaPP)
+            {
+                colab.PalavraPasse = novaPP;
+            }
+
+            await _context.SaveChangesAsync();
         }
 
         public async Task<List<Product>> GetProducts()
