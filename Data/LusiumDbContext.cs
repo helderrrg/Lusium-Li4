@@ -19,7 +19,7 @@ namespace Data
         
         public required DbSet<Instituition> Instituicao { get; set; }
 
-        public required DbSet<Colaborator> Colaborador { get; set; }
+        public required DbSet<Collaborator> Colaborador { get; set; }
 
         public required DbSet<Piece> Peca { get; set; }
 
