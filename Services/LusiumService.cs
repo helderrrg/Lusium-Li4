@@ -16,6 +16,51 @@ namespace Services
             _context = context;
         }
 
+        private bool IsEmailValid(string email)
+        {
+            var emailAttribute = new EmailAddressAttribute();
+            if (!emailAttribute.IsValid(email))
+            {
+                return false;
+            }
+            
+            if (email.IndexOf('@') == 0 || email.IndexOf('.') == 0 || email.IndexOf('@') == email.Length - 1 || email.IndexOf('.') == email.Length - 1)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool IsPasswordValid(string password)
+        {
+            if (password.Length < 8)
+            {
+                return false;
+            }
+
+            bool hasNumber = false;
+            bool hasSpecialChar = false;
+            foreach (char c in password)
+            {
+                if (char.IsDigit(c))
+                {
+                    hasNumber = true;
+                }
+                else if (!char.IsLetterOrDigit(c))
+                {
+                    hasSpecialChar = true;
+                }
+            }
+
+            if (!hasNumber || !hasSpecialChar)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         public async Task<bool> ValidaDadosAdministrador(string nome, string email, string pp)
         {
             if (nome == "" || email == "" || pp == "")
@@ -33,38 +78,13 @@ namespace Services
             }
 
             // email validation
-            var emailAttribute = new EmailAddressAttribute();
-            if (!emailAttribute.IsValid(email))
-            {
-                return false;
-            }
-            
-            if (email.IndexOf('@') == 0 || email.IndexOf('.') == 0 || email.IndexOf('@') == email.Length - 1 || email.IndexOf('.') == email.Length - 1)
+            if (!IsEmailValid(email))
             {
                 return false;
             }
 
             // password validation
-            if (pp.Length < 8)
-            {
-                return false;
-            }
-
-            bool hasNumber = false;
-            bool hasSpecialChar = false;
-            foreach (char c in pp)
-            {
-                if (char.IsDigit(c))
-                {
-                    hasNumber = true;
-                }
-                else if (!char.IsLetterOrDigit(c))
-                {
-                    hasSpecialChar = true;
-                }
-            }
-
-            if (!hasNumber || !hasSpecialChar)
+            if (!IsPasswordValid(pp))
             {
                 return false;
             }
@@ -127,38 +147,13 @@ namespace Services
             }
 
             // email validation
-            var emailAttribute = new EmailAddressAttribute();
-            if (!emailAttribute.IsValid(email))
-            {
-                return false;
-            }
-            
-            if (email.IndexOf('@') == 0 || email.IndexOf('.') == 0 || email.IndexOf('@') == email.Length - 1 || email.IndexOf('.') == email.Length - 1)
+            if (!IsEmailValid(email))
             {
                 return false;
             }
 
             // password validation
-            if (pp.Length < 8)
-            {
-                return false;
-            }
-
-            bool hasNumber = false;
-            bool hasSpecialChar = false;
-            foreach (char c in pp)
-            {
-                if (char.IsDigit(c))
-                {
-                    hasNumber = true;
-                }
-                else if (!char.IsLetterOrDigit(c))
-                {
-                    hasSpecialChar = true;
-                }
-            }
-
-            if (!hasNumber || !hasSpecialChar)
+            if (!IsPasswordValid(pp))
             {
                 return false;
             }
@@ -203,13 +198,7 @@ namespace Services
             }
 
             // email validation
-            var emailAttribute = new EmailAddressAttribute();
-            if (!emailAttribute.IsValid(email))
-            {
-                return false;
-            }
-            
-            if (email.IndexOf('@') == 0 || email.IndexOf('.') == 0 || email.IndexOf('@') == email.Length - 1 || email.IndexOf('.') == email.Length - 1)
+            if (!IsEmailValid(email))
             {
                 return false;
             }
@@ -221,26 +210,7 @@ namespace Services
             }
 
             // password validation
-            if (pp.Length < 8)
-            {
-                return false;
-            }
-
-            bool hasNumber = false;
-            bool hasSpecialChar = false;
-            foreach (char c in pp)
-            {
-                if (char.IsDigit(c))
-                {
-                    hasNumber = true;
-                }
-                else if (!char.IsLetterOrDigit(c))
-                {
-                    hasSpecialChar = true;
-                }
-            }
-
-            if (!hasNumber || !hasSpecialChar)
+            if (!IsPasswordValid(pp))
             {
                 return false;
             }
@@ -270,6 +240,74 @@ namespace Services
             await _context.SaveChangesAsync();
 
             return colab;
+        }
+
+        public async Task<bool> ValidaCredenciais(string email, string pp)
+        {
+            // email validation
+            if (!IsEmailValid(email))
+            {
+                return false;
+            }
+
+            // password validation
+            if (!IsPasswordValid(pp))
+            {
+                return false;
+            }
+
+            // at least one user with the given credentials
+            return await _context.Administrador.AnyAsync(a => a.Email == email && a.PalavraPasse == pp) ||
+                   await _context.Instituicao.AnyAsync(i => i.Email == email && i.PalavraPasse == pp) ||
+                   await _context.Colaborador.AnyAsync(c => c.Email == email && c.PalavraPasse == pp);
+        }
+
+        public async void AutenticaUtilizador(string codUtilizador)
+        {}
+
+        public async Task<bool> ValidaNovaPP(string codUtilizador, string novaPP)
+        {
+            // password validation
+            if (!IsPasswordValid(novaPP))
+            {
+                return false;
+            }
+
+            // the new password is different from the current one
+            var codUtilizadorInt = int.Parse(codUtilizador);
+            return !(await _context.Administrador.AnyAsync(a => a.ID == codUtilizadorInt && a.PalavraPasse == novaPP) ||
+                   await _context.Instituicao.AnyAsync(i => i.ID == codUtilizadorInt && i.PalavraPasse == novaPP) ||
+                   await _context.Colaborador.AnyAsync(c => c.ID == codUtilizadorInt && c.PalavraPasse == novaPP));
+        }
+
+        // no use case "autenticar a aplicação", o passo 2 do fluxo alternativo está a assumir comporatamento
+        // do método ValidaCrendenciais, que não é o correto
+        public async void AtualizaPP(string codUtilizador, string novaPP)
+        {
+            var codUtilizadorInt = int.Parse(codUtilizador);
+            var admin = await _context.Administrador.FirstOrDefaultAsync(a => a.ID == codUtilizadorInt);
+            if (admin != null)
+            {
+                admin.PalavraPasse = novaPP;
+                await _context.SaveChangesAsync();
+                return;
+            }
+
+            var inst = await _context.Instituicao.FirstOrDefaultAsync(i => i.ID == codUtilizadorInt);
+            if (inst != null)
+            {
+                inst.PalavraPasse = novaPP;
+                await _context.SaveChangesAsync();
+                return;
+            }
+
+            var colab = await _context.Colaborador.FirstOrDefaultAsync(c => c.ID == codUtilizadorInt);
+            if (colab != null)
+            {
+                colab.PalavraPasse = novaPP;
+                await _context.SaveChangesAsync();
+                return;
+            }
         }
 
         public async Task<List<Product>> GetProducts()
