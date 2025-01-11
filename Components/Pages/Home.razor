@@ -2,6 +2,31 @@
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="container mt-5">
+    <ModularTable T="Instituicao" Headers="headers" Content="content" IsEditable="isEditable" />
+</div>
 
-Welcome to your new app.
+@code {
+    private List<string> headers = new List<string>
+    {
+        "Nome", "NIF", "Nº Associação", "Email", "Morada", "Créditos Gastos"
+    };
+
+    private List<Instituicao> content = new List<Instituicao>
+    {
+        new Instituicao { Nome = "Instituição1", NIF = "-", NaoAssociado = "-", Email = "-", Morada = "-", CreditosGastados = 0 },
+        new Instituicao { Nome = "Instituição2", NIF = "-", NaoAssociado = "-", Email = "-", Morada = "-", CreditosGastados = 10 }
+    };
+
+    private bool isEditable = true;
+
+    public class Instituicao
+    {
+        public string Nome { get; set; }
+        public string NIF { get; set; }
+        public string NaoAssociado { get; set; }
+        public string Email { get; set; }
+        public string Morada { get; set; }
+        public int CreditosGastados { get; set; }
+    }
+}

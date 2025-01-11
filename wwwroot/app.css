@@ -1,19 +1,116 @@
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background-color: #335145;
 }
 
 a, .btn-link {
-    color: #006bb7;
+    color: #828C51;
 }
 
 .btn-primary {
     color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
+    background-color: #828C51;
+    border-color: #828C51;
+}
+
+/* Custom edit and remove button */
+
+.btn-edit, .btn-remove {
+    color: #fff;
+    background-color: #00000000;
+    border-color: #00000000;
+}
+
+/* Our custom table */
+
+.custom-table {
+    border-collapse: separate;
+    border-spacing: 0 5px; /* Space among lines */
+}
+
+.custom-table thead th {
+    border: none;
+    background: transparent; /* no background color */
+    font-weight: bold;
+    color: #BEEF9E; /* Text color */
+}
+
+.custom-table tbody tr {
+    background: #A6C36F; /* backgroung color for rows */
+    border-radius: 8px;
+    overflow: hidden; /* scroll if the screens is too small */
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); /* shadow for each row */
+}
+
+.custom-table tbody tr td {
+    border-top: none; /* remove upper borders */
+    border-bottom: none; /* remove bottom borders */
+}
+
+.custom-table tbody tr td:first-child {
+    border-left: none; /* remove left border */
+}
+
+.custom-table tbody tr td:last-child {
+    border-right: none; /* remove right border */
+}
+
+.custom-table .actions-column {
+    background: transparent; /* no background */
+    text-align: center;
+}
+
+.custom-table .actions-column button {
+    background: none; /* removes background */
+    border: none; /* removes borders */
+    cursor: pointer;
+}
+
+.custom-table .actions-column button i {
+    font-size: 1.2em;
+    color: #555; /* Icon color */
+}
+
+.custom-table .actions-column button i:hover {
+    color: #828C51; /* Icon color on hover */
+}
+
+/* Our custom search */
+
+.search-bar {
+    display: flex;
+    justify-content: flex-end; /* aligns the search bar to the right */
+    align-items: center;
+    gap: 10px; /* Space between elements */
+}
+
+.search-bar .search-input {
+    display: flex;
+    align-items: center;
+    gap: 0; /* no space between elements */
+    width: auto;
+}
+
+.search-bar .btn-filter {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #BEEF9E;
+    border-radius: 4px 0 0 4px; /* border radius to the left */
+    padding: 0.375rem 0.75rem;
+    cursor: pointer;
+}
+
+.search-bar .btn-filter:hover {
+    color: #828C51;
+}
+
+.search-bar .btn-outline-secondary {
+    border-radius: 0 4px 4px 0; /* border radius to the right */
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #828C51;
 }
 
 .content {

@@ -1,0 +1,61 @@
+@typeparam T
+
+@code {
+    [Parameter] public required List<string> Headers { get; set; }
+    [Parameter] public required List<T> Content { get; set; }
+    [Parameter] public bool IsEditable { get; set; }
+}
+
+<div class="container mt-5">
+    <!-- Search bar -->
+    <div class="d-flex justify-content-end align-items-center mb-3 search-bar">
+        <div class="input-group search-input">
+            <button class="btn btn-filter">
+                <i class="bi bi-list"></i>
+            </button>
+            <input type="text" class="form-control" placeholder="Pesquisar...">
+            <button class="btn btn-outline-secondary" type="button">
+                <i class="bi bi-search"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+        <table class="table custom-table">
+            <thead>
+                <tr>
+                    @foreach (var header in Headers)
+                    {
+                        <th>@header</th>
+                    }
+                    @if (IsEditable)
+                    {
+                        <th></th> <!-- Coluna de ações -->
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Content)
+                {
+                    <tr>
+                        @if (item != null)
+                        {
+                            @foreach (var property in item.GetType().GetProperties())
+                            {
+                                <td>@property.GetValue(item)</td>
+                            }
+                        }
+                        @if (IsEditable)
+                        {
+                            <td class="actions-column">
+                                <button class="btn btn-sm btn-edit me-1"><i class="bi bi-pencil-square i-edit"></i></button>
+                                <button class="btn btn-sm btn-edit"><i class="bi bi-trash i-remove"></i></button>
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
