@@ -1,6 +1,6 @@
 namespace Models.Entities
 {
-    public class Collaborator
+    public class Collaborator : IUser
     {
         public int ID { get; set; }
         public required string Nome { get; set; }

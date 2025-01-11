@@ -1,6 +1,6 @@
 namespace Models.Entities
 {
-    public class Instituition
+    public class Instituition : IUser
     {
         public int ID { get; set; }
         public required string Nome { get; set; }

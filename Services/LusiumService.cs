@@ -267,8 +267,8 @@ namespace Services
                    await _context.Colaborador.AnyAsync(c => c.Email == email && c.PalavraPasse == pp);
         }
 
-        public async void AutenticaUtilizador(string codUtilizador)
-        {}
+        //public async Task AutenticaUtilizador(string codUtilizador)
+        //{}
 
         public async Task<bool> ValidaNovaPP(string codUtilizador, string novaPP)
         {
@@ -282,7 +282,7 @@ namespace Services
             return !await _context.Administrador.AnyAsync(a => a.ID == int.Parse(codUtilizador) && a.PalavraPasse == novaPP);
         }
 
-        public async void AtualizaPP(string codUtilizador, string novaPP)
+        public async Task AtualizaPP(string codUtilizador, string novaPP)
         {
             var admin = await _context.Administrador.FirstOrDefaultAsync(a => a.ID == int.Parse(codUtilizador));
             if (admin == null)
@@ -294,8 +294,8 @@ namespace Services
             await _context.SaveChangesAsync();
         }
 
-        public async void RemoverAutenticacao(string codUtilizador)
-        {}
+        //public async Task RemoverAutenticacao(string codUtilizador)
+        //{}
 
         public async Task<bool> ValidaNovosDadosAdministrador(string codAdministrador, string novoNome, string novaPP)
         {
@@ -331,7 +331,7 @@ namespace Services
             return await _context.Administrador.AnyAsync(a => a.ID == int.Parse(codUtilizador) && a.PalavraPasse == pp);
         }
 
-        public async void AtualizaDadosAdministrador(string codAdministrador, string novoNome, string novaPP)
+        public async Task AtualizaDadosAdministrador(string codAdministrador, string novoNome, string novaPP)
         {
             var admin = await _context.Administrador.FirstOrDefaultAsync(a => a.ID == int.Parse(codAdministrador));
             if (admin == null)
@@ -339,7 +339,7 @@ namespace Services
                 return;
             }
             // removes the need to call SaveChangesAsync on the DB
-            if (admin.Nome != novoNome && admin.PalavraPasse != novaPP)
+            if (admin.Nome == novoNome && admin.PalavraPasse == novaPP)
             {
                 return;
             }
@@ -384,7 +384,7 @@ namespace Services
             return true;
         }
 
-        public async void AtualizaDadosInstituicao(string codInstituicao, string novoNome, string novaMorada, string novaPP)
+        public async Task AtualizaDadosInstituicao(string codInstituicao, string novoNome, string novaMorada, string novaPP)
         {
             var inst = await _context.Instituicao.FirstOrDefaultAsync(i => i.ID == int.Parse(codInstituicao));
             if (inst == null)
@@ -392,7 +392,7 @@ namespace Services
                 return;
             }
             // removes the need to call SaveChangesAsync on the DB
-            if (inst.Nome != novoNome && inst.Morada != novaMorada && inst.PalavraPasse != novaPP)
+            if (inst.Nome == novoNome && inst.Morada == novaMorada && inst.PalavraPasse == novaPP)
             {
                 return;
             }
@@ -447,7 +447,7 @@ namespace Services
             return true;
         }
 
-        public async void AtualizaDadosColaborador(string codColaborador, string novoNome, DateOnly novaDataNascimento, string codNovaInstituicao, string novaPP)
+        public async Task AtualizaDadosColaborador(string codColaborador, string novoNome, DateOnly novaDataNascimento, string codNovaInstituicao, string novaPP)
         {
             var colab = await _context.Colaborador.FirstOrDefaultAsync(c => c.ID == int.Parse(codColaborador));
             if (colab == null)
@@ -455,7 +455,7 @@ namespace Services
                 return;
             }
             // removes the need to call SaveChangesAsync on the DB
-            if (colab.Nome != novoNome && colab.DataDeNascimento != novaDataNascimento && colab.Instituicao != int.Parse(codNovaInstituicao) && colab.PalavraPasse != novaPP)
+            if (colab.Nome == novoNome && colab.DataDeNascimento == novaDataNascimento && colab.Instituicao == int.Parse(codNovaInstituicao) && colab.PalavraPasse == novaPP)
             {
                 return;
             }
@@ -481,6 +481,74 @@ namespace Services
             }
 
             await _context.SaveChangesAsync();
+        }
+
+        public async Task RemoveUtilizador(string codUtilizador, string tipoUtilizador)
+        {
+            // in case the user is an administrator
+            if (tipoUtilizador == "Administrador")
+            {
+                var admin = await _context.Administrador.FirstOrDefaultAsync(a => a.ID == int.Parse(codUtilizador));
+                if (admin != null)
+                {
+                    _context.Administrador.Remove(admin);
+                    await _context.SaveChangesAsync();
+                    return;
+                }
+                return;
+            }
+
+            // in case the user is an institution
+            if (tipoUtilizador == "Instituição")
+            {
+                var inst = await _context.Instituicao.FirstOrDefaultAsync(i => i.ID == int.Parse(codUtilizador));
+                if (inst != null)
+                {
+                    // remove all the entries on table ManualDaInstituicao whose IDInstituicao is the same as inst.ID
+                    await _context.Database.ExecuteSqlRawAsync("DELETE FROM ManualDaInstituicao WHERE IDInstituicao = {0}", inst.ID);
+
+                    _context.Instituicao.Remove(inst);
+                    await _context.SaveChangesAsync();
+                    return;
+                }
+                return;
+            }
+
+            // in case the user is a collaborator
+            if (tipoUtilizador == "Colaborador")
+            {
+                var colab = await _context.Colaborador.FirstOrDefaultAsync(c => c.ID == int.Parse(codUtilizador));
+                if (colab != null)
+                {
+                    _context.Colaborador.Remove(colab);
+                    await _context.SaveChangesAsync();
+                }
+            }
+        }
+
+        public async Task RemoveColaboradoresInstituicao(string codInstituicao)
+        {
+            await _context.Database.ExecuteSqlRawAsync("DELETE FROM Colaborador WHERE Instituicao = {0}", int.Parse(codInstituicao));
+        }
+
+        public async Task<Dictionary<string, IUser>> ListaUtilizadores(string tipoUtilizador)
+        {
+            if (tipoUtilizador == "Administrador")
+            {
+                return await _context.Administrador.ToDictionaryAsync(a => a.ID.ToString(), a => (IUser)a);
+            }
+
+            if (tipoUtilizador == "Instituição")
+            {
+                return await _context.Instituicao.ToDictionaryAsync(i => i.ID.ToString(), i => (IUser)i);
+            }
+
+            if (tipoUtilizador == "Colaborador")
+            {
+                return await _context.Colaborador.ToDictionaryAsync(c => c.ID.ToString(), c => (IUser)c);
+            }
+
+            return new Dictionary<string, IUser>();
         }
 
         public async Task<List<Product>> GetProducts()
