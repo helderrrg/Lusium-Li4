@@ -89,8 +89,7 @@ namespace Services
                 return false;
             }
 
-            var admin = await _context.Administrador.FirstOrDefaultAsync(a => a.Email == email);
-            return admin == null;
+            return !await _context.Administrador.AnyAsync(a => a.Email == email);
         }
 
         public async Task<Administrator> RegistaAdministrador(string nome, string email, string pp)
@@ -158,8 +157,7 @@ namespace Services
                 return false;
             }
 
-            var inst = await _context.Instituicao.FirstOrDefaultAsync(i => i.Email == email);
-            return inst == null;
+            return !await _context.Instituicao.AnyAsync(i => i.Email == email);
         }
 
         public async Task<Instituition> RegistaInstituicao(string nome, string nif, string numAssoc, string email, string morada, string pp)
@@ -215,14 +213,12 @@ namespace Services
                 return false;
             }
 
-            var colab = await _context.Colaborador.FirstOrDefaultAsync(i => i.Email == email);
-            if (colab != null)
+            if (await _context.Colaborador.AnyAsync(i => i.Email == email))
             {
                 return false;
             }
 
-            var inst = await _context.Instituicao.FirstOrDefaultAsync(i => i.NumeroDeAssociacao == int.Parse(codInstituicaoAssociada));
-            return inst != null;
+            return await _context.Instituicao.AnyAsync(i => i.NumeroDeAssociacao == int.Parse(codInstituicaoAssociada));
         }
         
         public async Task<Collaborator> RegistaColaborador(string nome, string email, DateOnly dataDeNascimento, string codInstituicaoAssociada, string pp)
@@ -275,38 +271,16 @@ namespace Services
 
             // the new password is different from the current one
             var codUtilizadorInt = int.Parse(codUtilizador);
-            return !(await _context.Administrador.AnyAsync(a => a.ID == codUtilizadorInt && a.PalavraPasse == novaPP) ||
-                   await _context.Instituicao.AnyAsync(i => i.ID == codUtilizadorInt && i.PalavraPasse == novaPP) ||
-                   await _context.Colaborador.AnyAsync(c => c.ID == codUtilizadorInt && c.PalavraPasse == novaPP));
+            return !await _context.Administrador.AnyAsync(a => a.ID == codUtilizadorInt && a.PalavraPasse == novaPP);
         }
 
-        // no use case "autenticar a aplicação", o passo 2 do fluxo alternativo está a assumir comporatamento
-        // do método ValidaCrendenciais, que não é o correto
         public async void AtualizaPP(string codUtilizador, string novaPP)
         {
-            var codUtilizadorInt = int.Parse(codUtilizador);
-            var admin = await _context.Administrador.FirstOrDefaultAsync(a => a.ID == codUtilizadorInt);
+            var admin = await _context.Administrador.FirstOrDefaultAsync(a => a.ID == int.Parse(codUtilizador));
             if (admin != null)
             {
                 admin.PalavraPasse = novaPP;
                 await _context.SaveChangesAsync();
-                return;
-            }
-
-            var inst = await _context.Instituicao.FirstOrDefaultAsync(i => i.ID == codUtilizadorInt);
-            if (inst != null)
-            {
-                inst.PalavraPasse = novaPP;
-                await _context.SaveChangesAsync();
-                return;
-            }
-
-            var colab = await _context.Colaborador.FirstOrDefaultAsync(c => c.ID == codUtilizadorInt);
-            if (colab != null)
-            {
-                colab.PalavraPasse = novaPP;
-                await _context.SaveChangesAsync();
-                return;
             }
         }
 
