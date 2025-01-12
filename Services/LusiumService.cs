@@ -57,7 +57,8 @@ namespace Services
 
         public async Task<bool> ValidaDadosInstituicao(string nome, string nif, string numAssoc, string email, string morada, string pp)
         {
-            if (nif == "" || numAssoc == "" || morada == "")
+            // address validation
+            if (morada == "")
             {
                 return false;
             }
@@ -68,24 +69,14 @@ namespace Services
                 return false;
             }
 
-            // NIF validation
-            if (nif.Length != 9)
-            {
-                return false;
-            }
-
-            if (!int.TryParse(nif, out _))
+            // nif validation
+            if (!Utils.IsNifValid(nif))
             {
                 return false;
             }
 
             // numAssoc validation
-            if (numAssoc.Length != 9)
-            {
-                return false;
-            }
-
-            if (!int.TryParse(numAssoc, out _))
+            if (!Utils.IsNumAssocValid(numAssoc))
             {
                 return false;
             }
@@ -126,6 +117,7 @@ namespace Services
         
         public async Task<bool> ValidaDadosColaborador(string nome, string email, DateOnly dataDeNascimento, string codInstituicaoAssociada, string pp)
         {
+            // institution code validation
             if (codInstituicaoAssociada == "")
             {
                 return false;
@@ -144,7 +136,7 @@ namespace Services
             }
 
             // birth date validation
-            if (dataDeNascimento.Day < 1 || dataDeNascimento.Day > 31 || dataDeNascimento.Month < 1 || dataDeNascimento.Month > 12 || dataDeNascimento.Year < 1900 || dataDeNascimento.Year > DateTime.Now.Year - 18)
+            if (!Utils.IsDateValid(dataDeNascimento))
             {
                 return false;
             }
@@ -160,7 +152,7 @@ namespace Services
                 return false;
             }
 
-            return await _context.Instituicao.AnyAsync(i => i.NumeroDeAssociacao == int.Parse(codInstituicaoAssociada));
+            return await _context.Instituicao.AnyAsync(i => i.ID == int.Parse(codInstituicaoAssociada));
         }
         
         public async Task<Collaborator> RegistaColaborador(string nome, string email, DateOnly dataDeNascimento, string codInstituicaoAssociada, string pp)
@@ -356,7 +348,7 @@ namespace Services
                 return false;
             }
 
-            if (colab.DataDeNascimento != novaDataNascimento && (novaDataNascimento.Day < 1 || novaDataNascimento.Day > 31 || novaDataNascimento.Month < 1 || novaDataNascimento.Month > 12 || novaDataNascimento.Year < 1900 || novaDataNascimento.Year > DateTime.Now.Year - 18))
+            if (colab.DataDeNascimento != novaDataNascimento && !Utils.IsDateValid(novaDataNascimento))
             {
                 return false;
             }
@@ -420,7 +412,6 @@ namespace Services
                 {
                     _context.Administrador.Remove(admin);
                     await _context.SaveChangesAsync();
-                    return;
                 }
                 return;
             }
@@ -436,7 +427,6 @@ namespace Services
 
                     _context.Instituicao.Remove(inst);
                     await _context.SaveChangesAsync();
-                    return;
                 }
                 return;
             }

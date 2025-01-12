@@ -72,5 +72,40 @@ namespace Services
 
             return true;
         }
+
+        public static bool IsNifValid(string nif)
+        {
+            if (nif.Length != 9)
+            {
+                return false;
+            }
+
+            if (!int.TryParse(nif, out _))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public static bool IsNumAssocValid(string numAssoc)
+        {
+            if (numAssoc.Length != 6)
+            {
+                return false;
+            }
+
+            if (!int.TryParse(numAssoc, out _))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public static bool IsDateValid(DateOnly data) 
+        {
+            return !(data.Day < 1 || data.Day > 31 || data.Month < 1 || data.Month > 12 || data.Year < 1900 || data.Year > DateTime.Now.Year - 18);
+        }
     }
 }
