@@ -3,7 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Data;
 using Microsoft.Data.SqlClient;
 using System.Data;
-using System.ComponentModel.DataAnnotations;
+
+
 
 namespace Services
 {
@@ -16,90 +17,22 @@ namespace Services
             _context = context;
         }
 
-        private bool IsNameValid(string name)
-        {
-            if (name == "")
-            {
-                return false;
-            }
-
-            foreach (char c in name)
-            {
-                if (!char.IsLetter(c))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        private bool IsEmailValid(string email)
-        {
-            if (email == "")
-            {
-                return false;
-            }
-
-            var emailAttribute = new EmailAddressAttribute();
-            if (!emailAttribute.IsValid(email))
-            {
-                return false;
-            }
-            
-            if (email.IndexOf('@') == 0 || email.IndexOf('.') == 0 || email.IndexOf('@') == email.Length - 1 || email.IndexOf('.') == email.Length - 1)
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        private bool IsPasswordValid(string password)
-        {
-            if (password.Length < 8)
-            {
-                return false;
-            }
-
-            bool hasNumber = false;
-            bool hasSpecialChar = false;
-            foreach (char c in password)
-            {
-                if (char.IsDigit(c))
-                {
-                    hasNumber = true;
-                }
-                else if (!char.IsLetterOrDigit(c))
-                {
-                    hasSpecialChar = true;
-                }
-            }
-
-            if (!hasNumber || !hasSpecialChar)
-            {
-                return false;
-            }
-
-            return true;
-        }
-
         public async Task<bool> ValidaDadosAdministrador(string nome, string email, string pp)
         {
             // name validation
-            if (!IsNameValid(nome))
+            if (!Utils.IsNameValid(nome))
             {
                 return false;
             }
 
             // email validation
-            if (!IsEmailValid(email))
+            if (!Utils.IsEmailValid(email))
             {
                 return false;
             }
 
             // password validation
-            if (!IsPasswordValid(pp))
+            if (!Utils.IsPasswordValid(pp))
             {
                 return false;
             }
@@ -130,7 +63,7 @@ namespace Services
             }
 
             // name validation
-            if (!IsNameValid(nome))
+            if (!Utils.IsNameValid(nome))
             {
                 return false;
             }
@@ -158,13 +91,13 @@ namespace Services
             }
 
             // email validation
-            if (!IsEmailValid(email))
+            if (!Utils.IsEmailValid(email))
             {
                 return false;
             }
 
             // password validation
-            if (!IsPasswordValid(pp))
+            if (!Utils.IsPasswordValid(pp))
             {
                 return false;
             }
@@ -199,13 +132,13 @@ namespace Services
             }
 
             // name validation
-            if (!IsNameValid(nome))
+            if (!Utils.IsNameValid(nome))
             {
                 return false;
             }
 
             // email validation
-            if (!IsEmailValid(email))
+            if (!Utils.IsEmailValid(email))
             {
                 return false;
             }
@@ -217,7 +150,7 @@ namespace Services
             }
 
             // password validation
-            if (!IsPasswordValid(pp))
+            if (!Utils.IsPasswordValid(pp))
             {
                 return false;
             }
@@ -250,13 +183,13 @@ namespace Services
         public async Task<bool> ValidaCredenciais(string email, string pp)
         {
             // email validation
-            if (!IsEmailValid(email))
+            if (!Utils.IsEmailValid(email))
             {
                 return false;
             }
 
             // password validation
-            if (!IsPasswordValid(pp))
+            if (!Utils.IsPasswordValid(pp))
             {
                 return false;
             }
@@ -267,13 +200,10 @@ namespace Services
                    await _context.Colaborador.AnyAsync(c => c.Email == email && c.PalavraPasse == pp);
         }
 
-        //public async Task AutenticaUtilizador(string codUtilizador)
-        //{}
-
         public async Task<bool> ValidaNovaPP(string codUtilizador, string novaPP)
         {
             // password validation
-            if (!IsPasswordValid(novaPP))
+            if (!Utils.IsPasswordValid(novaPP))
             {
                 return false;
             }
@@ -294,9 +224,6 @@ namespace Services
             await _context.SaveChangesAsync();
         }
 
-        //public async Task RemoverAutenticacao(string codUtilizador)
-        //{}
-
         public async Task<bool> ValidaNovosDadosAdministrador(string codAdministrador, string novoNome, string novaPP)
         {
             var administrador = await _context.Administrador.FirstOrDefaultAsync(a => a.ID == int.Parse(codAdministrador));
@@ -307,13 +234,13 @@ namespace Services
                 return false;
             }
 
-            if (administrador.Nome != novoNome && !IsNameValid(novoNome))
+            if (administrador.Nome != novoNome && !Utils.IsNameValid(novoNome))
             {
                 return false;
             
             }
 
-            if (administrador.PalavraPasse != novaPP && !IsPasswordValid(novaPP))
+            if (administrador.PalavraPasse != novaPP && !Utils.IsPasswordValid(novaPP))
             {
                 return false;
             }
@@ -323,7 +250,7 @@ namespace Services
 
         public async Task<bool> ValidaPP(string codUtilizador, string pp)
         {
-            if (!IsPasswordValid(pp))
+            if (!Utils.IsPasswordValid(pp))
             {
                 return false;
             }
@@ -366,7 +293,7 @@ namespace Services
                 return false;
             }
 
-            if (instituicao.Nome != novoNome && !IsNameValid(novoNome))
+            if (instituicao.Nome != novoNome && !Utils.IsNameValid(novoNome))
             {
                 return false;
             }
@@ -376,7 +303,7 @@ namespace Services
                 return false;
             }
 
-            if (instituicao.PalavraPasse != novaPP && !IsPasswordValid(novaPP))
+            if (instituicao.PalavraPasse != novaPP && !Utils.IsPasswordValid(novaPP))
             {
                 return false;
             }
@@ -424,7 +351,7 @@ namespace Services
                 return false;
             }
 
-            if (colab.Nome != novoNome && !IsNameValid(novoNome))
+            if (colab.Nome != novoNome && !Utils.IsNameValid(novoNome))
             {
                 return false;
             }
@@ -439,7 +366,7 @@ namespace Services
                 return false;
             }
 
-            if (colab.PalavraPasse != novaPP && !IsPasswordValid(novaPP))
+            if (colab.PalavraPasse != novaPP && !Utils.IsPasswordValid(novaPP))
             {
                 return false;
             }
