@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Data;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Collections;
 
 
 
@@ -192,7 +193,7 @@ namespace Services
                    await _context.Colaborador.AnyAsync(c => c.Email == email && c.PalavraPasse == pp);
         }
 
-        public async Task<bool> ValidaNovaPP(string codUtilizador, string novaPP)
+        public async Task<bool> ValidaNovaPP(string email, string novaPP)
         {
             // password validation
             if (!Utils.IsPasswordValid(novaPP))
@@ -200,8 +201,18 @@ namespace Services
                 return false;
             }
 
-            // the new password is different from the current one
-            return !await _context.Administrador.AnyAsync(a => a.ID == int.Parse(codUtilizador) && a.PalavraPasse == novaPP);
+            var nameParam = new SqlParameter("@Nome", SqlDbType.VarChar, 45) { Direction = ParameterDirection.Output };
+            var roleParam = new SqlParameter("@Role", SqlDbType.VarChar, 20) { Direction = ParameterDirection.Output };
+
+            await _context.Database.ExecuteSqlRawAsync(
+                "EXEC VerificarIniciarSessao @Email = {0}, @PalavraPasse = {1}, @Nome = @Nome OUTPUT, @Role = @Role OUTPUT",
+                email,
+                novaPP,
+                nameParam,
+                roleParam
+            );
+
+            return nameParam.Value.ToString() == "" || roleParam.Value.ToString() == "";
         }
 
         public async Task AtualizaPP(string codUtilizador, string novaPP)
@@ -240,14 +251,25 @@ namespace Services
             return true;
         }
 
-        public async Task<bool> ValidaPP(string codUtilizador, string pp)
+        public async Task<bool> ValidaPP(string email, string pp)
         {
             if (!Utils.IsPasswordValid(pp))
             {
                 return false;
             }
 
-            return await _context.Administrador.AnyAsync(a => a.ID == int.Parse(codUtilizador) && a.PalavraPasse == pp);
+            var nameParam = new SqlParameter("@Nome", SqlDbType.VarChar, 45) { Direction = ParameterDirection.Output };
+            var roleParam = new SqlParameter("@Role", SqlDbType.VarChar, 20) { Direction = ParameterDirection.Output };
+
+            await _context.Database.ExecuteSqlRawAsync(
+                "EXEC VerificarIniciarSessao @Email = {0}, @PalavraPasse = {1}, @Nome = @Nome OUTPUT, @Role = @Role OUTPUT",
+                email,
+                pp,
+                nameParam,
+                roleParam
+            );
+
+            return nameParam.Value.ToString() != "" && roleParam.Value.ToString() != "";
         }
 
         public async Task AtualizaDadosAdministrador(string codAdministrador, string novoNome, string novaPP)
@@ -467,6 +489,53 @@ namespace Services
 
             return new Dictionary<string, IUser>();
         }
+
+        public async Task<Dictionary<string, IUser>> FiltraUtilizadores(string nome, string tipoUtilizador) 
+        {
+            if (tipoUtilizador == "Administrador")
+            {
+                return await _context.Administrador.Where(a => a.Nome.Contains(nome)).ToDictionaryAsync(a => a.ID.ToString(), a => (IUser)a);
+            }
+
+            if (tipoUtilizador == "Instituição")
+            {
+                return await _context.Instituicao.Where(i => i.Nome.Contains(nome)).ToDictionaryAsync(i => i.ID.ToString(), i => (IUser)i);
+            }
+
+            if (tipoUtilizador == "Colaborador")
+            {
+                return await _context.Colaborador.Where(c => c.Nome.Contains(nome)).ToDictionaryAsync(c => c.ID.ToString(), c => (IUser)c);
+            }
+            
+            return new Dictionary<string, IUser>();
+        }
+
+
+        public async Task<Dictionary<string, IUser>> OrdenaUtilizadores(IComparer<IUser> comparer, string tipoUtilizador)
+        {
+            if (tipoUtilizador == "Administrador")
+            {
+                return await _context.Administrador.OrderBy(a => a, comparer).ToDictionaryAsync(a => a.ID.ToString(), a => (IUser)a);
+            }
+
+            if (tipoUtilizador == "Instituição")
+            {
+                return await _context.Instituicao.OrderBy(i => i, comparer).ToDictionaryAsync(i => i.ID.ToString(), i => (IUser)i);
+            }
+
+            if (tipoUtilizador == "Colaborador")
+            {
+                return await _context.Colaborador.OrderBy(c => c, comparer).ToDictionaryAsync(c => c.ID.ToString(), c => (IUser)c);
+            }
+
+            return new Dictionary<string, IUser>();
+        }
+    
+
+
+
+
+
 
         public async Task<List<Product>> GetProducts()
         {
