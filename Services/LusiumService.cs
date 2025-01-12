@@ -543,13 +543,36 @@ namespace Services
             return await _context.Produto.ToDictionaryAsync(p => p.ID.ToString(), p => p);
         }
 
+        // exibePaginaManual(codManual: String) : PaginaManual
 
+        // iterarPaginaManual(codManual: String, comando: String) : PaginaManual
 
+        // disponibilidadeProduto(codProduto: String) : boolean
+
+        // verificaSaldo(codInstituicao: String) : boolean
+
+        // processaCompra(codInstituicao: String) : void
+
+        // validaMorada(morada: String) : boolean ???????????????????????????????
+
+        // listaComprasEfetuadas(codInstituicao: String) : Map\<String, CompraEfetuada>
 
         public async Task<Purchase?> ExibeCompraEfetuada(string codCompra)
         {
            return await _context.Compra.FirstOrDefaultAsync(c => c.NumeroDaCompra == int.Parse(codCompra));
         }
+
+        // listaManuais(codUtilizador: String) : Map\<String, Manual>
+        
+        // validaQuantidadeCreditos(quantidade: int) : boolean
+
+        // atualizaQuantidadeCreditos(codInstituicao: String, quantidade: int) : void
+
+        // validaQuantidadePecas(quantidade: int) : boolean
+
+        // atualizaQuantidadePecas(codPeca: String, quantidade: int) : void
+
+        // listaPecas() : Map\<String, Peca>
 
         public async Task<List<Product>> GetProducts()
         {
