@@ -511,13 +511,19 @@ namespace Services
         }
 
 
+        /*
+            Criar classe de comparação para ordenar instituições:
+            class NomeInstituicaoComparer : IComparer<Instituition>
+            {
+                public int Compare(Instituition x, Instituition y)
+                {
+                    return x.Nome.CompareTo(y.Nome);
+                }
+            }
+        */
+
         public async Task<Dictionary<string, IUser>> OrdenaUtilizadores(IComparer<IUser> comparer, string tipoUtilizador)
         {
-            if (tipoUtilizador == "Administrador")
-            {
-                return await _context.Administrador.OrderBy(a => a, comparer).ToDictionaryAsync(a => a.ID.ToString(), a => (IUser)a);
-            }
-
             if (tipoUtilizador == "Instituição")
             {
                 return await _context.Instituicao.OrderBy(i => i, comparer).ToDictionaryAsync(i => i.ID.ToString(), i => (IUser)i);
@@ -532,10 +538,18 @@ namespace Services
         }
     
 
+        public async Task<Dictionary<string, Product>> ListaProdutos()
+        {
+            return await _context.Produto.ToDictionaryAsync(p => p.ID.ToString(), p => p);
+        }
 
 
 
 
+        public async Task<Purchase?> ExibeCompraEfetuada(string codCompra)
+        {
+           return await _context.Compra.FirstOrDefaultAsync(c => c.NumeroDaCompra == int.Parse(codCompra));
+        }
 
         public async Task<List<Product>> GetProducts()
         {
