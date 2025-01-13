@@ -1,6 +1,3 @@
-USE ModelDatabase;
-GO
-
 -- Desativar restrições temporariamente para evitar problemas de dependência
 ALTER TABLE ManualInstituicao NOCHECK CONSTRAINT ALL;
 ALTER TABLE Pagina NOCHECK CONSTRAINT ALL;
@@ -20,4 +17,3 @@ IF OBJECT_ID('Manual', 'U') IS NOT NULL DROP TABLE Manual;
 IF OBJECT_ID('Instituicao', 'U') IS NOT NULL DROP TABLE Instituicao;
 IF OBJECT_ID('Administrador', 'U') IS NOT NULL DROP TABLE Administrador;
 GO
-c
