@@ -23,8 +23,8 @@ namespace Data
 
         public required DbSet<Piece> Peca { get; set; }
 
-        public required DbSet<InstituitionManual> ManualDaInstituicao { get; set; }
+        public required DbSet<InstituitionManual> ManualInstituicao { get; set; }
 
-        public required DbSet<PiecePerProduct> PecaPorProduto { get; set; }
+        public required DbSet<PiecePerProduct> PecaProduto { get; set; }
     }
 }

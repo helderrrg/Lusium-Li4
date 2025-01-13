@@ -103,7 +103,7 @@ namespace Services
             {
                 Nome = nome,
                 NIF = nif,
-                NumeroDeAssociacao = int.Parse(numAssoc),
+                NumeroAssociacao = int.Parse(numAssoc),
                 Email = email,
                 Morada = morada,
                 Creditos = 0,
@@ -162,8 +162,8 @@ namespace Services
             {
                 Nome = nome,
                 Email = email,
-                DataDeNascimento = dataDeNascimento,
-                Instituicao = int.Parse(codInstituicaoAssociada),
+                DataNascimento = dataDeNascimento,
+                InstituicaoID = int.Parse(codInstituicaoAssociada),
                 PalavraPasse = pp
             };
 
@@ -370,12 +370,12 @@ namespace Services
                 return false;
             }
 
-            if (colab.DataDeNascimento != novaDataNascimento && !Utils.IsDateValid(novaDataNascimento))
+            if (colab.DataNascimento != novaDataNascimento && !Utils.IsDateValid(novaDataNascimento))
             {
                 return false;
             }
 
-            if (colab.Instituicao != int.Parse(codNovaInstituicao) && !await _context.Instituicao.AnyAsync(i => i.NumeroDeAssociacao == int.Parse(codNovaInstituicao)))
+            if (colab.InstituicaoID != int.Parse(codNovaInstituicao) && !await _context.Instituicao.AnyAsync(i => i.NumeroAssociacao == int.Parse(codNovaInstituicao)))
             {
                 return false;
             }
@@ -396,7 +396,7 @@ namespace Services
                 return;
             }
             // removes the need to call SaveChangesAsync on the DB
-            if (colab.Nome == novoNome && colab.DataDeNascimento == novaDataNascimento && colab.Instituicao == int.Parse(codNovaInstituicao) && colab.PalavraPasse == novaPP)
+            if (colab.Nome == novoNome && colab.DataNascimento == novaDataNascimento && colab.InstituicaoID == int.Parse(codNovaInstituicao) && colab.PalavraPasse == novaPP)
             {
                 return;
             }
@@ -406,14 +406,14 @@ namespace Services
                 colab.Nome = novoNome;
             }
 
-            if (colab.DataDeNascimento != novaDataNascimento)
+            if (colab.DataNascimento != novaDataNascimento)
             {
-                colab.DataDeNascimento = novaDataNascimento;
+                colab.DataNascimento = novaDataNascimento;
             }
 
-            if (colab.Instituicao != int.Parse(codNovaInstituicao))
+            if (colab.InstituicaoID != int.Parse(codNovaInstituicao))
             {
-                colab.Instituicao = int.Parse(codNovaInstituicao);
+                colab.InstituicaoID = int.Parse(codNovaInstituicao);
             }
 
             if (colab.PalavraPasse != novaPP)
@@ -427,7 +427,7 @@ namespace Services
         public async Task RemoveUtilizador(string codUtilizador, string tipoUtilizador)
         {
             // in case the user is an administrator
-            if (tipoUtilizador == "Administrador")
+            if (tipoUtilizador == "Admin")
             {
                 var admin = await _context.Administrador.FirstOrDefaultAsync(a => a.ID == int.Parse(codUtilizador));
                 if (admin != null)
@@ -439,7 +439,7 @@ namespace Services
             }
 
             // in case the user is an institution
-            if (tipoUtilizador == "Instituição")
+            if (tipoUtilizador == "Institution")
             {
                 var inst = await _context.Instituicao.FirstOrDefaultAsync(i => i.ID == int.Parse(codUtilizador));
                 if (inst != null)
@@ -454,7 +454,7 @@ namespace Services
             }
 
             // in case the user is a collaborator
-            if (tipoUtilizador == "Colaborador")
+            if (tipoUtilizador == "Collaborator")
             {
                 var colab = await _context.Colaborador.FirstOrDefaultAsync(c => c.ID == int.Parse(codUtilizador));
                 if (colab != null)
@@ -472,17 +472,17 @@ namespace Services
 
         public async Task<Dictionary<string, IUser>> ListaUtilizadores(string tipoUtilizador)
         {
-            if (tipoUtilizador == "Administrador")
+            if (tipoUtilizador == "Admin")
             {
                 return await _context.Administrador.ToDictionaryAsync(a => a.ID.ToString(), a => (IUser)a);
             }
 
-            if (tipoUtilizador == "Instituição")
+            if (tipoUtilizador == "Institution")
             {
                 return await _context.Instituicao.ToDictionaryAsync(i => i.ID.ToString(), i => (IUser)i);
             }
 
-            if (tipoUtilizador == "Colaborador")
+            if (tipoUtilizador == "Collaborator")
             {
                 return await _context.Colaborador.ToDictionaryAsync(c => c.ID.ToString(), c => (IUser)c);
             }
@@ -492,24 +492,23 @@ namespace Services
 
         public async Task<Dictionary<string, IUser>> FiltraUtilizadores(string nome, string tipoUtilizador) 
         {
-            if (tipoUtilizador == "Administrador")
+            if (tipoUtilizador == "Admin")
             {
                 return await _context.Administrador.Where(a => a.Nome.Contains(nome)).ToDictionaryAsync(a => a.ID.ToString(), a => (IUser)a);
             }
 
-            if (tipoUtilizador == "Instituição")
+            if (tipoUtilizador == "Institution")
             {
                 return await _context.Instituicao.Where(i => i.Nome.Contains(nome)).ToDictionaryAsync(i => i.ID.ToString(), i => (IUser)i);
             }
 
-            if (tipoUtilizador == "Colaborador")
+            if (tipoUtilizador == "Collaborator")
             {
                 return await _context.Colaborador.Where(c => c.Nome.Contains(nome)).ToDictionaryAsync(c => c.ID.ToString(), c => (IUser)c);
             }
             
             return new Dictionary<string, IUser>();
         }
-
 
         /*
             Criar classe de comparação para ordenar instituições:
@@ -521,15 +520,14 @@ namespace Services
                 }
             }
         */
-
         public async Task<Dictionary<string, IUser>> OrdenaUtilizadores(IComparer<IUser> comparer, string tipoUtilizador)
         {
-            if (tipoUtilizador == "Instituição")
+            if (tipoUtilizador == "Institution")
             {
                 return await _context.Instituicao.OrderBy(i => i, comparer).ToDictionaryAsync(i => i.ID.ToString(), i => (IUser)i);
             }
 
-            if (tipoUtilizador == "Colaborador")
+            if (tipoUtilizador == "Collaborator")
             {
                 return await _context.Colaborador.OrderBy(c => c, comparer).ToDictionaryAsync(c => c.ID.ToString(), c => (IUser)c);
             }
@@ -543,36 +541,105 @@ namespace Services
             return await _context.Produto.ToDictionaryAsync(p => p.ID.ToString(), p => p);
         }
 
-        // exibePaginaManual(codManual: String) : PaginaManual
+        // exibePaginaManual(codManual: String) : PaginaManual ???????????????????????????????
 
-        // iterarPaginaManual(codManual: String, comando: String) : PaginaManual
+        // iterarPaginaManual(codManual: String, comando: String) : PaginaManual ???????????????????????????????
 
-        // disponibilidadeProduto(codProduto: String) : boolean
+        public async Task<bool> DisponibilidadeProduto(string codProduto) {
+            var codProdutoParam = new SqlParameter("@codProduto", SqlDbType.Int) { Value = int.Parse(codProduto) };
+            var disponivelParam = new SqlParameter("@Disponivel", SqlDbType.Bit) { Direction = ParameterDirection.Output };
 
-        // verificaSaldo(codInstituicao: String) : boolean
+            await _context.Database.ExecuteSqlRawAsync(
+                "EXEC VerificarDisponibilidadeProduto @codProduto = @codProduto, @Disponivel = @Disponivel OUTPUT",
+                codProdutoParam,
+                disponivelParam
+            );
 
-        // processaCompra(codInstituicao: String) : void
+            return (bool)disponivelParam.Value;
+        }
 
-        // validaMorada(morada: String) : boolean ???????????????????????????????
+        public async Task<bool> VerificaSaldo(string codInstituicao, string codProduto)
+        {
+            var codInstituicaoParam = new SqlParameter("@codInstituicao", SqlDbType.Int) { Value = int.Parse(codInstituicao) };
+            var codProdutoParam = new SqlParameter("@codProduto", SqlDbType.Int) { Value = int.Parse(codProduto) };
+            var saldoSuficienteParam = new SqlParameter("@SaldoSuficiente", SqlDbType.Bit) { Direction = ParameterDirection.Output };
 
-        // listaComprasEfetuadas(codInstituicao: String) : Map\<String, CompraEfetuada>
+            await _context.Database.ExecuteSqlRawAsync(
+                "EXEC VerificarSaldoInstituicao @codInstituicao = @codInstituicao, @codProduto = @codProduto, @SaldoSuficiente = @SaldoSuficiente OUTPUT",
+                codInstituicaoParam,
+                codProdutoParam,
+                saldoSuficienteParam
+            );
+
+            return (bool)saldoSuficienteParam.Value;
+        }
+
+        public async Task ProcessaCompra(string codInstituicao, string codProduto) {
+            var codInstituicaoParam = new SqlParameter("@codInstituicao", SqlDbType.Int) { Value = int.Parse(codInstituicao) };
+            var codProdutoParam = new SqlParameter("@codProduto", SqlDbType.Int) { Value = int.Parse(codProduto) };
+
+            await _context.Database.ExecuteSqlRawAsync(
+                "EXEC ProcessarCompra @codInstituicao = @codInstituicao, @codProduto = @codProduto",
+                codInstituicaoParam,
+                codProdutoParam
+            );
+        }
+
+        public bool ValidaMorada(string morada)
+        {
+            return morada != "";
+        }
+
+        public async Task<Dictionary<string, Purchase>> ListaComprasEfetuadas(string codInstituicao)
+        {
+            return await _context.Compra.Where(c => c.InstituicaoID == int.Parse(codInstituicao)).ToDictionaryAsync(c => c.NumeroCompra.ToString(), c => c);
+        }
 
         public async Task<Purchase?> ExibeCompraEfetuada(string codCompra)
         {
-           return await _context.Compra.FirstOrDefaultAsync(c => c.NumeroDaCompra == int.Parse(codCompra));
+           return await _context.Compra.FirstOrDefaultAsync(c => c.NumeroCompra == int.Parse(codCompra));
         }
 
         // listaManuais(codUtilizador: String) : Map\<String, Manual>
         
-        // validaQuantidadeCreditos(quantidade: int) : boolean
+        public bool ValidaQuantidadeCreditos(int quantidade)
+        {
+            return quantidade >= 0;
+        }
 
-        // atualizaQuantidadeCreditos(codInstituicao: String, quantidade: int) : void
+        public async Task AtualizaQuantidadeCreditos(string codInstituicao, int quantidade)
+        {
+            var inst = await _context.Instituicao.FirstOrDefaultAsync(i => i.ID == int.Parse(codInstituicao));
+            if (inst == null)
+            {
+                return;
+            }
 
-        // validaQuantidadePecas(quantidade: int) : boolean
+            inst.Creditos = quantidade;
+            await _context.SaveChangesAsync();
+        }
 
-        // atualizaQuantidadePecas(codPeca: String, quantidade: int) : void
+        public bool ValidaQuantidadePecas(int quantidade)
+        {
+            return quantidade >= 0;
+        }
 
-        // listaPecas() : Map\<String, Peca>
+        public async Task AtualizaQuantidadePecas(string codPeca, int quantidade)
+        {
+            var peca = await _context.Peca.FirstOrDefaultAsync(p => p.ID == int.Parse(codPeca));
+            if (peca == null)
+            {
+                return;
+            }
+
+            peca.Quantidade = quantidade;
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<Dictionary<string, Piece>> ListaPecas()
+        {
+            return await _context.Peca.ToDictionaryAsync(p => p.ID.ToString(), p => p);
+        }
 
         public async Task<List<Product>> GetProducts()
         {

@@ -61,6 +61,69 @@ BEGIN
 END;
 GO
 
+
+
+-- por testar
+CREATE PROCEDURE VerificarDisponibilidadeProduto
+    @codProduto INT,
+    @Disponivel BIT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Inicializa a variável de saída como 1 (disponível)
+    SET @Disponivel = 1;
+
+    -- Verifica se existe alguma peça com quantidade insuficiente
+    IF EXISTS (
+        SELECT 1
+        FROM PecaProduto pp
+        INNER JOIN Peca p ON pp.IDPeca = p.ID
+        WHERE pp.IDProduto = @codProduto
+          AND p.Quantidade < pp.Quantidade
+    )
+    BEGIN
+        -- Define o valor de saída como 0 (indisponível)
+        SET @Disponivel = 0;
+    END
+END;
+GO
+
+
+
+-- por testar
+CREATE PROCEDURE VerificarSaldoInstituicao
+    @codInstituicao INT,
+    @codProduto INT,
+    @SaldoSuficiente BIT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Inicializa a variável de saída como 1 (saldo suficiente)
+    SET @SaldoSuficiente = 1;
+
+    -- Verifica se o saldo da instituição é insuficiente
+    IF EXISTS (
+        SELECT Saldo
+        FROM Instituicao
+        WHERE ID = @codInstituicao
+          AND Saldo < (
+            SELECT Preco
+            FROM Produto
+            WHERE ID = @codProduto
+          )
+    )
+    BEGIN
+        -- Define o valor de saída como 0 (saldo insuficiente)
+        SET @SaldoSuficiente = 0;
+    END
+END;
+GO
+
+
+
+
 CREATE PROCEDURE ProcessaCompra
     @codInstituicao INT,
     @codProduto INT,

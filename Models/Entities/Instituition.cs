@@ -5,7 +5,7 @@ namespace Models.Entities
         public int ID { get; set; }
         public required string Nome { get; set; }
         public required string NIF { get; set; }
-        public int NumeroDeAssociacao { get; set; }
+        public int NumeroAssociacao { get; set; }
         public required string Email { get; set; }
         public required string Morada { get; set; }
         public int Creditos { get; set; }
