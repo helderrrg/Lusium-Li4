@@ -63,7 +63,7 @@ GO
 
 
 
--- por testar
+-- POR TESTAR
 CREATE PROCEDURE VerificarDisponibilidadeProduto
     @codProduto INT,
     @Disponivel BIT OUTPUT
@@ -91,7 +91,7 @@ GO
 
 
 
--- por testar
+-- POR TESTAR
 CREATE PROCEDURE VerificarSaldoInstituicao
     @codInstituicao INT,
     @codProduto INT,
@@ -193,5 +193,42 @@ BEGIN
         -- Propagar o erro
         THROW;
     END CATCH
+END;
+GO
+
+
+
+-- POR TESTAR
+CREATE PROCEDURE ListarManuais
+    @codUtilizador INT,
+    @tipoUtilizador VARCHAR(20)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Verificar se o utilizador é um administrador
+    IF @tipoUtilizador = 'Admin'
+    BEGIN
+        SELECT m.ID, m.Capa, m.Nome, m.Descricao
+        FROM Manual m;
+    END
+    ELSE
+    BEGIN
+        IF @tipoUtilizador = 'Institution'
+        BEGIN
+            SELECT m.ID, m.Capa, m.Nome, m.Descricao
+            FROM Manual m
+            INNER JOIN ManualInstituicao mi ON m.ID = mi.IDManual
+            WHERE mi.IDInstituicao = @codUtilizador;
+        END
+        ELSE
+        BEGIN
+            SELECT m.ID, m.Capa, m.Nome, m.Descricao
+            FROM Manual m
+            INNER JOIN ManualInstituicao mi ON m.ID = mi.IDManual
+            INNER JOIN Colaborador c ON mi.IDInstituicao = c.InstituicaoID
+            WHERE c.ID = @codUtilizador;
+        END
+    END
 END;
 GO

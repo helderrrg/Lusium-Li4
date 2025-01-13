@@ -3,8 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Data;
 using Microsoft.Data.SqlClient;
 using System.Data;
-using System.Collections;
-
 
 
 namespace Services
@@ -574,14 +572,16 @@ namespace Services
             return (bool)saldoSuficienteParam.Value;
         }
 
-        public async Task ProcessaCompra(string codInstituicao, string codProduto) {
+        public async Task ProcessaCompra(string codInstituicao, string codProduto, string enderecoEntrega) {
             var codInstituicaoParam = new SqlParameter("@codInstituicao", SqlDbType.Int) { Value = int.Parse(codInstituicao) };
             var codProdutoParam = new SqlParameter("@codProduto", SqlDbType.Int) { Value = int.Parse(codProduto) };
+            var enderecoEntregaParam = new SqlParameter("@EnderecoEntrega", SqlDbType.VarChar, 45) { Value = enderecoEntrega };
 
             await _context.Database.ExecuteSqlRawAsync(
-                "EXEC ProcessarCompra @codInstituicao = @codInstituicao, @codProduto = @codProduto",
+                "EXEC ProcessarCompra @codInstituicao = @codInstituicao, @codProduto = @codProduto, @EnderecoEntrega = @EnderecoEntrega",
                 codInstituicaoParam,
-                codProdutoParam
+                codProdutoParam,
+                enderecoEntregaParam
             );
         }
 
@@ -600,8 +600,12 @@ namespace Services
            return await _context.Compra.FirstOrDefaultAsync(c => c.NumeroCompra == int.Parse(codCompra));
         }
 
-        // listaManuais(codUtilizador: String) : Map\<String, Manual>
-        
+        /* POR IMPLEMENTAR **************************
+        public async Task<Dictionary<string, Manual>> ListaManuais(string codUtilizador, string tipoUtilizador)
+        {
+        }
+        ****************************************** */
+
         public bool ValidaQuantidadeCreditos(int quantidade)
         {
             return quantidade >= 0;
