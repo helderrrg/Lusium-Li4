@@ -9,5 +9,7 @@ namespace Models.Entities
         public int IdadeMinima { get; set; }
         public required string ImagemAlusiva { get; set; }
         public int ManualAssociado { get; set; }
+        public ICollection<PiecePerProduct>? PecaProdutos { get; set; }
+        public ICollection<Purchase>? Compras { get; set; }
     }
 }
