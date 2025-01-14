@@ -600,11 +600,48 @@ namespace Services
            return await _context.Compra.FirstOrDefaultAsync(c => c.NumeroCompra == int.Parse(codCompra));
         }
 
-        /* POR IMPLEMENTAR **************************
         public async Task<Dictionary<string, Manual>> ListaManuais(string codUtilizador, string tipoUtilizador)
         {
+            var codUtilizadorParam = new SqlParameter("@codUtilizador", SqlDbType.Int) { Value = int.Parse(codUtilizador) };
+            var tipoUtilizadorParam = new SqlParameter("@tipoUtilizador", SqlDbType.VarChar, 20) { Value = tipoUtilizador };
+
+            var manuais = new Dictionary<string, Manual>();
+
+            using (var connection = _context.Database.GetDbConnection())
+            {
+                await connection.OpenAsync();
+
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = "EXEC ListarManuais @codUtilizador, @tipoUtilizador";
+                    command.CommandType = CommandType.Text;
+
+                    command.Parameters.Add(codUtilizadorParam);
+                    command.Parameters.Add(tipoUtilizadorParam);
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            var id = reader["ID"].ToString();
+
+                            if (!string.IsNullOrEmpty(id))
+                            {
+                                manuais[id] = new Manual
+                                {
+                                    ID = Convert.ToInt32(reader["ID"])!,
+                                    Capa = reader["Capa"]?.ToString()!,
+                                    Nome = reader["Nome"]?.ToString()!,
+                                    Descricao = reader["Descricao"]?.ToString()!
+                                };
+                            }
+                        }
+                    }
+                }
+            }
+
+            return manuais;
         }
-        ****************************************** */
 
         public bool ValidaQuantidadeCreditos(int quantidade)
         {

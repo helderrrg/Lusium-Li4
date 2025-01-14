@@ -198,7 +198,6 @@ GO
 
 
 
--- POR TESTAR
 CREATE PROCEDURE ListarManuais
     @codUtilizador INT,
     @tipoUtilizador VARCHAR(20)
@@ -206,29 +205,54 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Verificar se o utilizador é um administrador
+    -- Verificar tipo de utilizador
     IF @tipoUtilizador = 'Admin'
     BEGIN
-        SELECT m.ID, m.Capa, m.Nome, m.Descricao
-        FROM Manual m;
+        -- O administrador pode visualizar todos os manuais
+        SELECT 
+            m.ID, 
+            m.Capa, 
+            m.Nome, 
+            m.Descricao
+        FROM 
+            Manual m;
+    END
+    ELSE IF @tipoUtilizador = 'Institution'
+    BEGIN
+        -- A instituição visualiza apenas os manuais associados
+        SELECT 
+            m.ID, 
+            m.Capa, 
+            m.Nome, 
+            m.Descricao
+        FROM 
+            Manual m
+        INNER JOIN 
+            ManualInstituicao mi ON m.ID = mi.IDManual
+        WHERE 
+            mi.IDInstituicao = @codUtilizador;
+    END
+    ELSE IF @tipoUtilizador = 'Collaborator'
+    BEGIN
+        -- O colaborador visualiza apenas os manuais da sua instituição
+        SELECT 
+            m.ID, 
+            m.Capa, 
+            m.Nome, 
+            m.Descricao
+        FROM 
+            Manual m
+        INNER JOIN 
+            ManualInstituicao mi ON m.ID = mi.IDManual
+        INNER JOIN 
+            Colaborador c ON mi.IDInstituicao = c.InstituicaoID
+        WHERE 
+            c.ID = @codUtilizador;
     END
     ELSE
     BEGIN
-        IF @tipoUtilizador = 'Institution'
-        BEGIN
-            SELECT m.ID, m.Capa, m.Nome, m.Descricao
-            FROM Manual m
-            INNER JOIN ManualInstituicao mi ON m.ID = mi.IDManual
-            WHERE mi.IDInstituicao = @codUtilizador;
-        END
-        ELSE
-        BEGIN
-            SELECT m.ID, m.Capa, m.Nome, m.Descricao
-            FROM Manual m
-            INNER JOIN ManualInstituicao mi ON m.ID = mi.IDManual
-            INNER JOIN Colaborador c ON mi.IDInstituicao = c.InstituicaoID
-            WHERE c.ID = @codUtilizador;
-        END
+        -- Retornar NULL para sinalizar tipo inválido
+        SELECT NULL AS ID, NULL AS Capa, NULL AS Nome, NULL AS Descricao;
     END
 END;
 GO
