@@ -1,12 +1,6 @@
-CREATE DATABASE ModelDatabase;
-GO
-
-USE ModelDatabase;
-GO
-
 -- Tabela Administrador
 CREATE TABLE Administrador (
-    ID INT PRIMARY KEY,
+    ID INT IDENTITY(1,1) PRIMARY KEY,
     Nome VARCHAR(45),
     Email VARCHAR(45),
     PalavraPasse VARCHAR(250)
@@ -14,7 +8,7 @@ CREATE TABLE Administrador (
 
 -- Tabela Instituição
 CREATE TABLE Instituicao (
-    ID INT PRIMARY KEY,
+    ID INT IDENTITY(1,1) PRIMARY KEY,
     Nome VARCHAR(45),
     NIF VARCHAR(25),
     NumeroAssociacao INT,
@@ -26,7 +20,7 @@ CREATE TABLE Instituicao (
 
 -- Tabela Colaborador
 CREATE TABLE Colaborador (
-    ID INT PRIMARY KEY,
+    ID INT IDENTITY(1,1) PRIMARY KEY,
     Nome VARCHAR(45),
     Email VARCHAR(45),
     DataNascimento DATE,
@@ -37,7 +31,7 @@ CREATE TABLE Colaborador (
 
 -- Tabela Manual
 CREATE TABLE Manual (
-    ID INT PRIMARY KEY,
+    ID INT IDENTITY(1,1) PRIMARY KEY,
     Capa VARCHAR(150),
     Nome VARCHAR(25),
     Descricao VARCHAR(75)
@@ -54,7 +48,7 @@ CREATE TABLE ManualInstituicao (
 
 -- Tabela Página
 CREATE TABLE Pagina (
-    ID INT PRIMARY KEY,
+    ID INT IDENTITY(1,1) PRIMARY KEY,
     ImagemAlusiva VARCHAR(150),
     Numeracao INT,
     ManualAssociado INT,
@@ -63,7 +57,7 @@ CREATE TABLE Pagina (
 
 -- Tabela Produto
 CREATE TABLE Produto (
-    ID INT PRIMARY KEY,
+    ID INT IDENTITY(1,1) PRIMARY KEY,
     Nome VARCHAR(25),
     Descricao VARCHAR(75),
     Custo INT,
@@ -75,7 +69,7 @@ CREATE TABLE Produto (
 
 -- Tabela Peça
 CREATE TABLE Peca (
-    ID INT PRIMARY KEY,
+    ID INT IDENTITY(1,1) PRIMARY KEY,
     Nome VARCHAR(25),
     ImagemAlusiva VARCHAR(150),
     Quantidade INT
@@ -93,7 +87,7 @@ CREATE TABLE PecaProduto (
 
 -- Tabela Compra
 CREATE TABLE Compra (
-    NumeroCompra INT PRIMARY KEY,
+    NumeroCompra INT IDENTITY(1,1) PRIMARY KEY,
     DataCompra DATE,
     EnderecoEntrega VARCHAR(45),
     ProdutoAssociado INT,
