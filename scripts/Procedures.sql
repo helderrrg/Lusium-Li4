@@ -1,6 +1,7 @@
 CREATE PROCEDURE VerificarIniciarSessao
     @Email VARCHAR(45),
     @PalavraPasse VARCHAR(250),
+    @ID VARCHAR(45) OUTPUT,
     @Nome VARCHAR(45) OUTPUT,
     @Role VARCHAR(20) OUTPUT
 AS
@@ -8,6 +9,7 @@ BEGIN
     SET NOCOUNT ON;
 
     -- Inicializar as variáveis de saída com NULL
+    SET @ID = NULL;
     SET @Nome = NULL;
     SET @Role = NULL;
 
@@ -19,7 +21,8 @@ BEGIN
     )
     BEGIN
         SELECT 
-            @Nome = Nome, 
+            @ID = ID,
+            @Nome = Nome,
             @Role = 'Admin'
         FROM Administrador
         WHERE Email = @Email AND PalavraPasse = @PalavraPasse;
@@ -35,6 +38,7 @@ BEGIN
     )
     BEGIN
         SELECT 
+            @ID = ID,
             @Nome = Nome, 
             @Role = 'Institution'
         FROM Instituicao
@@ -51,6 +55,7 @@ BEGIN
     )
     BEGIN
         SELECT 
+            @ID = ID,
             @Nome = Nome, 
             @Role = 'Collaborator'
         FROM Colaborador

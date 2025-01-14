@@ -687,20 +687,22 @@ namespace Services
             return await _context.Produto.ToListAsync();
         }
 
-        public async Task<(string? Name, string? Role)> LoginVerifyAsync(string email, string password)
+        public async Task<(string? ID, string? Name, string? Role)> LoginVerifyAsync(string email, string password)
         {
+            var idParam = new SqlParameter("@ID", SqlDbType.VarChar, 45) { Direction = ParameterDirection.Output };
             var nameParam = new SqlParameter("@Nome", SqlDbType.VarChar, 45) { Direction = ParameterDirection.Output };
             var roleParam = new SqlParameter("@Role", SqlDbType.VarChar, 20) { Direction = ParameterDirection.Output };
 
             await _context.Database.ExecuteSqlRawAsync(
-                "EXEC VerificarIniciarSessao @Email = {0}, @PalavraPasse = {1}, @Nome = @Nome OUTPUT, @Role = @Role OUTPUT",
+                "EXEC VerificarIniciarSessao @Email = {0}, @PalavraPasse = {1}, @ID = @ID OUTPUT, @Nome = @Nome OUTPUT, @Role = @Role OUTPUT",
                 email,
                 password,
+                idParam,
                 nameParam,
                 roleParam
             );
 
-            return (nameParam.Value.ToString(), roleParam.Value.ToString());
+            return (idParam.Value.ToString(), nameParam.Value.ToString(), roleParam.Value.ToString());
         }
     }
 }

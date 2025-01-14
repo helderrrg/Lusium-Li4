@@ -1,0 +1,63 @@
+@page "/manuals"
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager navigationManager
+@attribute [Authorize(Roles = "Admin,Institution,Collaborator")]
+
+<PageTitle>Manuais</PageTitle>
+
+<h1>Manuais</h1>
+
+@if (manualList == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Descrição</th>
+                <th>Capa</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var manual in manualList)
+            {
+                <tr>
+                    <td>@manual.Value.ID</td>
+                    <td>@manual.Value.Nome</td>
+                    <td>@manual.Value.Descricao</td>
+                    <td><img src="@manual.Value.Capa" alt="@manual.Value.Nome" width="100" /></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Dictionary<string, Manual> manualList = new();
+
+    [Inject]
+    public required LusiumService LusiumService { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        
+        string userID = string.Empty;
+        string userRole = string.Empty;
+
+        if (user.Identity?.IsAuthenticated ?? false)
+        {
+            userID = user.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
+            userRole = user.FindFirst(ClaimTypes.Role)?.Value!;
+        } else {
+            navigationManager.NavigateTo("/login");
+        }
+
+        manualList = await LusiumService.ListaManuais(userID, userRole);
+    }
+}

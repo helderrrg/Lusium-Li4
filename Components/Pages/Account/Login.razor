@@ -57,16 +57,20 @@
             return;
         }
 
-        var (name, role) = await LusiumService.LoginVerifyAsync(Model.Email, Model.Password);
+        var (id, name, role) = await LusiumService.LoginVerifyAsync(Model.Email, Model.Password);
 
-        if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(role))
+        if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(name) || string.IsNullOrEmpty(role))
         {
             errorMessage = "Email ou palavra-passe inválidos";
             return;
         }
 
+        // Temporarily display the user's information
+        Console.WriteLine($"ID: {id}, Name: {name}, Role: {role}");
+
         var claims = new List<Claim>
         {
+            new Claim(ClaimTypes.NameIdentifier, id),
             new Claim(ClaimTypes.Name, name),
             new Claim(ClaimTypes.Role, role)
         };
