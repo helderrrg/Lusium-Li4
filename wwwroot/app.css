@@ -24,27 +24,52 @@ a, .btn-link {
 /* Our custom table */
 
 .custom-table {
-    border-collapse: separate;
-    border-spacing: 0 5px; /* Space among lines */
+    display: table;
+    width: 100%;
+    padding: 15px;
+    border-spacing: 0 5px; /* Space among rows */
 }
 
-.custom-table thead th {
-    border: none;
-    background: transparent; /* no background color */
+.table-header .table-row,
+.table-body .table-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Ensures vertical alignment */
+}
+
+.table-cell {
+    flex: 1; /* Ensures all cells have equal width */
+    padding: 8px;
+}
+
+.table-header .table-cell {
     font-weight: bold;
-    color: #BEEF9E; /* Text color */
+    color: #A6C36F; /* Text color */
+    background: transparent; /* no background color */
 }
 
-.custom-table tbody tr {
-    background: #A6C36F; /* backgroung color for rows */
+.table-header .table-row {
+    font-weight: bold;
+    background: transparent; /* no background color */
+}
+
+.table-body {
+    display: flex;
+    flex-direction: column;
+    gap: 5px; /* Space among rows */
+}
+
+.table-body .table-row {
+    background-color: #A6C36F; /* Background color for rows */
     border-radius: 8px;
-    overflow: hidden; /* scroll if the screens is too small */
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); /* shadow for each row */
+    overflow: hidden; /* Ensure the border-radius is visible */
+    box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.2); /* Shadow for each row */
 }
 
-.custom-table tbody tr td {
-    border-top: none; /* remove upper borders */
-    border-bottom: none; /* remove bottom borders */
+.table-body .table-cell {
+    align-content: start;
+    margin: 0%;
+    border: none; /* No borders since divs are styled differently */
 }
 
 .custom-table tbody tr td:first-child {
@@ -55,9 +80,9 @@ a, .btn-link {
     border-right: none; /* remove right border */
 }
 
-.custom-table .actions-column {
-    background: transparent; /* no background */
-    text-align: center;
+.actions-column {
+    flex: 0 0 100px; /* Fixed width for actions column */
+    background: transparent; /* No background */
 }
 
 .custom-table .actions-column button {

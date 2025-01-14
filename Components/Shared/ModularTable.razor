@@ -22,40 +22,43 @@
 
     <!-- Table -->
     <div class="table-responsive">
-        <table class="table custom-table">
-            <thead>
-                <tr>
+        <div class="table custom-table">
+            <!-- Table header -->
+            <div class="table-header">
+                <div class="table-row">
                     @foreach (var header in Headers)
                     {
-                        <th>@header</th>
+                        <div class="table-cell">@header</div>
                     }
                     @if (IsEditable)
                     {
-                        <th></th> <!-- Coluna de ações -->
+                        <div class="table-cell"></div> <!-- Coluna de ações -->
                     }
-                </tr>
-            </thead>
-            <tbody>
+                </div>
+            </div>
+
+            <!-- Table body -->
+            <div class="table-body">
                 @foreach (var item in Content)
                 {
-                    <tr>
+                    <div class="table-row">
                         @if (item != null)
                         {
                             @foreach (var property in item.GetType().GetProperties())
                             {
-                                <td>@property.GetValue(item)</td>
+                                <div class="table-cell">@property.GetValue(item)</div>
                             }
                         }
                         @if (IsEditable)
                         {
-                            <td class="actions-column">
+                            <div class="table-cell actions-column">
                                 <button class="btn btn-sm btn-edit me-1"><i class="bi bi-pencil-square i-edit"></i></button>
                                 <button class="btn btn-sm btn-edit"><i class="bi bi-trash i-remove"></i></button>
-                            </td>
+                            </div>
                         }
-                    </tr>
+                    </div>
                 }
-            </tbody>
-        </table>
+            </div>
+        </div>
     </div>
 </div>
