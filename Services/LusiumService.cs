@@ -698,5 +698,20 @@ namespace Services
         {
             return await _context.Produto.ToListAsync();
         }
+
+        // Extras
+        public async Task validateAdmin(string codUtilizador)
+        {
+            if (int.TryParse(codUtilizador, out int id))
+            {
+                string sql = "UPDATE Administrador SET Validado = 1 WHERE ID = @p0";
+                await _context.Database.ExecuteSqlRawAsync(sql, id);
+            }
+            else
+            {
+                Console.WriteLine("Error validating admin: " + id);
+            }
+        }
+
     }
 }

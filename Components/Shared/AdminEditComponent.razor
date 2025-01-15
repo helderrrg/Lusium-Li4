@@ -1,4 +1,4 @@
-﻿@inject LusiumService LusiumService
+﻿@* @inject LusiumService LusiumService
 @rendermode InteractiveServer
 
 <h1>Editar Administrador</h1>
@@ -49,6 +49,66 @@
         else
         {
             message = "Dados inválidos. Não foi possível editar.";
+        }
+    }
+}*@
+
+@inject LusiumService LusiumService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<h1>Editar Administrador</h1>
+
+<div>
+    <label for="nome">Nome</label>
+    <input type="text"
+           class="form-control"
+           id="name"
+           @bind="userName"
+           placeholder="@userName"
+           readonly />
+    <div class="form-group">
+        <label for="password">Nova Palavra-Passe</label>
+        <input type="password" class="form-control" id="password" @bind="password" />
+        <label for="confirmPassword">Confirmar Nova Palavra-Passe</label>
+        <input type="password" class="form-control" id="confirmPassword" @bind="confirmPassword" />
+    </div>
+
+    <button @onclick="AlterarSenha">Alterar Senha</button>
+
+    <p>@message</p>
+</div>
+
+@code {
+    [Parameter] public required string userId { get; set; }
+    [Parameter] public required string userName { get; set; }
+
+    private string password { get; set; } = string.Empty;
+    private string confirmPassword { get; set; } = string.Empty;
+    private string message { get; set; } = string.Empty;
+
+    private async Task AlterarSenha()
+    {
+        if (password != confirmPassword)
+        {
+            message = "As palavras-passe não coincidem.";
+            return;
+        }
+
+        var valid = await LusiumService.ValidaNovosDadosAdministrador(userId, userName, password);
+
+        if (valid)
+        {
+            await LusiumService.AtualizaDadosAdministrador(userId, userName, password);
+            message = "Senha alterada com sucesso.";
+
+            await LusiumService.validateAdmin(userId);
+
+            NavigationManager.NavigateTo("/login");
+        }
+        else
+        {
+            message = "Erro ao alterar senha.";
         }
     }
 }
