@@ -62,6 +62,50 @@ BEGIN
 END;
 GO
 
+CREATE PROCEDURE ValidaPP
+    @Email VARCHAR(45),
+    @PalavraPasse VARCHAR(250),
+    @IsValid BIT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Inicializar a variável de saída
+    SET @IsValid = 0;
+
+    -- Verificar nas tabelas
+    IF EXISTS (
+        SELECT 1
+        FROM Administrador
+        WHERE Email = @Email AND PalavraPasse = @PalavraPasse
+    )
+    BEGIN
+        SET @IsValid = 1;
+        RETURN;
+    END
+
+    IF EXISTS (
+        SELECT 1
+        FROM Instituicao
+        WHERE Email = @Email AND PalavraPasse = @PalavraPasse
+    )
+    BEGIN
+        SET @IsValid = 1;
+        RETURN;
+    END
+
+    IF EXISTS (
+        SELECT 1
+        FROM Colaborador
+        WHERE Email = @Email AND PalavraPasse = @PalavraPasse
+    )
+    BEGIN
+        SET @IsValid = 1;
+        RETURN;
+    END
+END;
+GO
+
 
 
 -- POR TESTAR

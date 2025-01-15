@@ -1,0 +1,54 @@
+﻿@inject LusiumService LusiumService
+@rendermode InteractiveServer
+
+<h1>Editar Administrador</h1>
+
+<div class="form-group">
+    <label for="nome">Nome</label>
+    <input type="text"
+           class="form-control"
+           id="name"
+           @bind="userName"
+           placeholder="@userName"
+           readonly />
+    <label for="password">Nova Palavra-Passe</label>
+    <input type="password" class="form-control" id="password" @bind="password" />
+    <label for="confirmPassword">Confirmar Nova Palavra-Passe</label>
+    <input type="password" class="form-control" id="confirmPassword" @bind="confirmPassword" />
+</div>
+
+<button @onclick="EditAdmin">Alterar Dados</button>
+
+<p>@message</p>
+
+@code {
+    private string userID { get; set; } = string.Empty;
+    private string userName { get; set; } = string.Empty;
+    private string userEmail { get; set; } = string.Empty;
+
+    private string password { get; set; } = string.Empty;
+    private string confirmPassword { get; set; } = string.Empty;
+
+    private string message { get; set; } = string.Empty;
+
+    private async Task EditAdmin()
+    {
+        if (password != confirmPassword)
+        {
+            message = "As palavras-passe não coincidem.";
+            return;
+        }
+
+        var valid = await LusiumService.ValidaNovosDadosAdministrador(userID, userName, password);
+
+        if (valid)
+        {
+            await LusiumService.AtualizaDadosAdministrador(userID, userName, password);
+            message = "Administrador editado com sucesso.";
+        }
+        else
+        {
+            message = "Dados inválidos. Não foi possível editar.";
+        }
+    }
+}

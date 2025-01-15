@@ -6,42 +6,36 @@
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Authentication.Cookies
 @using System.Data
+@using Services
 @inject LusiumDbContext lusiumDbContext
 @inject NavigationManager navigationManager
 
-@if (admins.Count == 0)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <div class="d-flex justify-content-center align-items-center vh-100">
-        <div class="col-lg-4">
-            <EditForm Model="@Model" OnValidSubmit="AutenticarUtilizador" FormName="LoginForm">
-                <DataAnnotationsValidator />
-                <div class="text-center mb-4">
-                    <h2 class="fw-bold">Iniciar Sessão</h2>
-                </div>
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <InputText id="email" @bind-Value="Model.Email" class="form-control" placeholder="Email" />
-                    <ValidationMessage For="() => Model.Email" />
-                </div>
-                <div class="mb-3">
-                    <label for="password" class="form-label">Palavra-Passe</label>
-                    <InputText id="password" @bind-Value="Model.Password" class="form-control" placeholder="Palavra-Passe" type="password" />
-                    <ValidationMessage For="() => Model.Password" />
-                </div>
-                <div class="mb-3 text-center">
-                    <span class="text-danger">@errorMessage</span>
-                </div>
-                <div class="d-grid">
-                    <button type="submit" class="btn btn-primary btn-lg">Iniciar Sessão</button>
-                </div>
-            </EditForm>
-        </div>
+<div class="d-flex justify-content-center align-items-center vh-100">
+    <div class="col-lg-4">
+        <EditForm Model="@Model" OnValidSubmit="AutenticarUtilizador" FormName="LoginForm">
+            <DataAnnotationsValidator />
+            <div class="text-center mb-4">
+                <h2 class="fw-bold">Iniciar Sessão</h2>
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <InputText id="email" @bind-Value="Model.Email" class="form-control" placeholder="Email" />
+                <ValidationMessage For="() => Model.Email" />
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Palavra-Passe</label>
+                <InputText id="password" @bind-Value="Model.Password" class="form-control" placeholder="Palavra-Passe" type="password" />
+                <ValidationMessage For="() => Model.Password" />
+            </div>
+            <div class="mb-3 text-center">
+                <span class="text-danger">@errorMessage</span>
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary btn-lg">Iniciar Sessão</button>
+            </div>
+        </EditForm>
     </div>
-}
+</div>
 
 @code {
     [CascadingParameter]
@@ -53,47 +47,57 @@ else
     [Inject]
     public required LusiumService LusiumService { get; set; }
 
-    private string? errorMessage;
+    private string errorMessage = string.Empty;
 
     private async Task AutenticarUtilizador()
     {
         if (string.IsNullOrEmpty(Model.Email) || string.IsNullOrEmpty(Model.Password))
         {
-            errorMessage = "Email e palavra-passe são obrigatórios";
+            errorMessage = "Email e palavra-passe são obrigatórios.";
             return;
         }
 
         DataTable result = await LusiumService.ValidaCredenciais(Model.Email, Model.Password);
 
-        var id = result.Rows[0]["ID"].ToString();
-        var name = result.Rows[0]["Nome"].ToString();
-        var role = result.Rows[0]["Role"].ToString();
-        var validAdmin = string.Empty;
-        if (role == "Admin")
+        if (result.Rows.Count == 0)
         {
-            validAdmin = result.Rows[0]["Validado"].ToString();
-        }
-
-        // Se for um administrador e não estiver validado precisa de forçar a validação
-
-        if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(name) || string.IsNullOrEmpty(role))
-        {
-            errorMessage = "Email ou palavra-passe inválidos";
+            errorMessage = "Email ou palavra-passe inválidos.";
             return;
         }
 
-        // Temporarily display the user's information
-        Console.WriteLine($"ID: {id}, Name: {name}, Role: {role}");
+        var id = result.Rows[0]["ID"].ToString();
+        var name = result.Rows[0]["Nome"].ToString();
+        var role = result.Rows[0]["Role"].ToString();
+        var validAdmin = result.Rows[0].Table.Columns.Contains("Validado") ? result.Rows[0]["Validado"].ToString() : null;
 
+        if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(name) || string.IsNullOrEmpty(role))
+        {
+            errorMessage = "Erro ao recuperar informações do utilizador.";
+            return;
+        }
+
+        // Lógica específica para Admin
+        if (role == "Admin" && validAdmin == "False")
+        {
+            // Mostrar modal para validar admin
+        }
+
+        await FinalizarLogin(id, name, Model.Email, role);
+    }
+
+    private async Task FinalizarLogin(string id, string name, string email, string role)
+    {
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, id),
             new Claim(ClaimTypes.Name, name),
+            new Claim(ClaimTypes.Email, email),
             new Claim(ClaimTypes.Role, role)
         };
 
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         var principal = new ClaimsPrincipal(identity);
+
         await HttpContext.SignInAsync(principal);
         navigationManager.NavigateTo("/");
     }

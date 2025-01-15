@@ -270,18 +270,16 @@ namespace Services
                 return false;
             }
 
-            var nameParam = new SqlParameter("@Nome", SqlDbType.VarChar, 45) { Direction = ParameterDirection.Output };
-            var roleParam = new SqlParameter("@Role", SqlDbType.VarChar, 20) { Direction = ParameterDirection.Output };
+            var isValidParam = new SqlParameter("@IsValid", SqlDbType.Bit) { Direction = ParameterDirection.Output };
 
             await _context.Database.ExecuteSqlRawAsync(
-                "EXEC VerificarIniciarSessao @Email = {0}, @PalavraPasse = {1}, @Nome = @Nome OUTPUT, @Role = @Role OUTPUT",
+                "EXEC ValidaPP @Email = {0}, @PalavraPasse = {1}, @IsValid = @IsValid OUTPUT",
                 email,
                 pp,
-                nameParam,
-                roleParam
+                isValidParam
             );
 
-            return nameParam.Value.ToString() != "" && roleParam.Value.ToString() != "";
+            return (bool)isValidParam.Value;
         }
 
         public async Task AtualizaDadosAdministrador(string codAdministrador, string novoNome, string novaPP)

@@ -12,7 +12,7 @@
     <label for="email">Email</label>
     <input type="text" class="form-control" id="email" @bind="email" />
     <label for="password">Password</label>
-    <input type="text" class="form-control" id="password" placeholder="admin_44" readonly />
+    <input type="text" class="form-control" id="password" @bind="password" />
 </div>
 
 <button @onclick="RegisterAdmin">Registar</button>
@@ -22,7 +22,7 @@
 
     private string name = string.Empty;
     private string email = string.Empty;
-    private string password = "admin_44";
+    private string password = string.Empty;
 
     private string message = string.Empty; 
 
