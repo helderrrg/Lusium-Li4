@@ -1,4 +1,6 @@
 @page "/admins/register"
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
 
 <PageTitle>Registar Administrador</PageTitle>
 
@@ -6,29 +8,46 @@
 
 <div class="form-group">
     <label for="nome">Nome</label>
-    <input type="text" class="form-control" id="nome" @bind="nome" />
+    <input type="text" class="form-control" id="name" @bind="name" />
+    <label for="email">Email</label>
     <input type="text" class="form-control" id="email" @bind="email" />
-    <input type="text" class="form-control" id="password" @bind="password" />
+    <label for="password">Password</label>
+    <input type="text" class="form-control" id="password" placeholder="admin_44" readonly />
 </div>
 
 <button @onclick="RegisterAdmin">Registar</button>
 
+<p>@message</p>
 @code {
 
-    private string nome = string.Empty;
+    private string name = string.Empty;
     private string email = string.Empty;
-    private string password = string.Empty;
+    private string password = "admin_44";
+
+    private string message = string.Empty; 
 
     [Inject]
     public required LusiumService LusiumService { get; set; }
 
-    public void RegisterAdmin()
+    public async Task RegisterAdmin()
     {
-        var valid = await LusiumService.ValidaDadosAdministrador(nome, email, password);
+        var valid = await LusiumService.ValidaDadosAdministrador(name, email, password);
 
         if (valid)
         {
-            LusiumService.RegistaAdministrador(nome, email, password);
+            Administrator administrator = await LusiumService.RegistaAdministrador(name, email, password);
+            if (administrator != null)
+            {
+                message = $"Administrador registado com os campos: Nome - {administrator.Nome}, Email - {administrator.Email}.";
+            }
+            else
+            {
+                message = "Não foi possível registar o administrador.";
+            }
+        }
+        else
+        {
+            message = "Dados inválidos. Não foi possível registar.";
         }
     }
 }

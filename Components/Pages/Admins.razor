@@ -1,5 +1,6 @@
 @page "/admins"
 @inject NavigationManager navigationManager
+@attribute [Authorize(Roles = "Admin")]
 @rendermode InteractiveServer
 
 <PageTitle>Administradores</PageTitle>

@@ -1,17 +1,9 @@
 CREATE PROCEDURE VerificarIniciarSessao
     @Email VARCHAR(45),
-    @PalavraPasse VARCHAR(250),
-    @ID VARCHAR(45) OUTPUT,
-    @Nome VARCHAR(45) OUTPUT,
-    @Role VARCHAR(20) OUTPUT
+    @PalavraPasse VARCHAR(250)
 AS
 BEGIN
     SET NOCOUNT ON;
-
-    -- Inicializar as variáveis de saída com NULL
-    SET @ID = NULL;
-    SET @Nome = NULL;
-    SET @Role = NULL;
 
     -- Verificar na tabela Administrador
     IF EXISTS (
@@ -21,9 +13,11 @@ BEGIN
     )
     BEGIN
         SELECT 
-            @ID = ID,
-            @Nome = Nome,
-            @Role = 'Admin'
+            ID,
+            Nome,
+			Email,
+            'Admin' AS Role,
+            Validado
         FROM Administrador
         WHERE Email = @Email AND PalavraPasse = @PalavraPasse;
 
@@ -38,9 +32,10 @@ BEGIN
     )
     BEGIN
         SELECT 
-            @ID = ID,
-            @Nome = Nome, 
-            @Role = 'Institution'
+            ID,
+            Nome,
+			Email,
+            'Institution' AS Role
         FROM Instituicao
         WHERE Email = @Email AND PalavraPasse = @PalavraPasse;
 
@@ -55,9 +50,10 @@ BEGIN
     )
     BEGIN
         SELECT 
-            @ID = ID,
-            @Nome = Nome, 
-            @Role = 'Collaborator'
+            ID,
+            Nome,
+			Email,
+            'Collaborator' AS Role
         FROM Colaborador
         WHERE Email = @Email AND PalavraPasse = @PalavraPasse;
 

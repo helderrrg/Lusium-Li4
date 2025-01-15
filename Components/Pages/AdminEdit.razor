@@ -1,0 +1,65 @@
+﻿@page "/admins/edit"
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Editar Administrador</PageTitle>
+
+<h1>Editar Administrador</h1>
+
+<div class="form-group">
+    <label for="nome">Nome</label>
+    <input type="text" class="form-control" id="name" @bind="name" />
+    <label for="password">Nova Palavra-Passe</label>
+    <input type="text" class="form-control" id="password" @bind="password" />
+    <label for="password">Confirmar Nova Palavra-Passe</label>
+    <input type="text" class="form-control" id="password" @bind="password" />
+</div>
+
+<button @onclick="EditAdmin">Editar</button>
+
+<p>@message</p>
+
+@code {
+
+    private string userID = string.Empty;
+    private string name = string.Empty;
+    private string password = string.Empty;
+
+    private string message = string.Empty;
+
+    [Inject]
+    public required LusiumService LusiumService { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated ?? false)
+        {
+            userID = user.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
+            name = user.FindFirst(ClaimTypes.Name)?.Value!;
+        }
+        else
+        {
+            navigationManager.NavigateTo("/login");
+        }
+    }
+
+    public async Task EditAdmin()
+    {
+        var valid = await LusiumService.ValidaNovosDadosAdministrador(userID, name, password);
+
+        if (valid)
+        {
+            await LusiumService.AtualizaDadosAdministrador(userID, name, password);
+            
+            message = $"Administrador editado com sucesso.";
+        }
+        else
+        {
+            message = "Dados inválidos. Não foi possível editar.";
+        }
+    }
+}
