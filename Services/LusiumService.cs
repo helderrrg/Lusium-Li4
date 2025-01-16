@@ -173,8 +173,30 @@ namespace Services
 
         public async Task<bool> ValidaCredenciais(string email, string pp)
         {
+<<<<<<< Updated upstream
             // email validation
             if (!Utils.IsEmailValid(email))
+=======
+            var id = int.Parse(codColaborador);
+
+            return await _context.Colaborador.FirstOrDefaultAsync(c => c.ID == id);
+        }
+
+        public async Task<Instituition?> ObterInstituicao(string codInstituicao)
+        {
+            var id = int.Parse(codInstituicao);
+
+            return await _context.Instituicao.FirstOrDefaultAsync(i => i.ID == id);
+        }
+
+        public async Task<DataTable> ValidaCredenciais(string email, string password)
+        {
+            DataTable dataTable = new DataTable();
+
+            string query = @"EXEC VerificarIniciarSessao @Email = @EmailParam, @PalavraPasse = @PasswordParam";
+
+            using (var connection = _context.Database.GetDbConnection())
+>>>>>>> Stashed changes
             {
                 return false;
             }
@@ -322,7 +344,6 @@ namespace Services
 
             return true;
         }
-
         public async Task AtualizaDadosInstituicao(string codInstituicao, string novoNome, string novaMorada, string novaPP)
         {
             var inst = await _context.Instituicao.FirstOrDefaultAsync(i => i.ID == int.Parse(codInstituicao));
