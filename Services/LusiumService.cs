@@ -170,37 +170,13 @@ namespace Services
 
             return colab;
         }
-        public async Task<DataTable> ObterColaborador(string codColaborador)
+        public async Task<Collaborator?> ObterColaborador(string codColaborador)
         {
-            DataTable dataTable = new DataTable();
+            var id = int.Parse(codColaborador);
 
-            var codColaboradorParam = new SqlParameter("@codColaborador", SqlDbType.Int) { Value = int.Parse(codColaborador) };
-
-            var query = @"SELECT c.ID, c.Nome, c.Email, c.DataNascimento, c.InstituicaoID, c.PalavraPasse, 
-               i.ID as InstituicaoID, i.Nome as InstituicaoNome, i.NIF, i.NumeroAssociacao, 
-               i.Email as InstituicaoEmail, i.Morada, i.Creditos, i.PalavraPasse as InstituicaoPalavraPasse
-                        FROM Colaborador c
-                        LEFT JOIN Instituicao i ON c.InstituicaoID = i.ID
-                        WHERE c.ID = @codColaborador";
-
-            using (var connection = _context.Database.GetDbConnection())
-            {
-                await connection.OpenAsync();
-
-                using (var command = connection.CreateCommand())
-                {
-                    command.CommandText = query;
-                    command.Parameters.Add(codColaboradorParam);
-
-                    using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        dataTable.Load(reader);
-                    }
-                }
-            }
-
-            return dataTable;
+            return await _context.Colaborador.FirstOrDefaultAsync(c => c.ID == id);
         }
+
         public async Task<DataTable> ValidaCredenciais(string email, string password)
         {
             DataTable dataTable = new DataTable();

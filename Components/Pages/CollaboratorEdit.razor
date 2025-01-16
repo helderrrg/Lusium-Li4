@@ -90,21 +90,21 @@
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
-        DataTable result;
+        Collaborator result;
 
         if (user.Identity?.IsAuthenticated ?? false)
         {
             userID = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
-            result = await LusiumService.ObterColaborador(userID);
+            result = await LusiumService.ObterColaborador(userID)!;
 
-            if (result.Rows.Count > 0)
+            if (result != null)
             {
-                var row = result.Rows[0];
-                userName = row["Nome"].ToString() ?? string.Empty;
-                userEmail = row["Email"].ToString() ?? string.Empty;
-                birthDate = DateOnly.FromDateTime(DateTime.Parse(row["DataNascimento"].ToString() ?? string.Empty));
-                selectedInstitutionId = row["InstituicaoID"].ToString() ?? string.Empty;
+                userName = result.Nome;
+                userEmail = result.Email;
+                birthDate = result.DataNascimento;
+                selectedInstitutionId = result.InstituicaoID.ToString();
             }
+
         }
         else
         {
