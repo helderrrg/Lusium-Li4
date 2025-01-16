@@ -1,10 +1,10 @@
 -- Tabela Administrador
-INSERT INTO Administrador (Nome, Email, PalavraPasse)
+INSERT INTO Administrador (Nome, Email, PalavraPasse, Validado)
 VALUES
-('Admin1', 'admin1@example.com', 'password123'),
-('Admin2', 'admin2@example.com', 'password456'),
-('Admin3', 'admin3@example.com', 'password789'),
-('Admin4', 'admin4@example.com', 'password321');
+('Admin1', 'admin1@example.com', 'password123#', 1),
+('Admin2', 'admin2@example.com', 'password456#', 1),
+('Admin3', 'admin3@example.com', 'password789#', 1),
+('Admin4', 'admin4@example.com', 'password321#', 1);
 
 -- Tabela Instituição
 INSERT INTO Instituicao (Nome, NIF, NumeroAssociacao, Email, Morada, Creditos, PalavraPasse)

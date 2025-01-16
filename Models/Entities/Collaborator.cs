@@ -7,6 +7,7 @@ namespace Models.Entities
         public required string Email { get; set; }
         public DateOnly DataNascimento { get; set; }
         public int InstituicaoID { get; set; }
+        public Instituition? Instituicao { get; set; }
         public required string PalavraPasse { get; set; }
     }
 }

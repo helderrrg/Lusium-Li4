@@ -10,6 +10,7 @@ namespace Models.Entities
         public required string Morada { get; set; }
         public int Creditos { get; set; }
         public required string PalavraPasse { get; set; }
+        public ICollection<Collaborator>? Colaboradores { get; set; }
         public ICollection<InstituitionManual>? ManualInstituicoes { get; set; }
         public ICollection<Purchase>? Compras { get; set; }
     }

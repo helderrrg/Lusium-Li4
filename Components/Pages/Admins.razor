@@ -1,0 +1,18 @@
+@page "/admins"
+@inject NavigationManager navigationManager
+@attribute [Authorize(Roles = "Admin")]
+@rendermode InteractiveServer
+
+<PageTitle>Administradores</PageTitle>
+
+<h1>Administradores</h1>
+
+<button @onclick="NavigateToRegister">Registar Administrador</button>
+
+@code {
+
+    private void NavigateToRegister()
+    {
+        navigationManager.NavigateTo("/admins/register");
+    }
+}

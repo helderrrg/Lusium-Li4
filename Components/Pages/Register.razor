@@ -1,0 +1,24 @@
+﻿@page "/register"
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Registar</PageTitle>
+
+<h1>Registar</h1>
+
+<button @onclick="NavigateToRegisterInstitution">Registar Instituição</button>
+<button @onclick="NavigateToRegisterCollaborator">Registar Colaborador</button>
+
+@code {
+
+    private void NavigateToRegisterInstitution()
+    {
+        navigationManager.NavigateTo("/register/institution");
+    }
+
+    private void NavigateToRegisterCollaborator()
+    {
+        navigationManager.NavigateTo("/register/collaborator");
+    }
+
+}

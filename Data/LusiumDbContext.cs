@@ -65,6 +65,18 @@ namespace Data
             // Config Instituition
             modelBuilder.Entity<Instituition>()
                 .HasKey(i => i.ID);
+            
+            modelBuilder.Entity<Instituition>()
+                .HasMany(i => i.Colaboradores);
+
+            // Config Collaborator
+            modelBuilder.Entity<Collaborator>()
+                .HasKey(c => c.ID);
+
+            modelBuilder.Entity<Collaborator>()
+                .HasOne(c => c.Instituicao)
+                .WithMany(i => i.Colaboradores)
+                .HasForeignKey(c => c.InstituicaoID);
 
             // Config InstitutionManual
             modelBuilder.Entity<InstituitionManual>()

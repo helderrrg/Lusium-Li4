@@ -92,7 +92,7 @@ namespace Services
                 return false;
             }
 
-            return !await _context.Instituicao.AnyAsync(i => i.Email == email);
+            return !await _context.Instituicao.AnyAsync(i => i.Email == email); ;
         }
 
         public async Task<Instituition> RegistaInstituicao(string nome, string nif, string numAssoc, string email, string morada, string pp)
@@ -170,25 +170,45 @@ namespace Services
 
             return colab;
         }
-
-        public async Task<bool> ValidaCredenciais(string email, string pp)
+        public async Task<Collaborator?> ObterColaborador(string codColaborador)
         {
-            // email validation
-            if (!Utils.IsEmailValid(email))
+            var id = int.Parse(codColaborador);
+
+            return await _context.Colaborador.FirstOrDefaultAsync(c => c.ID == id);
+        }
+
+        public async Task<DataTable> ValidaCredenciais(string email, string password)
+        {
+            DataTable dataTable = new DataTable();
+
+            string query = @"EXEC VerificarIniciarSessao @Email = @EmailParam, @PalavraPasse = @PasswordParam";
+
+            using (var connection = _context.Database.GetDbConnection())
             {
-                return false;
+                await connection.OpenAsync();
+
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = query;
+
+                    var emailParam = command.CreateParameter();
+                    emailParam.ParameterName = "@EmailParam";
+                    emailParam.Value = email;
+                    command.Parameters.Add(emailParam);
+
+                    var passwordParam = command.CreateParameter();
+                    passwordParam.ParameterName = "@PasswordParam";
+                    passwordParam.Value = password;
+                    command.Parameters.Add(passwordParam);
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        dataTable.Load(reader);
+                    }
+                }
             }
 
-            // password validation
-            if (!Utils.IsPasswordValid(pp))
-            {
-                return false;
-            }
-
-            // at least one user with the given credentials
-            return await _context.Administrador.AnyAsync(a => a.Email == email && a.PalavraPasse == pp) ||
-                   await _context.Instituicao.AnyAsync(i => i.Email == email && i.PalavraPasse == pp) ||
-                   await _context.Colaborador.AnyAsync(c => c.Email == email && c.PalavraPasse == pp);
+            return dataTable;
         }
 
         public async Task<bool> ValidaNovaPP(string email, string novaPP)
@@ -256,18 +276,16 @@ namespace Services
                 return false;
             }
 
-            var nameParam = new SqlParameter("@Nome", SqlDbType.VarChar, 45) { Direction = ParameterDirection.Output };
-            var roleParam = new SqlParameter("@Role", SqlDbType.VarChar, 20) { Direction = ParameterDirection.Output };
+            var isValidParam = new SqlParameter("@IsValid", SqlDbType.Bit) { Direction = ParameterDirection.Output };
 
             await _context.Database.ExecuteSqlRawAsync(
-                "EXEC VerificarIniciarSessao @Email = {0}, @PalavraPasse = {1}, @Nome = @Nome OUTPUT, @Role = @Role OUTPUT",
+                "EXEC ValidaPP @Email = {0}, @PalavraPasse = {1}, @IsValid = @IsValid OUTPUT",
                 email,
                 pp,
-                nameParam,
-                roleParam
+                isValidParam
             );
 
-            return nameParam.Value.ToString() != "" && roleParam.Value.ToString() != "";
+            return (bool)isValidParam.Value;
         }
 
         public async Task AtualizaDadosAdministrador(string codAdministrador, string novoNome, string novaPP)
@@ -687,20 +705,19 @@ namespace Services
             return await _context.Produto.ToListAsync();
         }
 
-        public async Task<(string? Name, string? Role)> LoginVerifyAsync(string email, string password)
+        // Extras
+        public async Task validateAdmin(string codUtilizador)
         {
-            var nameParam = new SqlParameter("@Nome", SqlDbType.VarChar, 45) { Direction = ParameterDirection.Output };
-            var roleParam = new SqlParameter("@Role", SqlDbType.VarChar, 20) { Direction = ParameterDirection.Output };
-
-            await _context.Database.ExecuteSqlRawAsync(
-                "EXEC VerificarIniciarSessao @Email = {0}, @PalavraPasse = {1}, @Nome = @Nome OUTPUT, @Role = @Role OUTPUT",
-                email,
-                password,
-                nameParam,
-                roleParam
-            );
-
-            return (nameParam.Value.ToString(), roleParam.Value.ToString());
+            if (int.TryParse(codUtilizador, out int id))
+            {
+                string sql = "UPDATE Administrador SET Validado = 1 WHERE ID = @p0";
+                await _context.Database.ExecuteSqlRawAsync(sql, id);
+            }
+            else
+            {
+                Console.WriteLine("Error validating admin: " + id);
+            }
         }
+
     }
 }

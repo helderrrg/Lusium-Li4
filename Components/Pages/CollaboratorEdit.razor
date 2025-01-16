@@ -1,0 +1,207 @@
+@page "/collaborator/edit"
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+@using Services
+@using System.Data
+@inject NavigationManager navigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject LusiumService LusiumService
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin,Institution,Collaborator")]
+
+<PageTitle>Editar Colaborador</PageTitle>
+
+<h1>Editar Colaborador</h1>
+
+<div class="form-group">
+    <label for="nome">Nome</label>
+    <input type="text"
+           class="form-control"
+           id="name"
+           @bind="pendingName"
+           placeholder="@userName" />
+
+    <label for="birthDate">Data de nascimento</label>
+    <InputDate TValue="DateOnly?" class="form-control" id="birthDate" @bind-Value="birthDate" />
+
+    <label for="instituicao">Instituição associada</label>
+    <select class="form-control" id="instituicao" @bind="selectedInstitutionId">
+        <option value="">-- Selecione uma instituição --</option>
+        @foreach (var institution in institutions)
+        {
+            <option value="@institution.Value.ID">@institution.Value.Nome</option>
+        }
+    </select>
+
+    <label for="password">Nova Palavra-Passe</label>
+    <input type="password" class="form-control" id="password" @bind="password" />
+
+    <label for="confirmPassword">Confirmar Nova Palavra-Passe</label>
+    <input type="password" class="form-control" id="confirmPassword" @bind="confirmPassword" />
+</div>
+
+<button @onclick="ShowPasswordModal">Alterar Dados</button>
+
+<p>@message</p>
+
+@if (isModalOpen)
+{
+    <div class="modal show" tabindex="-1" style="display: block;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirme a Palavra-Passe Atual</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="currentPassword">Palavra-Passe Atual</label>
+                    <input type="password" class="form-control" id="currentPassword" @bind="currentPassword" />
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="CloseModal">Cancelar</button>
+                    <button class="btn btn-primary" @onclick="ConfirmEdit">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+    private string userID { get; set; } = string.Empty;
+    private string userName { get; set; } = string.Empty;
+    private string userEmail { get; set; } = string.Empty;
+    private DateOnly? birthDate;
+    private string selectedInstitutionId = string.Empty;
+    Dictionary<string, IUser> institutions = new();
+
+    private string pendingName { get; set; } = string.Empty;
+    private DateOnly? pendingBirthDate;
+    private string pendingInstitutionId { get; set; } = string.Empty;
+    private string password { get; set; } = string.Empty;
+    private string confirmPassword { get; set; } = string.Empty;
+
+    private string currentPassword { get; set; } = string.Empty;
+    private string message { get; set; } = string.Empty;
+
+    private bool isModalOpen { get; set; } = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        Collaborator result;
+
+        if (user.Identity?.IsAuthenticated ?? false)
+        {
+            userID = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+            result = await LusiumService.ObterColaborador(userID)!;
+
+            if (result != null)
+            {
+                userName = result.Nome;
+                userEmail = result.Email;
+                birthDate = result.DataNascimento;
+                selectedInstitutionId = result.InstituicaoID.ToString();
+            }
+
+        }
+        else
+        {
+            navigationManager.NavigateTo("/login");
+        }
+    }
+
+    private void ShowPasswordModal()
+    {
+        isModalOpen = true;
+    }
+
+    private void CloseModal()
+    {
+        isModalOpen = false;
+        currentPassword = string.Empty;
+    }
+
+    private async Task ConfirmEdit()
+    {
+        var confirmation = await LusiumService.ValidaPP(userEmail, currentPassword);
+
+        if (confirmation)
+        {
+            await EditCollaborator();
+            CloseModal();
+        }
+        else
+        {
+            message = "Palavra-passe atual inválida.";
+            CloseModal();
+        }
+    }
+
+    private async Task EditCollaborator()
+    {
+        if (password != confirmPassword)
+        {
+            message = "As palavras-passe não coincidem.";
+            CloseModal();
+            return;
+        }
+
+        // If he didn't change the password, we need to pass the current password just to validate the other fields
+        string tempPass = string.Empty;
+        if (!string.IsNullOrEmpty(password))
+        {
+            tempPass = password;
+        }
+        else
+        {
+            tempPass = currentPassword;
+        }
+
+        string tempName = string.Empty;
+        if (!string.IsNullOrEmpty(pendingName) && pendingName != userName)
+        {
+            tempName = pendingName;
+        }
+        else
+        {
+            tempName = userName;
+        }
+
+        string tempInstitutionId = string.Empty;
+        if (!string.IsNullOrEmpty(pendingInstitutionId) && pendingInstitutionId != selectedInstitutionId)
+        {
+            tempInstitutionId = pendingInstitutionId;
+        }
+        else
+        {
+            tempInstitutionId = selectedInstitutionId;
+        }
+
+        DateOnly? tempBirthDate = pendingBirthDate.HasValue && pendingBirthDate != birthDate ? pendingBirthDate : birthDate;
+
+        var valid = false;
+
+        if (tempBirthDate.HasValue)
+        {
+            valid = await LusiumService.ValidaNovosDadosColaborador(userID, tempName, tempBirthDate.Value, tempInstitutionId, tempPass);
+        }
+        else
+        { 
+			message = "Data de nascimento inválida.";
+        }
+
+        if (valid)
+        {
+            await LusiumService.AtualizaDadosColaborador(userID, tempName, tempBirthDate.Value, tempInstitutionId, tempPass);
+            message = "Colaborador editado com sucesso, as alterações serão refletidas no próximo início de sessão.";
+
+            // [TODO] Update the user's name in the claims
+        }
+        else
+        {
+            message = "Dados inválidos. Não foi possível editar.";
+        }
+    }
+}

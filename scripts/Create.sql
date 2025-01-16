@@ -3,7 +3,8 @@ CREATE TABLE Administrador (
     ID INT IDENTITY(1,1) PRIMARY KEY,
     Nome VARCHAR(45),
     Email VARCHAR(45),
-    PalavraPasse VARCHAR(250)
+    PalavraPasse VARCHAR(250),
+    Validado BIT DEFAULT 0
 );
 
 -- Tabela Instituição

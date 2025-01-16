@@ -15,7 +15,10 @@ namespace Services
             {
                 if (!char.IsLetter(c))
                 {
-                    return false;
+                    if (c != ' ')
+                    {
+                        return false;
+                    }
                 }
             }
 
