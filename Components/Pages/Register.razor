@@ -47,7 +47,7 @@
             border: none;
             text-decoration: none;
             display: flex;
-            background-color: #1e352f;
+            background-color: transparent;
             align-items: center;
             color: #A6C36F;
             transition: transform 0.2s ease-in-out;
@@ -61,16 +61,6 @@
             scale: 0.4;
             flex: 4;
         }
-
-        a {
-            text-decoration: none;
-        }
-
-        a:hover
-        {
-            color: #A6C36F;
-            text-decoration: none;
-        }
     </style>
 </head>
 <body>
@@ -79,11 +69,11 @@
             <div class="main-title">Registar</div>
             <div class="registration-options">
                 <button @onclick="NavigateToRegisterCollaborator">
-                    <a class="option-text">Colaborador</a>
+                    <div class="option-text">Colaborador</div>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="icon"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
                 </button>
                 <button @onclick="NavigateToRegisterInstitution">
-                    <a class="option-text">Instituição</a>
+                    <div class="option-text">Instituição</div>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="icon"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
                 </button>
             </div>

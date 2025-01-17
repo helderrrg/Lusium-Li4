@@ -1,4 +1,6 @@
 ﻿@page "/"
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
 
 <html>
 <head>
@@ -47,10 +49,11 @@
             justify-content: space-around;
         }
 
-        .button {
+        button {
             font-size: 1.3em;
             text-align: center;
             color: #1e352f;
+            border: none;
             padding: 0.5em 0px;
             width: 13em;
             background-color: #A6C36F;
@@ -58,18 +61,8 @@
             transition: transform 0.2s ease-in-out;
         }
 
-        .button:hover {
+        button:hover {
             transform: scale(1.1);
-        }
-
-        a {
-            text-decoration: none;
-        }
-
-        a:hover
-        {
-            color: #1e352f;
-            text-decoration: none;
         }
         
     </style>
@@ -82,13 +75,33 @@
                 <h3 class="sub-title">O processo de mutação de minérios para robôs.</h3>
             </div>
             <div class="button-wrapper">
-                <a class="button" href="/institutionList">Listagem de Instituições</a>
+                <button @onclick="NavigateToInstituionList">Listagem de Instituições</button>
                 <div class="auth-wrapper">
-                    <a class="button" href="/register">Registar</a>
-                    <a class="button" href="/login">Iniciar Sessão</a>
+                    <button @onclick="NavigateToRegisterMenu">Registar</button>
+                    <button @onclick="NavigateToLoginMenu">Iniciar Sessão</button>
                 </div>
             </div>
         </div>
     </div>
 </body>
 </html>
+
+
+@code {
+
+    private void NavigateToInstituionList()
+    {
+        navigationManager.NavigateTo("/institution/list");
+    }
+
+    private void NavigateToRegisterMenu()
+    {
+        navigationManager.NavigateTo("/register");
+    }
+
+    private void NavigateToLoginMenu()
+    {
+        navigationManager.NavigateTo("/login");
+    }
+
+}
