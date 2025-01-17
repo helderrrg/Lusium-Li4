@@ -1,18 +1,76 @@
 @page "/admins"
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager navigationManager
-@attribute [Authorize(Roles = "Admin")]
 @rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
 
 <PageTitle>Administradores</PageTitle>
 
 <h1>Administradores</h1>
 
-<button @onclick="NavigateToRegister">Registar Administrador</button>
+<input type="text" @bind="filterText" @oninput="OnFilterTextChanged" placeholder="Filtrar por nome..." class="form-control mb-3" />
+
+@if (adminList == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var manual in filteredAdminList)
+            {
+                <tr>
+                    <td>@manual.Value.ID</td>
+                    <td>@manual.Value.Nome</td>
+                    <td>@manual.Value.Email</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 
 @code {
+    private Dictionary<string, Administrator> adminList = new();
+    private string filterText = string.Empty;
 
-    private void NavigateToRegister()
+    [Inject]
+    public required LusiumService LusiumService { get; set; }
+
+    protected override async Task OnInitializedAsync()
     {
-        navigationManager.NavigateTo("/admins/register");
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        string userID = string.Empty;
+        string userRole = string.Empty;
+
+        if (user.Identity?.IsAuthenticated ?? false)
+        {
+            userID = user.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
+            userRole = user.FindFirst(ClaimTypes.Role)?.Value!;
+        }
+        else
+        {
+            navigationManager.NavigateTo("/login");
+        }
+
+        adminList = await LusiumService.ListaAdministradores();
+    }
+
+    private IEnumerable<KeyValuePair<string, Administrator>> filteredAdminList =>
+        adminList.Where(admin => string.IsNullOrEmpty(filterText) ||
+                                 admin.Value.Nome.Contains(filterText, StringComparison.OrdinalIgnoreCase));
+
+    private void OnFilterTextChanged()
+    {
+        StateHasChanged();
     }
 }

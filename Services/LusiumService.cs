@@ -184,6 +184,32 @@ namespace Services
             return await _context.Instituicao.FirstOrDefaultAsync(i => i.ID == id);
         }
 
+        public async Task<int> CalcularCreditosDispendidos(int instituicaoID)
+        {
+            int totalCreditos = 0;
+
+            string query = @"EXEC CalcularCreditosDispendidos @InstituicaoID";
+
+            using (var connection = _context.Database.GetDbConnection())
+            {
+                await connection.OpenAsync();
+
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = query;
+
+                    var instituicaoParam = command.CreateParameter();
+                    instituicaoParam.ParameterName = "@InstituicaoID";
+                    instituicaoParam.Value = instituicaoID;
+                    command.Parameters.Add(instituicaoParam);
+
+                    totalCreditos = Convert.ToInt32(await command.ExecuteScalarAsync());
+                }
+            }
+
+            return totalCreditos;
+        }
+
         public async Task<DataTable> ValidaCredenciais(string email, string password)
         {
             DataTable dataTable = new DataTable();
@@ -622,6 +648,16 @@ namespace Services
         public async Task<Purchase?> ExibeCompraEfetuada(string codCompra)
         {
            return await _context.Compra.FirstOrDefaultAsync(c => c.NumeroCompra == int.Parse(codCompra));
+        }
+
+        public async Task<Dictionary<string, Administrator>> ListaAdministradores()
+        {
+            return await _context.Administrador.ToDictionaryAsync(admin => admin.ID.ToString(), admin => admin);
+        }
+
+        public async Task<Dictionary<string, Instituition>> ListaInstituicoes()
+        {
+            return await _context.Instituicao.ToDictionaryAsync(inst => inst.ID.ToString(), inst => inst);
         }
 
         public async Task<Dictionary<string, Manual>> ListaManuais(string codUtilizador, string tipoUtilizador)

@@ -301,3 +301,21 @@ BEGIN
     END
 END;
 GO
+
+CREATE PROCEDURE CalcularCreditosDispendidos
+    @InstituicaoID INT
+AS
+BEGIN
+    -- Variável para armazenar o total de créditos dispendidos
+    DECLARE @TotalCreditos INT;
+
+    -- Somar os custos dos produtos associados às compras da instituição, tratando valores nulos
+    SELECT @TotalCreditos = COALESCE(SUM(p.Custo), 0)
+    FROM Compra c
+    JOIN Produto p ON c.ProdutoAssociado = p.ID
+    WHERE c.InstituicaoID = @InstituicaoID;
+
+    -- Devolver o total de créditos dispendidos
+    SELECT @TotalCreditos AS TotalCreditos;
+END;
+GO

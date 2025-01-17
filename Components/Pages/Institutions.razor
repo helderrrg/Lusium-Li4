@@ -1,0 +1,77 @@
+@page "/institutions"
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
+
+@*not working*@
+
+<PageTitle>Instituições</PageTitle>
+
+<h1>Instituições</h1>
+
+<input type="text" @bind="filterText" @oninput="OnFilterTextChanged" placeholder="Filtrar por nome..." class="form-control mb-3" />
+
+@if (institutionList == null || totalCreditosDispendidos.Count != institutionList.Count)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>NIF</th>
+                <th>Número de Associação</th>
+                <th>Email</th>
+                <th>Morada</th>
+                <th>Total de Créditos Dispendidos</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var institution in filteredinstitutionList)
+            {
+                <tr>
+                    <td>@institution.Value.ID</td>
+                    <td>@institution.Value.Nome</td>
+                    <td>@institution.Value.NIF</td>
+                    <td>@institution.Value.NumeroAssociacao</td>
+                    <td>@institution.Value.Email</td>
+                    <td>@institution.Value.Morada</td>
+                    <td>@totalCreditosDispendidos[institution.Value.ID.ToString()]</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Dictionary<string, Instituition> institutionList = new();
+    private string filterText = string.Empty;
+    private Dictionary<string, int> totalCreditosDispendidos = new();
+
+    [Inject]
+    public required LusiumService LusiumService { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        institutionList = await LusiumService.ListaInstituicoes();
+
+        foreach (var institution in institutionList.Values)
+        {
+            var totalCreditos = await LusiumService.CalcularCreditosDispendidos(institution.ID);
+
+            totalCreditosDispendidos[institution.ID.ToString()] = totalCreditos;
+        }
+    }
+
+    private IEnumerable<KeyValuePair<string, Instituition>> filteredinstitutionList =>
+        institutionList.Where(admin => string.IsNullOrEmpty(filterText) ||
+                                       admin.Value.Nome.Contains(filterText, StringComparison.OrdinalIgnoreCase));
+
+    private void OnFilterTextChanged()
+    {
+        StateHasChanged();
+    }
+}

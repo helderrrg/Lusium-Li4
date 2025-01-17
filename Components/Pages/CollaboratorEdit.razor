@@ -15,11 +15,7 @@
 
 <div class="form-group">
     <label for="nome">Nome</label>
-    <input type="text"
-           class="form-control"
-           id="name"
-           @bind="pendingName"
-           placeholder="@userName" />
+    <input type="text" class="form-control" id="name" @bind="pendingName" placeholder="@userName" />
 
     <label for="birthDate">Data de nascimento</label>
     <InputDate TValue="DateOnly?" class="form-control" id="birthDate" @bind-Value="birthDate" />
@@ -104,7 +100,6 @@
                 birthDate = result.DataNascimento;
                 selectedInstitutionId = result.InstituicaoID.ToString();
             }
-
         }
         else
         {
