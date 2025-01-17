@@ -1,0 +1,53 @@
+@page "/admins/register"
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>Registar Administrador</PageTitle>
+
+<h1>Registar Administrador</h1>
+
+<div class="form-group">
+    <label for="nome">Nome</label>
+    <input type="text" class="form-control" id="name" @bind="name" />
+    <label for="email">Email</label>
+    <input type="text" class="form-control" id="email" @bind="email" />
+    <label for="password">Password</label>
+    <input type="text" class="form-control" id="password" @bind="password" />
+</div>
+
+<button @onclick="RegisterAdmin">Registar</button>
+
+<p>@message</p>
+@code {
+
+    private string name = string.Empty;
+    private string email = string.Empty;
+    private string password = string.Empty;
+
+    private string message = string.Empty; 
+
+    [Inject]
+    public required LusiumService LusiumService { get; set; }
+
+    public async Task RegisterAdmin()
+    {
+        var valid = await LusiumService.ValidaDadosAdministrador(name, email, password);
+
+        if (valid)
+        {
+            Administrator administrator = await LusiumService.RegistaAdministrador(name, email, password);
+            if (administrator != null)
+            {
+                message = $"Administrador registado com os campos: Nome - {administrator.Nome}, Email - {administrator.Email}.";
+            }
+            else
+            {
+                message = "Não foi possível registar o administrador.";
+            }
+        }
+        else
+        {
+            message = "Dados inválidos. Não foi possível registar.";
+        }
+    }
+}

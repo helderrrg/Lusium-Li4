@@ -1,0 +1,83 @@
+﻿@page "/register/collaborator"
+@rendermode InteractiveServer
+
+<PageTitle>Registar Colaborador</PageTitle>
+
+<h1>Registar Colaborador</h1>
+
+<div class="form-group">
+    <label for="nome">Nome</label>
+    <input type="text" class="form-control" id="name" @bind="name" />
+
+    <label for="email">Email</label>
+    <input type="text" class="form-control" id="email" @bind="email" />
+
+    <label for="birthDate">Data de nascimento</label>
+    <InputDate TValue="DateOnly?" class="form-control" id="birthDate" @bind-Value="birthDate" />
+
+    <label for="instituicao">Instituição associada</label>
+    <select class="form-control" id="instituicao" @bind="selectedInstitutionId">
+        <option value="">-- Selecione uma instituição --</option>
+        @foreach (var institution in institutions)
+        {
+            <option value="@institution.Value.ID">@institution.Value.Nome</option>
+        }
+    </select>
+
+    <label for="password">Password</label>
+    <input type="text" class="form-control" id="password" @bind="password" />
+</div>
+
+<button @onclick="RegisterCollaborator">Registar</button>
+
+<p>@message</p>
+
+@code {
+
+    Dictionary<string, IUser> institutions = new();
+
+    private string name = string.Empty;
+    private string email = string.Empty;
+    private DateOnly? birthDate;
+    private string selectedInstitutionId = string.Empty;
+    private string password = string.Empty;
+
+    private string message = string.Empty;
+
+    [Inject]
+    public required LusiumService LusiumService { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Obtém a lista de instituições
+        institutions = await LusiumService.ListaUtilizadores("Institution");
+    }
+
+    public async Task RegisterCollaborator()
+    {
+        if (!birthDate.HasValue)
+        {
+            message = "Por favor, selecione uma data válida.";
+            return;
+        }
+
+        var valid = await LusiumService.ValidaDadosColaborador(name, email, birthDate.Value, selectedInstitutionId, password);
+
+        if (valid)
+        {
+            Collaborator collaborator = await LusiumService.RegistaColaborador(name, email, birthDate.Value, selectedInstitutionId, password);
+            if (collaborator != null)
+            {
+                message = $"Colaborador registado com os campos: Nome - {collaborator.Nome}, Email - {collaborator.Email}, Data de Nascimento - {collaborator.DataNascimento:yyyy-MM-dd}, Instituição Associada - {collaborator.Instituicao?.Nome}.";
+            }
+            else
+            {
+                message = "Não foi possível registar o colaborador.";
+            }
+        }
+        else
+        {
+            message = "Dados inválidos. Não foi possível registar.";
+        }
+    }
+}

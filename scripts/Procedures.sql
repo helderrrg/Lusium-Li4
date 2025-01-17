@@ -1,15 +1,9 @@
 CREATE PROCEDURE VerificarIniciarSessao
     @Email VARCHAR(45),
-    @PalavraPasse VARCHAR(250),
-    @Nome VARCHAR(45) OUTPUT,
-    @Role VARCHAR(20) OUTPUT
+    @PalavraPasse VARCHAR(250)
 AS
 BEGIN
     SET NOCOUNT ON;
-
-    -- Inicializar as variáveis de saída com NULL
-    SET @Nome = NULL;
-    SET @Role = NULL;
 
     -- Verificar na tabela Administrador
     IF EXISTS (
@@ -19,8 +13,11 @@ BEGIN
     )
     BEGIN
         SELECT 
-            @Nome = Nome, 
-            @Role = 'Admin'
+            ID,
+            Nome,
+			Email,
+            'Admin' AS Role,
+            Validado
         FROM Administrador
         WHERE Email = @Email AND PalavraPasse = @PalavraPasse;
 
@@ -35,8 +32,10 @@ BEGIN
     )
     BEGIN
         SELECT 
-            @Nome = Nome, 
-            @Role = 'Institution'
+            ID,
+            Nome,
+			Email,
+            'Institution' AS Role
         FROM Instituicao
         WHERE Email = @Email AND PalavraPasse = @PalavraPasse;
 
@@ -51,11 +50,57 @@ BEGIN
     )
     BEGIN
         SELECT 
-            @Nome = Nome, 
-            @Role = 'Collaborator'
+            ID,
+            Nome,
+			Email,
+            'Collaborator' AS Role
         FROM Colaborador
         WHERE Email = @Email AND PalavraPasse = @PalavraPasse;
 
+        RETURN;
+    END
+END;
+GO
+
+CREATE PROCEDURE ValidaPP
+    @Email VARCHAR(45),
+    @PalavraPasse VARCHAR(250),
+    @IsValid BIT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Inicializar a variável de saída
+    SET @IsValid = 0;
+
+    -- Verificar nas tabelas
+    IF EXISTS (
+        SELECT 1
+        FROM Administrador
+        WHERE Email = @Email AND PalavraPasse = @PalavraPasse
+    )
+    BEGIN
+        SET @IsValid = 1;
+        RETURN;
+    END
+
+    IF EXISTS (
+        SELECT 1
+        FROM Instituicao
+        WHERE Email = @Email AND PalavraPasse = @PalavraPasse
+    )
+    BEGIN
+        SET @IsValid = 1;
+        RETURN;
+    END
+
+    IF EXISTS (
+        SELECT 1
+        FROM Colaborador
+        WHERE Email = @Email AND PalavraPasse = @PalavraPasse
+    )
+    BEGIN
+        SET @IsValid = 1;
         RETURN;
     END
 END;
