@@ -76,7 +76,7 @@
                 <h3 class="sub-title">O processo de mutação de minérios para robôs.</h3>
             </div>
             <div class="button-wrapper">
-                <button @onclick="NavigateToInstituionList">Listagem de Instituições</button>
+                <button @onclick="NavigateToInstitutionList">Listagem de Instituições</button>
                 <div class="auth-wrapper">
                     <button @onclick="NavigateToRegisterMenu">Registar</button>
                     <button @onclick="NavigateToLoginMenu">Iniciar Sessão</button>
@@ -90,7 +90,7 @@
 
 @code {
 
-    private void NavigateToInstituionList()
+    private void NavigateToInstitutionList()
     {
         navigationManager.NavigateTo("/institution/list");
     }
