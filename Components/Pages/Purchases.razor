@@ -1,0 +1,67 @@
+@page "/purchases"
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Institution")]
+
+<PageTitle>Compras</PageTitle>
+
+<h1>Compras</h1>
+
+@if (purchasesList == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Número da Fatura</th>
+                <th>Data da Compra</th>
+                <th>Endereço de Entrega</th>
+                <th>Produto Associado</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var purchase in purchasesList)
+            {
+                <tr>
+                    <td>@purchase.Value.NumeroCompra</td>
+                    <td>@purchase.Value.DataCompra</td>
+                    <td>@purchase.Value.EnderecoEntrega</td>
+                    <td>@purchase.Value.ProdutoAssociado</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Dictionary<string, Purchase> purchasesList = new();
+    private string filterText = string.Empty;
+
+    [Inject]
+    public required LusiumService LusiumService { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        string userID = string.Empty;
+        string userRole = string.Empty;
+
+        if (user.Identity?.IsAuthenticated ?? false)
+        {
+            userID = user.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
+            userRole = user.FindFirst(ClaimTypes.Role)?.Value!;
+        }
+        else
+        {
+            navigationManager.NavigateTo("/login");
+        }
+
+        purchasesList = await LusiumService.ListaComprasEfetuadas(userID);
+    }
+}

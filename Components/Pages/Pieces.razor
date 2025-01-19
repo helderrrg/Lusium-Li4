@@ -1,0 +1,79 @@
+@page "/pieces"
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>Peças</PageTitle>
+
+<h1>Peças</h1>
+
+@if (piecesList == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Imagem Alusiva</th>
+                <th>Quantidade</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var piece in piecesList)
+            {
+                <tr>
+                    <td>@piece.Value.Nome</td>
+                    <td>@piece.Value.ImagemAlusiva</td>
+                    <td>
+                        <input type="number" min="0" class="form-control"
+                               @bind="piece.Value.Quantidade" />
+                    </td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => AtualizaQuantidade(piece.Key, piece.Value.Quantidade)">
+                            Atualizar
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Dictionary<string, Piece> piecesList = new();
+
+    [Inject]
+    public required LusiumService LusiumService { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        string userID = string.Empty;
+        string userRole = string.Empty;
+
+        if (user.Identity?.IsAuthenticated ?? false)
+        {
+            userID = user.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
+            userRole = user.FindFirst(ClaimTypes.Role)?.Value!;
+        }
+        else
+        {
+            navigationManager.NavigateTo("/login");
+        }
+
+        piecesList = await LusiumService.ListaPecas();
+    }
+
+    private async Task AtualizaQuantidade(string codPeca, int quantidade)
+    {
+            await LusiumService.AtualizaQuantidadePecas(codPeca, quantidade);
+            piecesList[codPeca].Quantidade = quantidade;
+    }
+}

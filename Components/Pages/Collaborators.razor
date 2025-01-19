@@ -1,0 +1,108 @@
+@page "/collaborators/{institutionID:int}"
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin,Institution")]
+
+<PageTitle>Colaboradores</PageTitle>
+
+<h1>Colaboradores</h1>
+
+<input type="text" @bind="filterText" @oninput="OnFilterTextChanged" placeholder="Filtrar por nome..." class="form-control mb-3" />
+
+<div class="mb-3">
+    <button class="btn btn-primary me-2" @onclick="() => SortBy(name)">Ordenar por Nome</button>
+    <button class="btn btn-secondary" @onclick="() => SortBy(birthDate)">Ordenar por Data de Nascimento</button>
+</div>
+
+
+@if (collaboratorList == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Data de Nascimento</th>
+                <th>Instituição Associada</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var manual in filteredCollaboratorList)
+            {
+                <tr>
+                    <td>@manual.Value.ID</td>
+                    <td>@manual.Value.Nome</td>
+                    <td>@manual.Value.Email</td>
+                    <td>@manual.Value.DataNascimento</td>
+                    <td>@manual.Value.InstituicaoID</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Dictionary<string, Collaborator> collaboratorList = new();
+    private string filterText = string.Empty;
+    private string currentSort = "name";
+    private string name = "name";
+    private string birthDate = "birthDate";
+
+    [Parameter]
+    public int institutionID { get; set; }
+
+    [Inject]
+    public required LusiumService LusiumService { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        string userID = string.Empty;
+        string userRole = string.Empty;
+
+        if (user.Identity?.IsAuthenticated ?? false)
+        {
+            userID = user.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
+            userRole = user.FindFirst(ClaimTypes.Role)?.Value!;
+        }
+        else
+        {
+            navigationManager.NavigateTo("/login");
+        }
+
+        collaboratorList = await LusiumService.ListaColaboradores(institutionID);
+    }
+
+    private IEnumerable<KeyValuePair<string, Collaborator>> filteredCollaboratorList
+    {
+        get
+        {
+            var query = collaboratorList
+                .Where(admin => string.IsNullOrEmpty(filterText) ||
+                                admin.Value.Nome.Contains(filterText, StringComparison.OrdinalIgnoreCase));
+
+            return currentSort == "name"
+                ? query.OrderBy(admin => admin.Value.Nome)
+                : query.OrderBy(admin => admin.Value.DataNascimento);
+        }
+    }
+
+    private void OnFilterTextChanged()
+    {
+        StateHasChanged();
+    }
+
+    private void SortBy(string criteria)
+    {
+        currentSort = criteria;
+        StateHasChanged();
+    }
+}
