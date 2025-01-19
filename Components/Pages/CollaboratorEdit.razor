@@ -9,40 +9,119 @@
 @rendermode InteractiveServer
 @attribute [Authorize(Roles = "Admin,Institution,Collaborator")]
 
-<PageTitle>Editar Colaborador</PageTitle>
-
-<h1>Editar Colaborador</h1>
-
-<div class="form-group">
-    <label for="nome">Nome</label>
-    <input type="text"
-           class="form-control"
-           id="name"
-           @bind="pendingName"
-           placeholder="@userName" />
-
-    <label for="birthDate">Data de nascimento</label>
-    <InputDate TValue="DateOnly?" class="form-control" id="birthDate" @bind-Value="birthDate" />
-
-    <label for="instituicao">Instituição associada</label>
-    <select class="form-control" id="instituicao" @bind="selectedInstitutionId">
-        <option value="">-- Selecione uma instituição --</option>
-        @foreach (var institution in institutions)
-        {
-            <option value="@institution.Value.ID">@institution.Value.Nome</option>
+<html>
+<head>
+    <style>
+        .page {
+            font-family: Arial, Helvetica, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            width: 100vw;
+            background-color: #1e352f;
         }
-    </select>
 
-    <label for="password">Nova Palavra-passe</label>
-    <input type="password" class="form-control" id="password" @bind="password" />
+        .content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 83%;
+            justify-content: space-between;
+        }
 
-    <label for="confirmPassword">Confirmar Nova Palavra-passe</label>
-    <input type="password" class="form-control" id="confirmPassword" @bind="confirmPassword" />
-</div>
+        .hero-title {
+        }
 
-<button @onclick="ShowPasswordModal">Alterar Dados</button>
+        .main-title {
+            font-weight: bold;
+            font-size: 3.5em;
+            color:#BEEF9E;
+        }
 
-<p>@message</p>
+        .form-group {
+            width: 70%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .top-text {
+            color: #A6C36F;
+            padding-left: 5px;
+            font-size: 1em;
+        }
+
+        .pair {
+            margin-top: 20px;
+        }
+
+        button {
+            font-size: 1em;
+            text-align: center;
+            color: #1e352f;
+            border: none;
+            padding: 0.5em 0px;
+            width: 8em;
+            background-color: #A6C36F;
+            border-radius: 5px;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        button:hover {
+            transform: scale(1.1);
+        }
+        
+    </style>
+
+    <PageTitle>Editar Colaborador</PageTitle>
+</head>
+<body>
+    <div class="page">
+        <div class="content">
+            <div class="hero-title">
+                <h1 class="main-title">Dados Colaborador</h1>
+            </div>
+            <div class="form-group">
+                <div>
+                    <div class="pair">
+                        <label for="nome" class="top-text">Novo Nome</label>
+                        <input type="text" class="form-control" id="name" @bind="pendingName" placeholder="ex: Orlando Belo" />
+                    </div>
+                    <div class="pair">
+                        <label for="birthDate" class="top-text">Nova Data de Nascimento</label>
+                        <InputDate TValue="DateOnly?" class="form-control" id="birthDate" @bind-Value="birthDate" />
+                    </div>
+                    <div class="pair">
+                        <label for="instituicao" class="top-text">Nova Instituição Associada</label>
+                        <select class="form-control" id="instituicao" @bind="selectedInstitutionId">
+                            <option value="">-- Selecione uma instituição --</option>
+                            @foreach (var institution in institutions)
+                            {
+                                <option value="@institution.Value.ID">@institution.Value.Nome</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="pair">
+                        <label for="password" class="top-text">Nova Palavra-Passe</label>
+                        <input type="password" class="form-control" id="password" @bind="password" />
+                    </div>
+                    <div class="pair">
+                        <label for="confirmPassword" class="top-text">Confirmar Nova Palavra-Passe</label>
+                        <input type="password" class="form-control" id="confirmPassword" @bind="confirmPassword" />
+                    </div>
+                </div>
+                <div>
+                    <button @onclick="ShowPasswordModal">Alterar Dados</button>
+                    <p>@message</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
 
 @if (isModalOpen)
 {
