@@ -1,4 +1,4 @@
-@page "/collaborator/edit"
+@page "/institution/edit/{institutionID:int}"
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Authentication.Cookies
 @using Services
@@ -7,33 +7,33 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject LusiumService LusiumService
 @rendermode InteractiveServer
-@attribute [Authorize(Roles = "Admin,Institution,Collaborator")]
+@attribute [Authorize(Roles = "Admin,Institution")]
 
-<PageTitle>Editar Colaborador</PageTitle>
+<PageTitle>Editar Instituição</PageTitle>
 
-<h1>Editar Colaborador</h1>
+<h1>Editar Instituição</h1>
 
 <div class="form-group">
     <label for="nome">Nome</label>
     <input type="text" class="form-control" id="name" @bind="pendingName" placeholder="@userName" />
 
-    <label for="birthDate">Data de nascimento</label>
-    <InputDate TValue="DateOnly?" class="form-control" id="birthDate" @bind-Value="birthDate" />
+    <label for="morada">Morada</label>
+    <input type="text" class="form-control" id="adress" @bind="pendingAdress" placeholder="@userAdress" />
 
-    <label for="instituicao">Instituição associada</label>
-    <select class="form-control" id="instituicao" @bind="selectedInstitutionId">
-        <option value="">-- Selecione uma instituição --</option>
-        @foreach (var institution in institutions)
-        {
-            <option value="@institution.Value.ID">@institution.Value.Nome</option>
-        }
-    </select>
+    @if(!isAdmin) 
+    {
+        <label for="password">Nova Palavra-Passe</label>
+        <input type="password" class="form-control" id="password" @bind="password" />
 
-    <label for="password">Nova Palavra-Passe</label>
-    <input type="password" class="form-control" id="password" @bind="password" />
+        <label for="confirmPassword">Confirmar Nova Palavra-Passe</label>
+        <input type="password" class="form-control" id="confirmPassword" />
+    }
 
-    <label for="confirmPassword">Confirmar Nova Palavra-Passe</label>
-    <input type="password" class="form-control" id="confirmPassword" @bind="confirmPassword" />
+    @if (isAdmin)
+    {
+        <label for="credits">Créditos</label>
+        <input type="number" class="form-control" id="credits" @bind="pendingCredits" min="0" placeholder="@institutionCredits" />
+    }
 </div>
 
 <button @onclick="ShowPasswordModal">Alterar Dados</button>
@@ -64,20 +64,22 @@
 }
 
 @code {
+    [Parameter]
+    public int institutionID { get; set; }
+
     private string userID { get; set; } = string.Empty;
     private string userName { get; set; } = string.Empty;
+    private string userAdress { get; set; } = string.Empty;
     private string userEmail { get; set; } = string.Empty;
-    private DateOnly? birthDate;
-    private string selectedInstitutionId = string.Empty;
-    Dictionary<string, IUser> institutions = new();
+    private int institutionCredits { get; set; } = 0;
+    private bool isAdmin { get; set; } = false;
 
     private string pendingName { get; set; } = string.Empty;
-    private DateOnly? pendingBirthDate;
-    private string pendingInstitutionId { get; set; } = string.Empty;
+    private string pendingAdress { get; set; } = string.Empty;
     private string password { get; set; } = string.Empty;
     private string confirmPassword { get; set; } = string.Empty;
-
     private string currentPassword { get; set; } = string.Empty;
+    private int pendingCredits { get; set; } = 0;
     private string message { get; set; } = string.Empty;
 
     private bool isModalOpen { get; set; } = false;
@@ -86,19 +88,21 @@
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
-        Collaborator result;
+        Instituition result;
 
         if (user.Identity?.IsAuthenticated ?? false)
         {
             userID = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
-            result = await LusiumService.ObterColaborador(userID)!;
+            isAdmin = user.IsInRole("Admin");
+
+            result = await LusiumService.ObterInstituicao(userID)!;
 
             if (result != null)
             {
                 userName = result.Nome;
                 userEmail = result.Email;
-                birthDate = result.DataNascimento;
-                selectedInstitutionId = result.InstituicaoID.ToString();
+                userAdress = result.Morada;
+                institutionCredits = result.Creditos;
             }
         }
         else
@@ -124,7 +128,7 @@
 
         if (confirmation)
         {
-            await EditCollaborator();
+            await EditInstitution();
             CloseModal();
         }
         else
@@ -134,7 +138,7 @@
         }
     }
 
-    private async Task EditCollaborator()
+    private async Task EditInstitution()
     {
         if (password != confirmPassword)
         {
@@ -143,56 +147,17 @@
             return;
         }
 
-        // If he didn't change the password, we need to pass the current password just to validate the other fields
-        string tempPass = string.Empty;
-        if (!string.IsNullOrEmpty(password))
-        {
-            tempPass = password;
-        }
-        else
-        {
-            tempPass = currentPassword;
-        }
+        string tempPass = string.IsNullOrEmpty(password) ? currentPassword : password;
+        string tempName = string.IsNullOrEmpty(pendingName) ? userName : pendingName;
+        string tempAdress = string.IsNullOrEmpty(pendingAdress) ? userAdress : pendingAdress;
+        int tempCredits = isAdmin && pendingCredits >= 0 ? pendingCredits : institutionCredits;
 
-        string tempName = string.Empty;
-        if (!string.IsNullOrEmpty(pendingName) && pendingName != userName)
-        {
-            tempName = pendingName;
-        }
-        else
-        {
-            tempName = userName;
-        }
-
-        string tempInstitutionId = string.Empty;
-        if (!string.IsNullOrEmpty(pendingInstitutionId) && pendingInstitutionId != selectedInstitutionId)
-        {
-            tempInstitutionId = pendingInstitutionId;
-        }
-        else
-        {
-            tempInstitutionId = selectedInstitutionId;
-        }
-
-        DateOnly? tempBirthDate = pendingBirthDate.HasValue && pendingBirthDate != birthDate ? pendingBirthDate : birthDate;
-
-        var valid = false;
-
-        if (tempBirthDate.HasValue)
-        {
-            valid = await LusiumService.ValidaNovosDadosColaborador(userID, tempName, tempBirthDate.Value, tempInstitutionId, tempPass);
-        }
-        else
-        { 
-			message = "Data de nascimento inválida.";
-        }
+        var valid = await LusiumService.ValidaNovosDadosInstituicao(institutionID.ToString(), tempName, tempAdress, tempPass, tempCredits);
 
         if (valid)
         {
-            await LusiumService.AtualizaDadosColaborador(userID, tempName, tempBirthDate.Value, tempInstitutionId, tempPass);
-            message = "Colaborador editado com sucesso, as alterações serão refletidas no próximo início de sessão.";
-
-            // [TODO] Update the user's name in the claims
+            await LusiumService.AtualizaDadosInstituicao(institutionID.ToString(), tempName, tempAdress, tempPass, tempCredits);
+            message = "Instituição editada com sucesso, as alterações serão refletidas no próximo início de sessão.";
         }
         else
         {

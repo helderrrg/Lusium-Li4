@@ -1,0 +1,162 @@
+@page "/products/purchase/{ProductID:int}"
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject LusiumService LusiumService
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Institution")]
+
+<PageTitle>Processar Compra</PageTitle>
+
+<h1>Processar Compra</h1>
+
+@if (produto == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="card">
+        <div class="card-body">
+            <h3>@produto.Nome</h3>
+            <p>@produto.Descricao</p>
+            <img src="@produto.ImagemAlusiva" alt="@produto.Nome" class="img-thumbnail" />
+            <p><strong>Preço:</strong> @produto.Custo créditos</p>
+            <p><strong>Idade Mínima:</strong> @produto.IdadeMinima anos</p>
+
+            @if (pecasNecessarias.Count > 0)
+            {
+                <p><strong>Peças Necessárias:</strong></p>
+                <ul>
+                    @foreach (var pecaNecessaria in pecasNecessarias)
+                    {
+                        var peca = pecas.FirstOrDefault(p => p.ID == pecaNecessaria.IDPeca);
+
+                        if (peca != null)
+                        {
+                            <li>
+                                @peca.Nome - Quantidade necessária: @pecaNecessaria.Quantidade - Stock disponível: @peca.Quantidade
+                            </li>
+                        }
+                        else
+                        {
+                            <li>
+                                Peça não encontrada! - Quantidade necessária: @pecaNecessaria.Quantidade
+                            </li>
+                        }
+                    }
+                </ul>
+            }
+            else
+            {
+                <p class="text-warning"><strong>Este produto não tem peças configuradas.</strong></p>
+            }
+
+            <p>
+                <strong>Status de Disponibilidade:</strong>
+                @if (pecasNecessarias.Count > 0 && pecasNecessarias.All(pecaNecessaria =>
+                {
+                    var peca = pecas.FirstOrDefault(p => p.ID == pecaNecessaria.IDPeca);
+                    return peca != null && peca.Quantidade >= pecaNecessaria.Quantidade;
+                }))
+                {
+                    <span class="text-success">Disponível</span>
+                }
+                else
+                {
+                    <span class="text-danger">Indisponível</span>
+                }
+            </p>
+        </div>
+    </div>
+
+    @if (pecasNecessarias.Count > 0 && pecasNecessarias.All(pecaNecessaria =>
+    {
+        var peca = pecas.FirstOrDefault(p => p.ID == pecaNecessaria.IDPeca);
+        return peca != null && peca.Quantidade >= pecaNecessaria.Quantidade;
+    }))
+    {
+        <h2>Informações da Compra</h2>
+        <div class="form-group">
+            <label for="enderecoEntrega">Endereço de Entrega</label>
+            <input type="text" class="form-control" id="enderecoEntrega" @bind="morada" placeholder="@morada" />
+        </div>
+        <button @onclick="ProcessarCompra" class="btn btn-primary">Comprar</button>
+    }
+    else
+    {
+        <p class="text-danger">O produto não pode ser comprado devido à indisponibilidade de peças.</p>
+    }
+}
+
+@code {
+    [Parameter]
+    public int ProductID { get; set; }
+
+    private Product? produto;
+    private string morada = string.Empty;
+    private string? codInstituicao;
+    private string message = string.Empty;
+
+    private List<PiecePerProduct> pecasNecessarias = new();
+    private List<Piece> pecas = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated ?? false)
+        {
+            codInstituicao = user.FindFirst("InstituicaoID")?.Value;
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/login");
+            return;
+        }
+
+        produto = await LusiumService.ObterProduto(ProductID.ToString());
+        if (produto == null)
+        {
+            message = "Produto não encontrado.";
+            return;
+        }
+
+        pecasNecessarias = await LusiumService.ObterPecasNecessariasPorProduto(produto.ID);
+        pecas = await LusiumService.ObterPecas();
+
+        if (!string.IsNullOrEmpty(codInstituicao))
+        {
+            var instituicao = await LusiumService.ObterInstituicao(codInstituicao);
+            if (instituicao != null && string.IsNullOrEmpty(morada))
+            {
+                morada = instituicao.Morada;
+            }
+        }
+    }
+
+    private async Task ProcessarCompra()
+    {
+        var instituicao = await LusiumService.ObterInstituicao(codInstituicao);
+        if (instituicao == null || instituicao.Creditos < produto.Custo)
+        {
+            message = "Créditos insuficientes para realizar a compra.";
+            return;
+        }
+
+        var pecasDisponiveis = pecasNecessarias.All(pecaNecessaria =>
+        {
+            var pecaStock = pecas.FirstOrDefault(p => p.ID == pecaNecessaria.IDPeca);
+            return pecaStock != null && pecaStock.Quantidade >= pecaNecessaria.Quantidade;
+        });
+
+        if (!pecasDisponiveis)
+        {
+            message = "O produto não está disponível devido à falta de peças no estoque.";
+            return;
+        }
+
+        // Processar a compra
+        await LusiumService.ProcessaCompra(codInstituicao, produto.ID.ToString(), morada);
+    }
+}
