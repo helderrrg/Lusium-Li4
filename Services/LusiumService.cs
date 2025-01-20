@@ -211,28 +211,15 @@ namespace Services
 
         public async Task<int> CalcularCreditosDispendidos(int instituicaoID)
         {
-            int totalCreditos = 0;
-
-            string query = @"EXEC CalcularCreditosDispendidos @InstituicaoID";
-
-            using (var connection = _context.Database.GetDbConnection())
-            {
-                await connection.OpenAsync();
-
-                using (var command = connection.CreateCommand())
-                {
-                    command.CommandText = query;
-
-                    var instituicaoParam = command.CreateParameter();
-                    instituicaoParam.ParameterName = "@InstituicaoID";
-                    instituicaoParam.Value = instituicaoID;
-                    command.Parameters.Add(instituicaoParam);
-
-                    totalCreditos = Convert.ToInt32(await command.ExecuteScalarAsync());
-                }
-            }
-
-            return totalCreditos;
+            return await _context.Compra
+                .Where(c => c.InstituicaoID == instituicaoID)
+                .Join(
+                    _context.Produto,
+                    compra => compra.ProdutoAssociado,
+                    produto => produto.ID,
+                    (compra, produto) => produto.Custo
+                )
+                .SumAsync(custo => custo);
         }
 
         public async Task<DataTable> ValidaCredenciais(string email, string password)
@@ -692,7 +679,7 @@ namespace Services
             var enderecoEntregaParam = new SqlParameter("@EnderecoEntrega", SqlDbType.VarChar, 45) { Value = enderecoEntrega };
 
             await _context.Database.ExecuteSqlRawAsync(
-                "EXEC ProcessarCompra @codInstituicao = @codInstituicao, @codProduto = @codProduto, @EnderecoEntrega = @EnderecoEntrega",
+                "EXEC ProcessaCompra @codInstituicao = @codInstituicao, @codProduto = @codProduto, @EnderecoEntrega = @EnderecoEntrega",
                 codInstituicaoParam,
                 codProdutoParam,
                 enderecoEntregaParam
@@ -810,11 +797,6 @@ namespace Services
         public async Task<Dictionary<string, Piece>> ListaPecas()
         {
             return await _context.Peca.ToDictionaryAsync(p => p.ID.ToString(), p => p);
-        }
-
-        public async Task<List<Product>> GetProducts()
-        {
-            return await _context.Produto.ToListAsync();
         }
 
         // Extras

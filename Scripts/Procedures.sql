@@ -168,7 +168,6 @@ GO
 
 
 
-
 CREATE PROCEDURE ProcessaCompra
     @codInstituicao INT,
     @codProduto INT,
@@ -225,8 +224,16 @@ BEGIN
         VALUES (@DataCompra, @EnderecoEntrega, @codProduto, @codInstituicao);
 
         -- 5. Disponibilizar o manual do produto na listagem de manuais da instituição
-        INSERT INTO ManualInstituicao (IDInstituicao, IDManual)
-        VALUES (@codInstituicao, @ManualAssociado);
+        IF NOT EXISTS (
+            SELECT 1
+            FROM ManualInstituicao
+            WHERE IDInstituicao = @codInstituicao
+                AND IDManual = @ManualAssociado
+        )
+        BEGIN
+            INSERT INTO ManualInstituicao (IDInstituicao, IDManual)
+            VALUES (@codInstituicao, @ManualAssociado);
+        END;
 
         -- Se tudo foi bem-sucedido, confirmar a transação
         COMMIT TRANSACTION;
@@ -309,8 +316,8 @@ BEGIN
     -- Variável para armazenar o total de créditos dispendidos
     DECLARE @TotalCreditos INT;
 
-    -- Somar os custos dos produtos associados às compras da instituição, tratando valores nulos
-    SELECT @TotalCreditos = COALESCE(SUM(p.Custo), 0)
+    -- Somar os custos dos produtos associados às compras da instituição
+    SELECT @TotalCreditos = SUM(p.Custo)
     FROM Compra c
     JOIN Produto p ON c.ProdutoAssociado = p.ID
     WHERE c.InstituicaoID = @InstituicaoID;

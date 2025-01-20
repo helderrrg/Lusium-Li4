@@ -1,6 +1,6 @@
 ﻿@page "/products"
 @rendermode InteractiveServer
-@attribute [Authorize(Roles = "Admin")]
+@attribute [Authorize(Roles = "Admin,Institution")]
 
 <PageTitle>Produtos</PageTitle>
 
@@ -49,6 +49,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        productList = await LusiumService.GetProducts();
+        var temp = await LusiumService.ListaProdutos();
+        productList = temp.Values.ToList();
     }
 }
