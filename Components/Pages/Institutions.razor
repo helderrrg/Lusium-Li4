@@ -85,8 +85,8 @@ else
 
             query = currentSort switch
             {
-                "name" => query.OrderByDescending(admin => admin.Value.Nome), // Ordenação decrescente por Nome
-                "creditsSpend" => query.OrderByDescending(admin => totalCreditosDispendidos[admin.Value.ID.ToString()]), // Ordenação decrescente por créditos
+                "name" => query.OrderBy(admin => admin.Value.Nome),
+                "creditsSpend" => query.OrderByDescending(admin => totalCreditosDispendidos[admin.Value.ID.ToString()]),
                 _ => query
             };
 
