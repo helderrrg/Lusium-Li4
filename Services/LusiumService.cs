@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Data;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using Lusium.Components.Pages;
 
 
 namespace Services
@@ -177,6 +178,63 @@ namespace Services
             return await _context.Colaborador.FirstOrDefaultAsync(c => c.ID == id);
         }
 
+        public async Task<Instituition?> ObterInstituicao(string codInstituicao)
+        {
+            var id = int.Parse(codInstituicao);
+            
+            return await _context.Instituicao.FirstOrDefaultAsync(i => i.ID == id);
+        }
+
+        public async Task<Product?> ObterProduto(string codProduto)
+        {
+            var id = int.Parse(codProduto);
+
+            return await _context.Produto.FirstOrDefaultAsync(p => p.ID == id);
+        }
+
+        public async Task<List<PiecePerProduct>> ObterPecasNecessariasPorProduto(int produtoId)
+        {
+            return await _context.PecaProduto
+                .Where(pp => pp.IDProduto == produtoId)
+                .Select(pp => new PiecePerProduct
+                {
+                    IDPeca = pp.IDPeca,
+                    Quantidade = pp.Quantidade
+                })
+                .ToListAsync();
+        }
+
+        public async Task<List<Piece>> ObterPecas()
+        {
+            return await _context.Peca.ToListAsync();
+        }
+
+        public async Task<int> CalcularCreditosDispendidos(int instituicaoID)
+        {
+            int totalCreditos = 0;
+
+            string query = @"EXEC CalcularCreditosDispendidos @InstituicaoID";
+
+            using (var connection = _context.Database.GetDbConnection())
+            {
+                await connection.OpenAsync();
+
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = query;
+
+                    var instituicaoParam = command.CreateParameter();
+                    instituicaoParam.ParameterName = "@InstituicaoID";
+                    instituicaoParam.Value = instituicaoID;
+                    command.Parameters.Add(instituicaoParam);
+
+                    totalCreditos = Convert.ToInt32(await command.ExecuteScalarAsync());
+                }
+            }
+
+            return totalCreditos;
+        }
+
         public async Task<DataTable> ValidaCredenciais(string email, string password)
         {
             DataTable dataTable = new DataTable();
@@ -314,7 +372,7 @@ namespace Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<bool> ValidaNovosDadosInstituicao(string codInstituicao, string novoNome, string novaMorada, string novaPP)
+        public async Task<bool> ValidaNovosDadosInstituicao(string codInstituicao, string novoNome, string novaMorada, string novaPP, int novoCreditos)
         {
             var instituicao = await _context.Instituicao.FirstOrDefaultAsync(i => i.ID == int.Parse(codInstituicao));
             // no institution found
@@ -338,10 +396,14 @@ namespace Services
                 return false;
             }
 
+            if(novoCreditos < 0)
+            {
+                return false;
+            }
+
             return true;
         }
-
-        public async Task AtualizaDadosInstituicao(string codInstituicao, string novoNome, string novaMorada, string novaPP)
+        public async Task AtualizaDadosInstituicao(string codInstituicao, string novoNome, string novaMorada, string novaPP, int novoCreditos)
         {
             var inst = await _context.Instituicao.FirstOrDefaultAsync(i => i.ID == int.Parse(codInstituicao));
             if (inst == null)
@@ -367,6 +429,11 @@ namespace Services
             if (inst.PalavraPasse != novaPP)
             {
                 inst.PalavraPasse = novaPP;
+            }
+
+            if (inst.Creditos != novoCreditos)
+            {
+                inst.Creditos = novoCreditos;
             }
 
             await _context.SaveChangesAsync();
@@ -561,6 +628,35 @@ namespace Services
 
         // iterarPaginaManual(codManual: String, comando: String) : PaginaManual ???????????????????????????????
 
+        public async Task<Manual?> ObterManualPorId(int id)
+        {
+            return await _context.Set<Manual>()
+                .Where(m => m.ID == id)
+                .Select(m => new Manual
+                {
+                    ID = m.ID,
+                    Nome = m.Nome,
+                    Descricao = m.Descricao,
+                    Capa = m.Capa
+                })
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<List<Page>> ListarPaginasPorManual(int manualId)
+        {
+            return await _context.Set<Page>()
+                .Where(p => p.ManualAssociado == manualId)
+                .OrderBy(p => p.Numeracao)
+                .Select(p => new Page
+                {
+                    ID = p.ID,
+                    ImagemAlusiva = p.ImagemAlusiva,
+                    Numeracao = p.Numeracao,
+                    ManualAssociado = p.ManualAssociado
+                })
+                .ToListAsync();
+        }
+
         public async Task<bool> DisponibilidadeProduto(string codProduto) {
             var codProdutoParam = new SqlParameter("@codProduto", SqlDbType.Int) { Value = int.Parse(codProduto) };
             var disponivelParam = new SqlParameter("@Disponivel", SqlDbType.Bit) { Direction = ParameterDirection.Output };
@@ -616,6 +712,22 @@ namespace Services
         public async Task<Purchase?> ExibeCompraEfetuada(string codCompra)
         {
            return await _context.Compra.FirstOrDefaultAsync(c => c.NumeroCompra == int.Parse(codCompra));
+        }
+
+        public async Task<Dictionary<string, Administrator>> ListaAdministradores()
+        {
+            return await _context.Administrador.ToDictionaryAsync(admin => admin.ID.ToString(), admin => admin);
+        }
+
+        public async Task<Dictionary<string, Instituition>> ListaInstituicoes()
+        {
+            return await _context.Instituicao.ToDictionaryAsync(inst => inst.ID.ToString(), inst => inst);
+        }
+        public async Task<Dictionary<string, Collaborator>> ListaColaboradores(int codInstituicao)
+        {
+            var colaboradores = await _context.Colaborador.Where(c => c.InstituicaoID == codInstituicao).ToListAsync();
+
+            return colaboradores.ToDictionary(c => c.ID.ToString(), c => c);
         }
 
         public async Task<Dictionary<string, Manual>> ListaManuais(string codUtilizador, string tipoUtilizador)

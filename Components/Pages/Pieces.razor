@@ -1,16 +1,14 @@
-@page "/admins"
+@page "/pieces"
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager navigationManager
 @rendermode InteractiveServer
 @attribute [Authorize(Roles = "Admin")]
 
-<PageTitle>Administradores</PageTitle>
+<PageTitle>Peças</PageTitle>
 
-<h1>Administradores</h1>
+<h1>Peças</h1>
 
-<input type="text" @bind="filterText" @oninput="OnFilterTextChanged" placeholder="Filtrar por nome..." class="form-control mb-3" />
-
-@if (adminList == null)
+@if (piecesList == null)
 {
     <p><em>Loading...</em></p>
 }
@@ -19,18 +17,27 @@ else
     <table class="table">
         <thead>
             <tr>
-                <th>ID</th>
                 <th>Nome</th>
-                <th>Email</th>
+                <th>Imagem Alusiva</th>
+                <th>Quantidade</th>
+                <th>Ações</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var manual in filteredAdminList)
+            @foreach (var piece in piecesList)
             {
                 <tr>
-                    <td>@manual.Value.ID</td>
-                    <td>@manual.Value.Nome</td>
-                    <td>@manual.Value.Email</td>
+                    <td>@piece.Value.Nome</td>
+                    <td>@piece.Value.ImagemAlusiva</td>
+                    <td>
+                        <input type="number" min="0" class="form-control"
+                               @bind="piece.Value.Quantidade" />
+                    </td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => AtualizaQuantidade(piece.Key, piece.Value.Quantidade)">
+                            Atualizar
+                        </button>
+                    </td>
                 </tr>
             }
         </tbody>
@@ -38,8 +45,7 @@ else
 }
 
 @code {
-    private Dictionary<string, Administrator> adminList = new();
-    private string filterText = string.Empty;
+    private Dictionary<string, Piece> piecesList = new();
 
     [Inject]
     public required LusiumService LusiumService { get; set; }
@@ -62,15 +68,12 @@ else
             navigationManager.NavigateTo("/login");
         }
 
-        adminList = await LusiumService.ListaAdministradores();
+        piecesList = await LusiumService.ListaPecas();
     }
 
-    private IEnumerable<KeyValuePair<string, Administrator>> filteredAdminList =>
-        adminList.Where(admin => string.IsNullOrEmpty(filterText) ||
-                                 admin.Value.Nome.Contains(filterText, StringComparison.OrdinalIgnoreCase));
-
-    private void OnFilterTextChanged()
+    private async Task AtualizaQuantidade(string codPeca, int quantidade)
     {
-        StateHasChanged();
+            await LusiumService.AtualizaQuantidadePecas(codPeca, quantidade);
+            piecesList[codPeca].Quantidade = quantidade;
     }
 }

@@ -1,0 +1,82 @@
+@page "/manual/{manualId:int}"
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@inject LusiumService LusiumService
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin, Collaborator, Institution")]
+
+<PageTitle>Manual</PageTitle>
+
+<h1>Manual: @manual?.Nome</h1>
+
+@if (manual == null || paginas == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="manual-details">
+        <img src="@manual.Capa" alt="Capa do Manual" class="manual-cover" />
+        <p><strong>Descrição:</strong> @manual.Descricao</p>
+    </div>
+
+    <div class="pagination-control">
+        <button class="btn btn-secondary" @onclick="PaginaAnterior" disabled="@(!PodeVoltar)">Anterior</button>
+        <span>Página @paginaAtual de @paginas.Count</span>
+        <button class="btn btn-secondary" @onclick="ProximaPagina" disabled="@(!PodeAvancar)">Próxima</button>
+    </div>
+
+    <div class="page-content">
+        <h2>Página @paginaAtual</h2>
+        <img src="@paginaAtualImagem" alt="Imagem da Página" class="page-image" />
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int ManualId { get; set; }
+
+    private Manual? manual;
+    private List<Page> paginas = new();
+    private int paginaAtual = 1;
+
+    private string? paginaAtualImagem => paginas.Any() ? paginas[paginaAtual - 1].ImagemAlusiva : null;
+    private bool PodeVoltar => paginaAtual > 1;
+    private bool PodeAvancar => paginaAtual < paginas.Count;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity?.IsAuthenticated ?? false)
+        {
+            NavigationManager.NavigateTo("/login");
+            return;
+        }
+
+        manual = await LusiumService.ObterManualPorId(ManualId);
+        paginas = await LusiumService.ListarPaginasPorManual(ManualId);
+
+        if (!paginas.Any())
+        {
+            NavigationManager.NavigateTo("/manuals");
+        }
+    }
+
+    private void PaginaAnterior()
+    {
+        if (PodeVoltar)
+        {
+            paginaAtual--;
+        }
+    }
+
+    private void ProximaPagina()
+    {
+        if (PodeAvancar)
+        {
+            paginaAtual++;
+        }
+    }
+}
