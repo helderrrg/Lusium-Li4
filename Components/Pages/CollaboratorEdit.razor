@@ -27,7 +27,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            height: 83%;
+            height: @(isUserCollaborator ? "83%" : "60%");
             justify-content: space-between;
         }
 
@@ -104,14 +104,17 @@
                             }
                         </select>
                     </div>
-                    <div class="pair">
-                        <label for="password" class="top-text">Nova Palavra-Passe</label>
-                        <input type="password" class="form-control" id="password" @bind="password" />
-                    </div>
-                    <div class="pair">
-                        <label for="confirmPassword" class="top-text">Confirmar Nova Palavra-Passe</label>
-                        <input type="password" class="form-control" id="confirmPassword" @bind="confirmPassword" />
-                    </div>
+                    @if (isUserCollaborator)
+                    {
+                        <div class="pair">
+                            <label for="password" class="top-text">Nova Palavra-Passe</label>
+                            <input type="password" class="form-control" id="password" @bind="password" />
+                        </div>
+                        <div class="pair">
+                            <label for="confirmPassword" class="top-text">Confirmar Nova Palavra-Passe</label>
+                            <input type="password" class="form-control" id="confirmPassword" @bind="confirmPassword" />
+                        </div>
+                    }
                 </div>
                 <div>
                     <button @onclick="ShowPasswordModal">Alterar Dados</button>
@@ -164,6 +167,7 @@
     private string message { get; set; } = string.Empty;
 
     private bool isModalOpen { get; set; } = false;
+    private bool isUserCollaborator { get; set; } = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -184,11 +188,19 @@
                 selectedInstitutionId = result.InstituicaoID.ToString();
             }
 
+            isUserCollaborator = await IsUserInRoleAsync("Collaborator");
         }
         else
         {
             navigationManager.NavigateTo("/login");
         }
+    }
+
+    private async Task<bool> IsUserInRoleAsync(string role)
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        return user.IsInRole(role);
     }
 
     private void ShowPasswordModal()
