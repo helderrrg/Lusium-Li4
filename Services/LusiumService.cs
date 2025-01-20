@@ -496,44 +496,59 @@ namespace Services
 
         public async Task RemoveUtilizador(string codUtilizador, string tipoUtilizador)
         {
-            // in case the user is an administrator
-            if (tipoUtilizador == "Admin")
-            {
-                var admin = await _context.Administrador.FirstOrDefaultAsync(a => a.ID == int.Parse(codUtilizador));
-                if (admin != null)
-                {
-                    _context.Administrador.Remove(admin);
-                    await _context.SaveChangesAsync();
-                }
-                return;
-            }
+            int userId = int.Parse(codUtilizador);
 
-            // in case the user is an institution
-            if (tipoUtilizador == "Institution")
+            switch (tipoUtilizador)
             {
-                var inst = await _context.Instituicao.FirstOrDefaultAsync(i => i.ID == int.Parse(codUtilizador));
-                if (inst != null)
-                {
-                    // remove all the entries on table ManualDaInstituicao whose IDInstituicao is the same as inst.ID
-                    await _context.Database.ExecuteSqlRawAsync("DELETE FROM ManualDaInstituicao WHERE IDInstituicao = {0}", inst.ID);
+                case "Admin":
+                    var admin = await _context.Administrador.FindAsync(userId);
+                    if (admin != null)
+                    {
+                        _context.Administrador.Remove(admin);
+                        await _context.SaveChangesAsync();
+                    }
+                    break;
 
-                    _context.Instituicao.Remove(inst);
-                    await _context.SaveChangesAsync();
-                }
-                return;
-            }
+                case "Institution":
+                    var instituicao = await _context.Instituicao
+                        .Include(i => i.Colaboradores) // Inclui colaboradores associados
+                        .Include(i => i.ManualInstituicoes) // Inclui as entradas em ManualInstituicao
+                        .FirstOrDefaultAsync(i => i.ID == userId);
 
-            // in case the user is a collaborator
-            if (tipoUtilizador == "Collaborator")
-            {
-                var colab = await _context.Colaborador.FirstOrDefaultAsync(c => c.ID == int.Parse(codUtilizador));
-                if (colab != null)
-                {
-                    _context.Colaborador.Remove(colab);
-                    await _context.SaveChangesAsync();
-                }
+                    if (instituicao != null)
+                    {
+                        // Remove os colaboradores associados
+                        if (instituicao.Colaboradores != null && instituicao.Colaboradores.Any())
+                        {
+                            _context.Colaborador.RemoveRange(instituicao.Colaboradores);
+                        }
+
+                        // Remove as entradas de ManualInstituicao associadas
+                        if (instituicao.ManualInstituicoes != null && instituicao.ManualInstituicoes.Any())
+                        {
+                            _context.ManualInstituicao.RemoveRange(instituicao.ManualInstituicoes);
+                        }
+
+                        // Remove a instituição
+                        _context.Instituicao.Remove(instituicao);
+                        await _context.SaveChangesAsync();
+                    }
+                    break;
+
+                case "Collaborator":
+                    var colaborador = await _context.Colaborador.FindAsync(userId);
+                    if (colaborador != null)
+                    {
+                        _context.Colaborador.Remove(colaborador);
+                        await _context.SaveChangesAsync();
+                    }
+                    break;
+
+                default:
+                    throw new ArgumentException("Tipo de utilizador inválido.");
             }
         }
+
 
         public async Task RemoveColaboradoresInstituicao(string codInstituicao)
         {

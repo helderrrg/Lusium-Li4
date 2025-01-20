@@ -30,6 +30,10 @@ else
                 <th>Email</th>
                 <th>Morada</th>
                 <th>Total de Créditos Dispendidos</th>
+                @if (isAdmin)
+                {
+                    <th>Ações</th>
+                }
             </tr>
         </thead>
         <tbody>
@@ -43,6 +47,14 @@ else
                     <td>@institution.Value.Email</td>
                     <td>@institution.Value.Morada</td>
                     <td>@totalCreditosDispendidos[institution.Value.ID.ToString()]</td>
+                    @if (isAdmin)
+                    {
+                        <td>
+                            <button class="btn btn-danger" @onclick="() => RemoveInstitution(institution.Value.ID.ToString())">
+                                Remover
+                            </button>
+                        </td>
+                    }
                 </tr>
             }
         </tbody>
@@ -56,6 +68,7 @@ else
     private string currentSort = "name";
     private string name = "name";
     private string creditsSpend = "creditsSpend";
+    private bool isAdmin { get; set; } = false;
 
     [Inject]
     public required LusiumService LusiumService { get; set; }
@@ -63,6 +76,9 @@ else
     protected override async Task OnInitializedAsync()
     {
         institutionList = await LusiumService.ListaInstituicoes();
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        isAdmin = user.IsInRole("Admin");
 
         foreach (var institution in institutionList.Values)
         {
@@ -103,5 +119,11 @@ else
     {
         currentSort = criteria;
         StateHasChanged();
+    }
+
+    private async Task RemoveInstitution(string institutionId)
+    {
+        await LusiumService.RemoveUtilizador(institutionId.ToString(), "Institution");
+        institutionList.Remove(institutionId);
     }
 }

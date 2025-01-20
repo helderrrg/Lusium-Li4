@@ -8,7 +8,7 @@
 
 <h1>Administradores</h1>
 
-<input type="text" @bind="filterText" @oninput="OnFilterTextChanged" placeholder="Filtrar por nome..." class="form-control mb-3" />
+<input type="text" @bind="filterText" placeholder="Filtrar por nome..." class="form-control mb-3" />
 
 @if (adminList == null)
 {
@@ -22,15 +22,28 @@ else
                 <th>ID</th>
                 <th>Nome</th>
                 <th>Email</th>
+                <th>Ações</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var manual in filteredAdminList)
+            @foreach (var admin in filteredAdminList)
             {
                 <tr>
-                    <td>@manual.Value.ID</td>
-                    <td>@manual.Value.Nome</td>
-                    <td>@manual.Value.Email</td>
+                    <td>@admin.Value.ID</td>
+                    <td>@admin.Value.Nome</td>
+                    <td>@admin.Value.Email</td>
+                    <td>
+                        @if (admin.Value.ID.ToString() != currentUserId)
+                        {
+                            <button class="btn btn-danger" @onclick="() => RemoveAdmin(admin.Value.ID.ToString())">
+                                Remover
+                            </button>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Não pode se remover</span>
+                        }
+                    </td>
                 </tr>
             }
         </tbody>
@@ -40,6 +53,7 @@ else
 @code {
     private Dictionary<string, Administrator> adminList = new();
     private string filterText = string.Empty;
+    private string currentUserId = string.Empty;
 
     [Inject]
     public required LusiumService LusiumService { get; set; }
@@ -49,28 +63,25 @@ else
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
-        string userID = string.Empty;
-        string userRole = string.Empty;
-
         if (user.Identity?.IsAuthenticated ?? false)
         {
-            userID = user.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
-            userRole = user.FindFirst(ClaimTypes.Role)?.Value!;
+            currentUserId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
+            adminList = await LusiumService.ListaAdministradores();
         }
         else
         {
             navigationManager.NavigateTo("/login");
         }
-
-        adminList = await LusiumService.ListaAdministradores();
     }
 
     private IEnumerable<KeyValuePair<string, Administrator>> filteredAdminList =>
         adminList.Where(admin => string.IsNullOrEmpty(filterText) ||
                                  admin.Value.Nome.Contains(filterText, StringComparison.OrdinalIgnoreCase));
 
-    private void OnFilterTextChanged()
+    private async Task RemoveAdmin(string adminId)
     {
-        StateHasChanged();
+            await LusiumService.RemoveUtilizador(adminId.ToString(), "Admin");
+            adminList.Remove(adminId);
     }
+
 }
