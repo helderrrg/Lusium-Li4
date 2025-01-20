@@ -2,12 +2,86 @@
 @inject NavigationManager navigationManager
 @rendermode InteractiveServer
 
-<PageTitle>Registar</PageTitle>
+<html>
+<head>
+    <PageTitle>Registar</PageTitle>
+    <style>
+        .page {
+            font-family: Arial, Helvetica, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            width: 100vw;
+            background-color: #1e352f;
+        }
 
-<h1>Registar</h1>
+        .content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
 
-<button @onclick="NavigateToRegisterInstitution">Registar Instituição</button>
-<button @onclick="NavigateToRegisterCollaborator">Registar Colaborador</button>
+        .main-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 4em;
+            color:#BEEF9E;
+        }
+
+        .registration-options {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .option-text {
+            font-size: 1.6em;
+            color: #A6C36F;
+            flex: 6;
+            text-align: left;
+        }
+
+        button {
+            border: none;
+            text-decoration: none;
+            display: flex;
+            background-color: transparent;
+            align-items: center;
+            color: #A6C36F;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        button:hover {
+            transform: scale(1.1);
+        }
+
+        .icon {
+            scale: 0.4;
+            flex: 4;
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="content">
+            <div class="main-title">Registar</div>
+            <div class="registration-options">
+                <button @onclick="NavigateToRegisterCollaborator">
+                    <div class="option-text">Colaborador</div>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="icon"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
+                </button>
+                <button @onclick="NavigateToRegisterInstitution">
+                    <div class="option-text">Instituição</div>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="icon"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
+                </button>
+            </div>
+        </div>
+    </div>    
+</body>
+</html>
 
 @code {
 

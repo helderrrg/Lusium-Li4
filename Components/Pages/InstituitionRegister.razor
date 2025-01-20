@@ -1,10 +1,9 @@
-@page "/admins/create"
+﻿@page "/register/institution"
 @rendermode InteractiveServer
-@attribute [Authorize(Roles = "Admin")]
 
 <html>
 <head>
-    <PageTitle>Criar Administrador</PageTitle>
+    <PageTitle>Registar Instituição</PageTitle>
     <style>
         .page {
             font-family: Arial, Helvetica, sans-serif;
@@ -82,7 +81,7 @@
 <body>
     <div class="page">
         <div class="content">
-            <div class="main-title">Criar Administrador</div>
+            <div class="main-title">Registar Instituição</div>
             <div class="form">
                 <div class="form-entry">
                     <label for="nome">Nome</label>
@@ -91,6 +90,20 @@
                 <div class="form-entry">
                     <label for="email">Email</label>
                     <input type="text" class="form-control" id="email" @bind="email" />
+                </div>
+                <div class="double-form-entry">
+                    <div class="form-entry">
+                        <label for="email">NIF</label>
+                        <input type="text" class="form-control" id="nif" @bind="nif" />
+                    </div>
+                    <div class="form-entry">
+                        <label for="email">Nº de Associação</label>
+                        <input type="text" class="form-control" id="numInst" @bind="numInst" />
+                    </div> 
+                </div>
+                <div class="form-entry">
+                    <label for="email">Morada</label>
+                    <input type="text" class="form-control" id="address" @bind="address" />
                 </div>
                 <div class="form-entry">
                     <label for="password">Palavra-passe</label>
@@ -102,7 +115,7 @@
                 </div>
             </div>
             <div class="button-wrapper">
-                <button @onclick="RegisterAdmin">Registar</button>
+                <button @onclick="RegisterInstitution">Registar</button>
             </div>
         </div>
     </div>
@@ -111,36 +124,45 @@
 
 <p>@message</p>
 
+
+
+
 @code {
-
     private string name = string.Empty;
-    private string email = string.Empty;
-    private string password = string.Empty;
-    private string confirmPassword = string.Empty;
-    private string message = string.Empty; 
-
-    [Inject]
-    public required LusiumService LusiumService { get; set; }
-
-    public async Task RegisterAdmin()
-    {
-        var valid = await LusiumService.ValidaDadosAdministrador(name, email, password);
-
-        if (valid)
+        private string email = string.Empty;
+        private string nif = string.Empty;
+        private string numInst = string.Empty;
+        private string address = string.Empty;
+        private string password = string.Empty;
+        private string confirmPassword = string.Empty;
+    
+        private string message = string.Empty;
+    
+        [Inject]
+        public required LusiumService LusiumService { get; set; }
+    
+        public async Task RegisterInstitution()
         {
-            Administrator administrator = await LusiumService.RegistaAdministrador(name, email, password);
-            if (administrator != null)
+
+            Console.WriteLine(nif.Length);
+
+            var valid = await LusiumService.ValidaDadosInstituicao(name, nif, numInst, email, address, password);
+    
+            if (valid)
             {
-                message = $"Administrador registado com os campos: Nome - {administrator.Nome}, Email - {administrator.Email}.";
+            Instituition institution = await LusiumService.RegistaInstituicao(name, nif, numInst, email, address, password);
+                if (institution != null)
+                {
+                    message = $"Instituição registada com os campos: Nome - {institution.Nome}, Email - {institution.Email}, Nif - {institution.NIF}, Número de Associação - {institution.NumeroAssociacao}, Morada - {institution.Morada}.";
+                }
+                else
+                {
+                    message = "Não foi possível registar a instituição.";
+                }
             }
             else
             {
-                message = "Não foi possível registar o administrador.";
+                message = "Dados inválidos. Não foi possível registar.";
             }
         }
-        else
-        {
-            message = "Dados inválidos. Não foi possível registar.";
-        }
-    }
 }

@@ -1,34 +1,129 @@
 ﻿@page "/register/collaborator"
 @rendermode InteractiveServer
 
-<PageTitle>Registar Colaborador</PageTitle>
 
-<h1>Registar Colaborador</h1>
-
-<div class="form-group">
-    <label for="nome">Nome</label>
-    <input type="text" class="form-control" id="name" @bind="name" />
-
-    <label for="email">Email</label>
-    <input type="text" class="form-control" id="email" @bind="email" />
-
-    <label for="birthDate">Data de nascimento</label>
-    <InputDate TValue="DateOnly?" class="form-control" id="birthDate" @bind-Value="birthDate" />
-
-    <label for="instituicao">Instituição associada</label>
-    <select class="form-control" id="instituicao" @bind="selectedInstitutionId">
-        <option value="">-- Selecione uma instituição --</option>
-        @foreach (var institution in institutions)
-        {
-            <option value="@institution.Value.ID">@institution.Value.Nome</option>
+<html>
+<head>
+    <PageTitle>Registar Colaborador</PageTitle>
+    <style>
+        .page {
+            font-family: Arial, Helvetica, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            width: 100vw;
+            background-color: #1e352f;
         }
-    </select>
 
-    <label for="password">Password</label>
-    <input type="text" class="form-control" id="password" @bind="password" />
-</div>
+        .content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-<button @onclick="RegisterCollaborator">Registar</button>
+        .main-title {
+            font-weight: bold;
+            font-size: 3.5em;
+            color:#BEEF9E;
+        }
+
+        label {
+            color:#BEEF9E;
+            padding-left: 5px;
+        }
+
+        .form {
+            width: 80%;
+        }
+
+        .form-entry {
+            margin-top: 20px;
+        }
+        
+        .double-form-entry {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .form-control {
+            width: 100%;
+            border-radius: 0.5em;
+        }
+
+        .button-wrapper {
+            width: 80%;
+            display: flex;
+            flex-direction: column;
+            align-items: left;
+        }
+
+        button {
+            font-size: 1em;
+            text-align: center;
+            color: #1e352f;
+            border: none;
+            padding: 0.5em 0px;
+            width: 8em;
+            background-color: #A6C36F;
+            border-radius: 5px;
+            transition: transform 0.2s ease-in-out;
+            margin-top: 40px;
+        }
+
+        button:hover {
+            transform: scale(1.1);
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="content">
+            <div class="main-title">Registar Colaborador</div>
+            <div class="form">
+                <div class="form-entry">
+                    <label for="nome">Nome</label>
+                    <input type="text" class="form-control" id="name" @bind="name" />
+                </div>
+                <div class="form-entry">
+                    <label for="email">Email</label>
+                    <input type="text" class="form-control" id="email" @bind="email" />
+                </div>
+                <div class="double-form-entry">
+                    <div class="form-entry">
+                        <label for="birthDate">Data de nascimento</label>
+                        <InputDate TValue="DateOnly?" class="form-control" id="birthDate" @bind-Value="birthDate" />
+                    </div>
+                    <div class="form-entry selector">
+                        <label for="instituicao">Instituição associada</label>
+                        <select class="form-control" id="instituicao" @bind="selectedInstitutionId">
+                            <option value="">-- Selecione uma instituição --</option>
+                            @foreach (var institution in institutions)
+                            {
+                                <option value="@institution.Value.ID">@institution.Value.Nome</option>
+                            }
+                        </select>
+                    </div> 
+                </div>
+                <div class="form-entry">
+                    <label for="password">Palavra-passe</label>
+                    <input type="password" class="form-control" id="password" @bind="password" />
+                </div>
+                <div class="form-entry">
+                    <label for="confirmPassword">Confirmar Palavra-passe</label>
+                    <input type="password" class="form-control" id="confirmPassword" @bind="confirmPassword" />
+                </div>
+            </div>
+            <div class="button-wrapper">
+                <button @onclick="RegisterCollaborator">Registar</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
 
 <p>@message</p>
 
@@ -41,6 +136,7 @@
     private DateOnly? birthDate;
     private string selectedInstitutionId = string.Empty;
     private string password = string.Empty;
+    private string confirmPassword = string.Empty;
 
     private string message = string.Empty;
 

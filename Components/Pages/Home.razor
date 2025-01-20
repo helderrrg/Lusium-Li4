@@ -1,7 +1,108 @@
 ﻿@page "/"
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
 
-<PageTitle>Home</PageTitle>
+<html>
+<head>
+    <PageTitle>Lusium</PageTitle>
+    <style>
+        .page {
+            font-family: Arial, Helvetica, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            width: 100vw;
+            background-color: #1e352f;
+        }
 
-<h1>Hello, world!</h1>
+        .content {
+        }
 
-Welcome to your new app.
+        .hero-title {
+            text-align: center;
+        }
+
+        .main-title {
+            font-weight: bold;
+            font-size: 6em;
+            color:#BEEF9E;
+        }
+
+        .sub-title {
+            font-size: 2em;
+            color:#A6C36F;
+        }
+
+        .button-wrapper {
+            width: 100%;
+            margin-top: 10%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .auth-wrapper {
+            width: 90%;
+            padding-top: 1em;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        button {
+            font-size: 1.3em;
+            text-align: center;
+            color: #1e352f;
+            border: none;
+            padding: 0.5em 0px;
+            width: 13em;
+            background-color: #A6C36F;
+            border-radius: 5px;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        button:hover {
+            transform: scale(1.1);
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="content">
+            <div class="hero-title">
+                <h1 class="main-title">Lusium</h1>
+                <h3 class="sub-title">O processo de mutação de minérios para robôs.</h3>
+            </div>
+            <div class="button-wrapper">
+                <button @onclick="NavigateToInstitutionList">Listagem de Instituições</button>
+                <div class="auth-wrapper">
+                    <button @onclick="NavigateToRegisterMenu">Registar</button>
+                    <button @onclick="NavigateToLoginMenu">Iniciar Sessão</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+@code {
+
+    private void NavigateToInstitutionList()
+    {
+        navigationManager.NavigateTo("/institution/list");
+    }
+
+    private void NavigateToRegisterMenu()
+    {
+        navigationManager.NavigateTo("/register");
+    }
+
+    private void NavigateToLoginMenu()
+    {
+        navigationManager.NavigateTo("/login");
+    }
+
+}
