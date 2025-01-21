@@ -3,13 +3,16 @@
 @inject NavigationManager navigationManager
 @rendermode InteractiveServer
 
-@*not working*@
-
 <PageTitle>Instituições</PageTitle>
 
 <h1>Instituições</h1>
 
 <input type="text" @bind="filterText" @oninput="OnFilterTextChanged" placeholder="Filtrar por nome..." class="form-control mb-3" />
+
+<div class="mb-3">
+    <button class="btn btn-primary me-2" @onclick="() => SortBy(name)">Ordenar por Nome</button>
+    <button class="btn btn-secondary" @onclick="() => SortBy(creditsSpend)">Ordenar por Créditos Dispendidos</button>
+</div>
 
 @if (institutionList == null || totalCreditosDispendidos.Count != institutionList.Count)
 {
@@ -27,6 +30,10 @@ else
                 <th>Email</th>
                 <th>Morada</th>
                 <th>Total de Créditos Dispendidos</th>
+                @if (isAdmin)
+                {
+                    <th>Ações</th>
+                }
             </tr>
         </thead>
         <tbody>
@@ -40,6 +47,14 @@ else
                     <td>@institution.Value.Email</td>
                     <td>@institution.Value.Morada</td>
                     <td>@totalCreditosDispendidos[institution.Value.ID.ToString()]</td>
+                    @if (isAdmin)
+                    {
+                        <td>
+                            <button class="btn btn-danger" @onclick="() => RemoveInstitution(institution.Value.ID.ToString())">
+                                Remover
+                            </button>
+                        </td>
+                    }
                 </tr>
             }
         </tbody>
@@ -50,6 +65,10 @@ else
     private Dictionary<string, Instituition> institutionList = new();
     private string filterText = string.Empty;
     private Dictionary<string, int> totalCreditosDispendidos = new();
+    private string currentSort = "name";
+    private string name = "name";
+    private string creditsSpend = "creditsSpend";
+    private bool isAdmin { get; set; } = false;
 
     [Inject]
     public required LusiumService LusiumService { get; set; }
@@ -57,6 +76,9 @@ else
     protected override async Task OnInitializedAsync()
     {
         institutionList = await LusiumService.ListaInstituicoes();
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        isAdmin = user.IsInRole("Admin");
 
         foreach (var institution in institutionList.Values)
         {
@@ -66,12 +88,42 @@ else
         }
     }
 
-    private IEnumerable<KeyValuePair<string, Instituition>> filteredinstitutionList =>
-        institutionList.Where(admin => string.IsNullOrEmpty(filterText) ||
-                                       admin.Value.Nome.Contains(filterText, StringComparison.OrdinalIgnoreCase));
+    private IEnumerable<KeyValuePair<string, Instituition>> filteredinstitutionList
+    {
+        get
+        {
+            var query = institutionList.AsEnumerable();
+
+            if (!string.IsNullOrEmpty(filterText))
+            {
+                query = query.Where(admin => admin.Value.Nome.Contains(filterText, StringComparison.OrdinalIgnoreCase));
+            }
+
+            query = currentSort switch
+            {
+                "name" => query.OrderBy(admin => admin.Value.Nome),
+                "creditsSpend" => query.OrderByDescending(admin => totalCreditosDispendidos[admin.Value.ID.ToString()]),
+                _ => query
+            };
+
+            return query;
+        }
+    }
 
     private void OnFilterTextChanged()
     {
         StateHasChanged();
+    }
+
+    private void SortBy(string criteria)
+    {
+        currentSort = criteria;
+        StateHasChanged();
+    }
+
+    private async Task RemoveInstitution(string institutionId)
+    {
+        await LusiumService.RemoveUtilizador(institutionId.ToString(), "Institution");
+        institutionList.Remove(institutionId);
     }
 }

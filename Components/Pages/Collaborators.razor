@@ -8,13 +8,12 @@
 
 <h1>Colaboradores</h1>
 
-<input type="text" @bind="filterText" @oninput="OnFilterTextChanged" placeholder="Filtrar por nome..." class="form-control mb-3" />
+<input type="text" @bind="filterText" placeholder="Filtrar por nome..." class="form-control mb-3" />
 
 <div class="mb-3">
     <button class="btn btn-primary me-2" @onclick="() => SortBy(name)">Ordenar por Nome</button>
     <button class="btn btn-secondary" @onclick="() => SortBy(birthDate)">Ordenar por Data de Nascimento</button>
 </div>
-
 
 @if (collaboratorList == null)
 {
@@ -30,17 +29,23 @@ else
                 <th>Email</th>
                 <th>Data de Nascimento</th>
                 <th>Instituição Associada</th>
+                <th>Ações</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var manual in filteredCollaboratorList)
+            @foreach (var collaborator in filteredCollaboratorList)
             {
                 <tr>
-                    <td>@manual.Value.ID</td>
-                    <td>@manual.Value.Nome</td>
-                    <td>@manual.Value.Email</td>
-                    <td>@manual.Value.DataNascimento</td>
-                    <td>@manual.Value.InstituicaoID</td>
+                    <td>@collaborator.Value.ID</td>
+                    <td>@collaborator.Value.Nome</td>
+                    <td>@collaborator.Value.Email</td>
+                    <td>@collaborator.Value.DataNascimento.ToShortDateString()</td>
+                    <td>@collaborator.Value.InstituicaoID</td>
+                    <td>
+                    <button class="btn btn-danger" @onclick="() => RemoveCollaborator(collaborator.Value.ID.ToString())">
+                        Remover
+                    </button>
+                    </td>
                 </tr>
             }
         </tbody>
@@ -53,6 +58,7 @@ else
     private string currentSort = "name";
     private string name = "name";
     private string birthDate = "birthDate";
+    private string userID = string.Empty;
 
     [Parameter]
     public int institutionID { get; set; }
@@ -65,7 +71,6 @@ else
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
-        string userID = string.Empty;
         string userRole = string.Empty;
 
         if (user.Identity?.IsAuthenticated ?? false)
@@ -104,5 +109,11 @@ else
     {
         currentSort = criteria;
         StateHasChanged();
+    }
+
+    private async Task RemoveCollaborator(string collaboratorId)
+    {
+        await LusiumService.RemoveUtilizador(collaboratorId, "Collaborator");
+        collaboratorList.Remove(collaboratorId);
     }
 }
