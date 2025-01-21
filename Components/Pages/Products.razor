@@ -100,8 +100,9 @@
 
         .necessary-pieces {
             display: flex;
-            justify-content: center;
+            justify-content: space-around;
             align-items: center;
+            margin: 0.5em 0em 1.3em 0em;
         }
 
         button {
@@ -153,7 +154,9 @@
                                         <div class="description">@product.Descricao</div>
                                         <div class="text">Peças necessárias:</div>
                                         <div class="necessary-pieces">
-                                            <!-- @foreach (var piece in product.PecasNecessarias){<div class="img">@piece</div>}  -->
+                                            @foreach (var piecePerProduct in product.PecaProdutos){
+                                                <div class="img">@piecePerProduct.Peca.ImagemAlusiva</div>
+                                            }
                                         </div>
                                         <button>Comprar</button>
                                     </div>
