@@ -17,6 +17,13 @@ builder.Services.AddDbContext<LusiumDbContext>(options =>
 // Register services.
 builder.Services.AddScoped<LusiumService>();
 
+// Register HttpContextAccessor and custom service
+builder.Services.AddControllers();
+builder.Services.AddHttpClient("api", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7240/");
+});
+
 //Login Service
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -25,6 +32,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.Cookie.MaxAge = TimeSpan.FromMinutes(30);
         options.LoginPath = "/login";
         options.AccessDeniedPath = "/";
+        options.Cookie.SameSite = SameSiteMode.None; // Permite cookies entre origens
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Garante que o cookie seja enviado apenas em HTTPS
     });
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
@@ -34,19 +43,18 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-
-    // Scope the error handler to the request
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
+    app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
 
-//app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAntiforgery();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapControllers();
 // Setup razor components.
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
