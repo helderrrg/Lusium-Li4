@@ -201,19 +201,12 @@
                 selectedInstitutionId = result.InstituicaoID.ToString();
             }
 
-            isUserCollaborator = await IsUserInRoleAsync("Collaborator");
+            isUserCollaborator = user.IsInRole("Collaborator");
         }
         else
         {
             navigationManager.NavigateTo("/login");
         }
-    }
-
-    private async Task<bool> IsUserInRoleAsync(string role)
-    {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-        return user.IsInRole(role);
     }
 
     private void ShowPasswordModal()

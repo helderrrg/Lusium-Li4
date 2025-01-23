@@ -220,7 +220,7 @@
                         <div class="listing-cell sub-title-sm">@institution.Value.Morada</div>
                         <div class="listing-cell sub-title-sm">@totalCreditosDispendidos[institution.Value.ID.ToString()]</div>
                     </div>
-                    @if (idAdmin)
+                    @if (isAdmin)
                     {
                         <div class="edit-options">
                             <div class="button" @onclick="() => RemoveInstitution(institution.Value.ID.ToString())" >
