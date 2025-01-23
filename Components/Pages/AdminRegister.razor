@@ -2,134 +2,127 @@
 @rendermode InteractiveServer
 @attribute [Authorize(Roles = "Admin")]
 
-<html>
-<head>
-    <PageTitle>Criar Administrador</PageTitle>
-    <style>
-        .page {
-            font-family: Arial, Helvetica, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            width: 100vw;
-            background-color: #1e352f;
-        }
+<PageTitle>Criar Administrador</PageTitle>
+<style>
+    .page {
+        font-family: Arial, Helvetica, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        width: 100vw;
+        background-color: #1e352f;
+    }
 
-        .content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+    .content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
 
-        .main-title {
-            font-weight: bold;
-            font-size: 3.5em;
-            color:#BEEF9E;
-        }
+    .main-title {
+        font-weight: bold;
+        font-size: 3.5em;
+        color:#BEEF9E;
+    }
 
-        label {
-            color:#BEEF9E;
-            padding-left: 5px;
-        }
+    label {
+        color:#BEEF9E;
+        padding-left: 5px;
+    }
 
-        .form {
-            width: 80%;
-        }
+    .form {
+        width: 80%;
+    }
 
-        .form-entry {
-            margin-top: 20px;
-        }
-        
-        .double-form-entry {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-        }
+    .form-entry {
+        margin-top: 20px;
+    }
+    
+    .double-form-entry {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+    }
 
-        .form-control {
-            width: 100%;
-            border-radius: 0.5em;
-        }
+    .form-control {
+        width: 100%;
+        border-radius: 0.5em;
+    }
 
-        .button-wrapper {
-            width: 80%;
-            display: flex;
-            flex-direction: column;
-            align-items: left;
-        }
+    .button-wrapper {
+        width: 80%;
+        display: flex;
+        flex-direction: column;
+        align-items: left;
+    }
 
-        button {
-            font-size: 1em;
-            text-align: center;
-            color: #1e352f;
-            border: none;
-            padding: 0.5em 0px;
-            width: 8em;
-            background-color: #A6C36F;
-            border-radius: 5px;
-            transition: transform 0.2s ease-in-out;
-            margin-top: 40px;
-        }
+    button {
+        font-size: 1em;
+        text-align: center;
+        color: #1e352f;
+        border: none;
+        padding: 0.5em 0px;
+        width: 8em;
+        background-color: #A6C36F;
+        border-radius: 5px;
+        transition: transform 0.2s ease-in-out;
+        margin-top: 40px;
+    }
 
-        button:hover {
-            transform: scale(1.1);
-        }
+    button:hover {
+        transform: scale(1.1);
+    }
 
-        .info-message-wrapper {
-            margin-top: 4em;
-            width: 80%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: left;
-        }
+    .info-message-wrapper {
+        margin-top: 4em;
+        width: 80%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: left;
+    }
 
-        .info-message {
-            background-color: #ea6565;
-            padding: 10px;
-            border-radius: 5px;
-            color: white;
-        }
-    </style>
-</head>
-<body>
-    <div class="page">
-        <div class="content">
-            <div class="main-title">Criar Administrador</div>
-            <div class="form">
-                <div class="form-entry">
-                    <label for="nome">Nome</label>
-                    <input type="text" class="form-control" id="name" @bind="name" />
-                </div>
-                <div class="form-entry">
-                    <label for="email">Email</label>
-                    <input type="text" class="form-control" id="email" @bind="email" />
-                </div>
-                <div class="form-entry">
-                    <label for="password">Palavra-passe</label>
-                    <input type="password" class="form-control" id="password" @bind="password" />
-                </div>
-                <div class="form-entry">
-                    <label for="confirmPassword">Confirmar Palavra-passe</label>
-                    <input type="password" class="form-control" id="confirmPassword" @bind="confirmPassword" />
-                </div>
+    .info-message {
+        background-color: #ea6565;
+        padding: 10px;
+        border-radius: 5px;
+        color: white;
+    }
+</style>
+<div class="page">
+    <div class="content">
+        <div class="main-title">Criar Administrador</div>
+        <div class="form">
+            <div class="form-entry">
+                <label for="nome">Nome</label>
+                <input type="text" class="form-control" id="name" @bind="name" />
             </div>
-            <div class="button-wrapper">
-                <button @onclick="RegisterAdmin">Registar</button>
+            <div class="form-entry">
+                <label for="email">Email</label>
+                <input type="text" class="form-control" id="email" @bind="email" />
             </div>
-            @if (!string.IsNullOrEmpty(message))
-            {
-                <div class="info-message-wrapper">
-                    <div class="info-message">@message</div>
-                </div>
-            }
+            <div class="form-entry">
+                <label for="password">Palavra-passe</label>
+                <input type="password" class="form-control" id="password" @bind="password" />
+            </div>
+            <div class="form-entry">
+                <label for="confirmPassword">Confirmar Palavra-passe</label>
+                <input type="password" class="form-control" id="confirmPassword" @bind="confirmPassword" />
+            </div>
         </div>
+        <div class="button-wrapper">
+            <button @onclick="RegisterAdmin">Registar</button>
+        </div>
+        @if (!string.IsNullOrEmpty(message))
+        {
+            <div class="info-message-wrapper">
+                <div class="info-message">@message</div>
+            </div>
+        }
     </div>
-</body>
-</html>
-}
+</div>
 
 @code {
 
