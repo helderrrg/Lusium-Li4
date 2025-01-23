@@ -6,31 +6,118 @@
 @attribute [Authorize(Roles = "Admin, Collaborator, Institution")]
 
 <PageTitle>Manual</PageTitle>
+<style>
+    .page {
+        font-family: Arial, Helvetica, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        width: 100vw;
+        background-color: #1e352f;
+    }
 
-<h1>Manual: @manual?.Nome</h1>
+    .content {
+        width: 70%;
+        height: 70%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
 
-@if (manual == null || paginas == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <div class="manual-details">
-        <img src="@manual.Capa" alt="Capa do Manual" class="manual-cover" />
-        <p><strong>Descrição:</strong> @manual.Descricao</p>
+    .manual-wrapper {
+        position: relative;
+    }
+
+    img {
+        width: 100%;
+        height: auto;
+        background-color: blue;
+    }
+
+    .control-wrapper {
+        position: absolute;
+        bottom: 0px;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .pagination-control {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 80%;
+        margin-bottom: 0.4em;
+    }
+
+    .right-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .page-info {
+        font-weight: bold;
+        font-size: 1.4em;
+        color: #A6C36F;
+        margin-right: 1em;
+    }
+
+    .button {
+        background-color: transparent;
+        border: none;
+    }
+
+    .button:hover:enabled {
+        transform: scale(1.1);
+    }
+    
+    .button:disabled {
+        cursor: default;
+    }
+
+    .button:enabled svg {
+        fill: #A6C36F;
+    }
+
+    .button:disabled svg {
+        fill: #949597;
+    }
+    
+</style>
+<div class="page">
+    <div class="content">
+        @if (manual == null || paginas == null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            <div class="manual-wrapper">
+                <img src="https://i.ytimg.com/vi/CfPCjUZjT5o/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLCV5e6ryyA2hIms1WOEb50ZgDgWxg" alt="Imagem da Página" width="1000" height="400" />
+                <div class="control-wrapper">
+                    <div class="pagination-control">
+                        <button class="button" @onclick="PaginaAnterior" disabled="@(!PodeVoltar)">
+                            <svg width="27" height="24" viewBox="0 0 27 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.939341 10.9393C0.353554 11.5251 0.353554 12.4749 0.939341 13.0607L10.4853 22.6066C11.0711 23.1924 12.0208 23.1924 12.6066 22.6066C13.1924 22.0208 13.1924 21.0711 12.6066 20.4853L4.12132 12L12.6066 3.51472C13.1924 2.92893 13.1924 1.97919 12.6066 1.3934C12.0208 0.807611 11.0711 0.807611 10.4853 1.3934L0.939341 10.9393ZM27 10.5L2 10.5V13.5L27 13.5V10.5Z"/></svg>
+                        </button>
+                        <div class="right-info">
+                            <div class="page-info">@paginaAtual/@paginas.Count</div>
+                            <button class="button" @onclick="ProximaPagina" disabled="@(!PodeAvancar)">
+                                <svg width="27" height="24" viewBox="0 0 27 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M26.0607 13.0607C26.6464 12.4749 26.6464 11.5251 26.0607 10.9393L16.5147 1.3934C15.9289 0.807611 14.9792 0.807611 14.3934 1.3934C13.8076 1.97919 13.8076 2.92893 14.3934 3.51472L22.8787 12L14.3934 20.4853C13.8076 21.0711 13.8076 22.0208 14.3934 22.6066C14.9792 23.1924 15.9289 23.1924 16.5147 22.6066L26.0607 13.0607ZM0 13.5L25 13.5V10.5L0 10.5L0 13.5Z"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
+</div>
 
-    <div class="pagination-control">
-        <button class="btn btn-secondary" @onclick="PaginaAnterior" disabled="@(!PodeVoltar)">Anterior</button>
-        <span>Página @paginaAtual de @paginas.Count</span>
-        <button class="btn btn-secondary" @onclick="ProximaPagina" disabled="@(!PodeAvancar)">Próxima</button>
-    </div>
 
-    <div class="page-content">
-        <h2>Página @paginaAtual</h2>
-        <img src="@paginaAtualImagem" alt="Imagem da Página" class="page-image" />
-    </div>
-}
+
 
 @code {
     [Parameter]
