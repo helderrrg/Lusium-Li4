@@ -27,9 +27,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            height: 72%;
-            height: @(isAdmin ? "60%" : "72%");
-            justify-content: space-between;
+            justify-content: start;
         }
 
         .hero-title {
@@ -43,10 +41,9 @@
 
         .form-group {
             width: 80%;
-            height: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: start;
         }
 
         .top-text {
@@ -91,6 +88,7 @@
         }
 
         button {
+            margin-top: 40px;
             font-size: 1em;
             text-align: center;
             color: #1e352f;
@@ -147,7 +145,7 @@
                                 <label for="credits" class="current-credits-text">Créditos Atuais</label>
                                 <div class="value-and-img">
                                     <label for="credits" class="current-credits-number"> @institutionCredits</label>
-                                    <svg width="20" height="20" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 12L1.65464 9.5978C1.25128 9.3748 1 8.94424 1 8.47604V3.49512M6 12L10.3454 9.5978C10.7488 9.3748 11 8.94424 11 8.47604V3.49512M6 12V8.1728M1 3.49512L5.42256 1.14427C5.78444 0.951911 6.21556 0.951911 6.57744 1.14427L11 3.49512M1 3.49512L4.35101 5.34763M11 3.49512L7.649 5.34763M6 8.1728C7.03556 8.1728 7.875 7.31608 7.875 6.2592C7.875 5.92917 7.79313 5.61866 7.649 5.34763M6 8.1728C4.96444 8.1728 4.125 7.31608 4.125 6.2592C4.125 5.92917 4.20687 5.61866 4.35101 5.34763M4.35101 5.34763C4.66844 4.75079 5.28787 4.3456 6 4.3456C6.71213 4.3456 7.33156 4.75079 7.649 5.34763" stroke="#646A75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                    <svg width="20" height="20" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 12L1.65464 9.5978C1.25128 9.3748 1 8.94424 1 8.47604V3.49512M6 12L10.3454 9.5978C10.7488 9.3748 11 8.94424 11 8.47604V3.49512M6 12V8.1728M1 3.49512L5.42256 1.14427C5.78444 0.951911 6.21556 0.951911 6.57744 1.14427L11 3.49512M1 3.49512L4.35101 5.34763M11 3.49512L7.649 5.34763M6 8.1728C7.03556 8.1728 7.875 7.31608 7.875 6.2592C7.875 5.92917 7.79313 5.61866 7.649 5.34763M6 8.1728C4.96444 8.1728 4.125 7.31608 4.125 6.2592C4.125 5.92917 4.20687 5.61866 4.35101 5.34763M4.35101 5.34763C4.66844 4.75079 5.28787 4.3456 6 4.3456C6.71213 4.3456 7.33156 4.75079 7.649 5.34763" stroke="#646A75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                                 </div>
                             </div>
                             <div>
