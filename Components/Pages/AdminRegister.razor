@@ -76,7 +76,22 @@
         button:hover {
             transform: scale(1.1);
         }
-        
+
+        .info-message-wrapper {
+            margin-top: 4em;
+            width: 80%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: left;
+        }
+
+        .info-message {
+            background-color: #ea6565;
+            padding: 10px;
+            border-radius: 5px;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -104,12 +119,17 @@
             <div class="button-wrapper">
                 <button @onclick="RegisterAdmin">Registar</button>
             </div>
+            @if (!string.IsNullOrEmpty(message))
+            {
+                <div class="info-message-wrapper">
+                    <div class="info-message">@message</div>
+                </div>
+            }
         </div>
     </div>
 </body>
 </html>
-
-<p>@message</p>
+}
 
 @code {
 
@@ -124,6 +144,12 @@
 
     public async Task RegisterAdmin()
     {
+        if (password != confirmPassword)
+        {
+            message = "As palavras-passe não coincidem.";
+            return;
+        }
+
         var valid = await LusiumService.ValidaDadosAdministrador(name, email, password);
 
         if (valid)
