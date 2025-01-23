@@ -103,7 +103,22 @@
         button:hover {
             transform: scale(1.1);
         }
-        
+
+        .info-message-wrapper {
+            margin-top: 4em;
+            width: 80%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: left;
+        }
+
+        .info-message {
+            background-color: #ea6565;
+            padding: 10px;
+            border-radius: 5px;
+            color: white;
+        }
     </style>
 
     <PageTitle>Editar Instituição</PageTitle>
@@ -157,8 +172,13 @@
                 </div>
                 <div>
                     <button @onclick="ShowPasswordModal">Alterar Dados</button>
-                    <p>@message</p>
                 </div>
+                @if (!string.IsNullOrEmpty(message))
+                {
+                    <div class="info-message-wrapper">
+                        <div class="info-message">@message</div>
+                    </div>
+                }
             </div>
         </div>
     </div>
