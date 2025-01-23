@@ -1,23 +1,191 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-            <AuthorizeView>
-                <Authorized>
-                    <a href="/logout">Logout</a>
-                </Authorized>
-                <NotAuthorized>
-                    <a href="/login">Login</a>
-                </NotAuthorized>
-            </AuthorizeView>
-        </div>
+<style>
+    .page {
+        padding-top: 30px;
+    }
 
-        <div>
-            @Body
-        </div>
-    </main>
+    .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #A6C36F;
+        height: 60px;
+        width: 100vw;
+        font-family: Arial, Helvetica, sans-serif;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+        padding-left: 15px;
+        padding-right: 40px;
+    }
+
+    .default-word {
+        font-weight: bold;
+        color: #1e352f;
+        text-decoration: none;
+    }
+
+    .default-word:hover {
+        color: #BEEF9E;
+        transition: 0.3s;
+    }
+
+    .admin-features {
+        width: 700px;
+        display: flex;
+        margin-left: 40px;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .institution-features {
+        width: 900px;
+        display: flex;
+        margin-left: 40px;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .collaborator-features {
+        width: 600px;
+        display: flex;
+        margin-left: 40px;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .logout-button {
+        text-decoration: none;
+        text-align: center;
+        color: #A6C36F;
+        border: none;
+        padding: 0.5em 0px;
+        width: 9em;
+        background-color: #1e352f;
+        border-radius: 5px;
+        transition: 0.2s ease-in-out;
+    }
+
+    .logout-button:hover {
+        background-color: #BEEF9E;
+        color: #1e352f;
+        transform: scale(1.05);
+    }
+
+    .pair {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        cursor: pointer;
+    }
+
+    .pair svg {
+        margin-left: 5px;
+        margin-top: 3px;
+    }
+
+    .pop-menu {
+        display: none;
+    }
+
+    .pair:hover .pop-menu {
+        padding: 10px;
+        display: block;
+        position: absolute;
+        top: 100%;
+        right: 0%;
+        background-color: white;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        width: 180%;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .bold {
+        font-weight: bold;
+    }
+
+</style>
+
+<div class="page">
+    <AuthorizeView>
+        <Authorized>
+            <AuthorizeView Roles="Admin" Context="adminContext">
+                <div class="top-bar admin-bar">
+                    <a href="/">LOGÓTIPO [TODO]</a>
+                    <div class="admin-features">
+                        <a href="/products" class="default-word">Loja</a>
+                        <a href="/manuals" class="default-word">Manuais</a>
+                        <a href="/pieces" class="default-word">Peças</a>
+                        <div class="pair">
+                            <div class="bold">Listagem</div>
+                            <svg width="12" height="7" viewBox="0 0 12 7" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5.46967 6.53033C5.76256 6.82322 6.23744 6.82322 6.53033 6.53033L11.3033 1.75736C11.5962 1.46447 11.5962 0.989593 11.3033 0.696699C11.0104 0.403806 10.5355 0.403806 10.2426 0.696699L6 4.93934L1.75736 0.696699C1.46447 0.403806 0.989593 0.403806 0.696699 0.696699C0.403806 0.989593 0.403806 1.46447 0.696699 1.75736L5.46967 6.53033ZM5.25 5V6H6.75V5H5.25Z" fill="#484848"/></svg>
+                            <div class="pop-menu">
+                                <a href="/institutions" class="default-word">Instituições</a>
+                                <a href="/collaborators" class="default-word">Colaboradores</a>
+                                <a href="/admins" class="default-word">Administradores</a>
+                            </div>
+                        </div>
+                        <a href="/logout" class="logout-button">Terminar Sessão</a>
+                    </div>
+                </div>
+            </AuthorizeView>
+            <AuthorizeView Roles="Institution" Context="institutionContext">
+                <div class="top-bar institution-bar">
+                    <a href="/">LOGÓTIPO [TODO]</a>
+                    <div class="institution-features">
+                        <a href="/products" class="default-word">Loja</a>
+                        <a href="/manuals" class="default-word">Manuais</a>
+                        <a href="/purchases" class="default-word">Histórico de Compras</a>
+                        <div class="pair">
+                            <div class="bold">Listagem</div>
+                            <svg width="12" height="7" viewBox="0 0 12 7" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5.46967 6.53033C5.76256 6.82322 6.23744 6.82322 6.53033 6.53033L11.3033 1.75736C11.5962 1.46447 11.5962 0.989593 11.3033 0.696699C11.0104 0.403806 10.5355 0.403806 10.2426 0.696699L6 4.93934L1.75736 0.696699C1.46447 0.403806 0.989593 0.403806 0.696699 0.696699C0.403806 0.989593 0.403806 1.46447 0.696699 1.75736L5.46967 6.53033ZM5.25 5V6H6.75V5H5.25Z" fill="#484848"/></svg>
+                            <div class="pop-menu">
+                                <a href="/institutions" class="default-word">Instituições</a>
+                                <a href="/collaborators" class="default-word">Colaboradores</a>
+                            </div>
+                        </div>
+                        <a href="/institution/edit" class="default-word">Alterar Dados</a>
+                        <a href="/logout" class="logout-button">Terminar Sessão</a>
+                    </div>
+                </div>
+            </AuthorizeView>
+            <AuthorizeView Roles="Collaborator" Context="collaboratorContext">
+                <div class="top-bar collaborator-bar">
+                    <a href="/">LOGÓTIPO [TODO]</a>
+                    <div class="collaborator-features">
+                        <a href="/manuals" class="default-word">Manuais</a>
+                        <div class="pair">
+                            <div class="bold">Listagem</div>
+                            <svg width="12" height="7" viewBox="0 0 12 7" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5.46967 6.53033C5.76256 6.82322 6.23744 6.82322 6.53033 6.53033L11.3033 1.75736C11.5962 1.46447 11.5962 0.989593 11.3033 0.696699C11.0104 0.403806 10.5355 0.403806 10.2426 0.696699L6 4.93934L1.75736 0.696699C1.46447 0.403806 0.989593 0.403806 0.696699 0.696699C0.403806 0.989593 0.403806 1.46447 0.696699 1.75736L5.46967 6.53033ZM5.25 5V6H6.75V5H5.25Z" fill="#484848"/></svg>
+                            <div class="pop-menu">
+                                <a href="/institutions" class="default-word">Instituições</a>
+                            </div>
+                        </div>
+                        <a href="/collaborator/edit" class="default-word">Alterar Dados</a>
+                        <a href="/logout" class="logout-button">Terminar Sessão</a>
+                    </div>
+                </div>
+            </AuthorizeView>
+        </Authorized>
+        <NotAuthorized>
+            <div class="top-bar">
+                <a href="/">LOGÓTIPO [TODO]</a>
+                <a href="/" class="default-word">Página Principal</a>
+            </div>
+        </NotAuthorized>
+    </AuthorizeView>
+
+    <div>
+        @Body
+    </div>
 </div>
 
 <div id="blazor-error-ui">
