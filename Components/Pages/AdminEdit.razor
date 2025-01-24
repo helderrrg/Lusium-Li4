@@ -5,6 +5,7 @@
 @inject NavigationManager navigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject LusiumService LusiumService
+@inject SessionService Session
 @rendermode InteractiveServer
 @attribute [Authorize(Roles = "Admin")]
 
@@ -98,7 +99,7 @@
             <div>
                 <div class="pair">
                     <label for="nome" class="top-text">Novo Nome</label>
-                    <input type="text" class="form-control" id="name" @bind="pendingName" placeholder="ex: Orlando Belo" />
+                    <input type="text" class="form-control" id="name" @bind="pendingName" placeholder="@userName" />
                 </div>
                 <div class="pair">
                     <label for="password" class="top-text">Nova Palavra-passe</label>
@@ -166,9 +167,9 @@
 
         if (user.Identity?.IsAuthenticated ?? false)
         {
-            userID = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
-            userName = user.FindFirst(ClaimTypes.Name)?.Value ?? "Nome não encontrado";
-            userEmail = user.FindFirst(ClaimTypes.Email)?.Value ?? "Email não encontrado";
+            userID = user.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
+            userName = Session.Name;
+            userEmail = Session.Email;
         }
         else
         {
@@ -238,9 +239,9 @@
         if (valid)
         {
             await LusiumService.AtualizaDadosAdministrador(userID, tempName, tempPass);
-            message = "Administrador editado com sucesso, as alterações serão refletidas no próximo início de sessão.";
+            message = "Administrador editado com sucesso.";
             
-            // [TODO] Update the user's name in the claims
+            Session.Name = tempName;
         }
         else
         {

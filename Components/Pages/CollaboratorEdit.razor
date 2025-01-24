@@ -6,6 +6,7 @@
 @inject NavigationManager navigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject LusiumService LusiumService
+@inject SessionService Session
 @rendermode InteractiveServer
 @attribute [Authorize(Roles = "Admin,Institution,Collaborator")]
 
@@ -98,15 +99,15 @@
             <div>
                 <div class="pair">
                     <label for="nome" class="top-text">Novo Nome</label>
-                    <input type="text" class="form-control" id="name" @bind="pendingName" placeholder="ex: Orlando Belo" />
+                    <input type="text" class="form-control" id="name" @bind="pendingName"/>
                 </div>
                 <div class="pair">
                     <label for="birthDate" class="top-text">Nova Data de Nascimento</label>
-                    <InputDate TValue="DateOnly?" class="form-control" id="birthDate" @bind-Value="birthDate" />
+                    <InputDate TValue="DateOnly?" class="form-control" id="birthDate" @bind-Value="@pendingBirthDate"/>
                 </div>
                 <div class="pair">
                     <label for="instituicao" class="top-text">Nova Instituição Associada</label>
-                    <select class="form-control" id="instituicao" @bind="selectedInstitutionId">
+                    <select class="form-control" id="instituicao" @bind="pendingInstitutionId">
                         <option value="">-- Selecione uma instituição --</option>
                         @foreach (var institution in institutions)
                         {
@@ -199,9 +200,16 @@
                 userEmail = result.Email;
                 birthDate = result.DataNascimento;
                 selectedInstitutionId = result.InstituicaoID.ToString();
+
+                // Populate the form with the current values
+                pendingName = userName;
+                pendingBirthDate = birthDate;
+                pendingInstitutionId = selectedInstitutionId;
             }
 
             isUserCollaborator = user.IsInRole("Collaborator");
+
+            institutions = await LusiumService.ListaUtilizadores("Institution");
         }
         else
         {
@@ -292,9 +300,9 @@
         if (valid)
         {
             await LusiumService.AtualizaDadosColaborador(userID, tempName, tempBirthDate.Value, tempInstitutionId, tempPass);
-            message = "Colaborador editado com sucesso, as alterações serão refletidas no próximo início de sessão.";
+            message = "Colaborador editado com sucesso.";
 
-            // [TODO] Update the user's name in the claims
+            Session.Name = tempName;
         }
         else
         {

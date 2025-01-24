@@ -6,6 +6,7 @@
 @inject NavigationManager navigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject LusiumService LusiumService
+@inject SessionService Session
 @rendermode InteractiveServer
 @attribute [Authorize(Roles = "Admin,Institution")]
 
@@ -295,7 +296,9 @@
         if (valid)
         {
             await LusiumService.AtualizaDadosInstituicao(institutionID.ToString(), tempName, tempAdress, tempPass, tempCredits);
-            message = "Instituição editada com sucesso, as alterações serão refletidas no próximo início de sessão.";
+            message = "Instituição editada com sucesso.";
+
+            Session.Name = tempName;
         }
         else
         {
