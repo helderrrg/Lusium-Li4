@@ -5,10 +5,252 @@
 @rendermode InteractiveServer
 @attribute [Authorize(Roles = "Institution")]
 
+<style>
+    .page {
+        font-family: Arial, Helvetica, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        width: 100vw;
+        background-color: #1e352f;
+    }
+
+    .content {
+        width: 400px;
+        display: flex;
+        flex-direction: column;
+        justify-content: start;
+    }
+
+    .image-and-specs {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 25px;
+    }
+
+    .specs {
+        font-size: 1.5em;
+        font-weight: bold;
+        color: #A6C36F;
+        display: flex;
+        flex-direction: column;
+        align-items: end;
+        padding-top: 15px;
+    }
+
+    .creditos {
+        display: flex;
+        align-items: center;
+        margin-top: 15px;
+    }
+
+    .creditos svg {
+        margin-left: 5px;
+    }
+
+    .adresses {
+        margin-top: 25px;
+        font-size: 1.3em;
+        font-weight: bold;
+        color: #A6C36F;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .new-adress-text {
+        cursor: pointer;
+        font-weight: bold;
+        color: @(usarMoradaAlternativa ? "#BEEF9E" : "grey");
+        text-decoration: none;
+    }
+
+    .new-adress-text:hover {
+        color: #BEEF9E;
+        transition: 0.3s;
+    }
+
+    .reg-adress-text {
+        cursor: pointer;
+        font-weight: bold;
+        color: @(usarMoradaAlternativa ? "grey" : "#BEEF9E");
+        text-decoration: none;
+    }
+
+    .reg-adress-text:hover {
+        color: #BEEF9E;
+        transition: 0.3s;
+    }
+
+    .top-text {
+        color: #A6C36F;
+        padding-left: 5px;
+        font-size: 1em;
+    }
+
+    .pair {
+        margin-top: 20px;
+    }
+
+    button {
+        margin-top: 40px;
+        font-size: 1em;
+        text-align: center;
+        color: #1e352f;
+        border: none;
+        padding: 0.5em 0px;
+        width: 8em;
+        background-color: #A6C36F;
+        border-radius: 5px;
+        transition: transform 0.2s ease-in-out;
+    }
+
+    button:hover {
+        transform: scale(1.1);
+    }
+
+    .info-message-wrapper {
+        margin-top: 4em;
+        width: 80%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: left;
+    }
+
+    .info-message {
+        background-color: #ea6565;
+        padding: 10px;
+        border-radius: 5px;
+        color: white;
+    }
+</style>
+
 <PageTitle>Processar Compra</PageTitle>
 
-<h1>Processar Compra</h1>
+@if (produto == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+<div class="page">
+    <div class="content">
+        <div class="image-and-specs">
+            <img src="@produto.ImagemAlusiva" alt="@produto.Nome" width="200" height="200" />
+            <div class="specs">
+                <div>@produto.Nome</div>
+                <div  class="creditos">
+                    <div>@produto.Custo</div>
+                    <svg width="25" height="25" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 12L1.65464 9.5978C1.25128 9.3748 1 8.94424 1 8.47604V3.49512M6 12L10.3454 9.5978C10.7488 9.3748 11 8.94424 11 8.47604V3.49512M6 12V8.1728M1 3.49512L5.42256 1.14427C5.78444 0.951911 6.21556 0.951911 6.57744 1.14427L11 3.49512M1 3.49512L4.35101 5.34763M11 3.49512L7.649 5.34763M6 8.1728C7.03556 8.1728 7.875 7.31608 7.875 6.2592C7.875 5.92917 7.79313 5.61866 7.649 5.34763M6 8.1728C4.96444 8.1728 4.125 7.31608 4.125 6.2592C4.125 5.92917 4.20687 5.61866 4.35101 5.34763M4.35101 5.34763C4.66844 4.75079 5.28787 4.3456 6 4.3456C6.71213 4.3456 7.33156 4.75079 7.649 5.34763" stroke="#646A75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+            </div>
+        </div>
+        <div class="adresses">
+            <div @onclick="UsarMoradaAlternativa" class="new-adress-text">Morada alternativa</div>
+            <div @onclick="UsarMoradaDeRegisto" class="reg-adress-text">Morada de registo</div>
+        </div>
+        <div>
+            @if (usarMoradaAlternativa)
+            {
+                <div class="pair">
+                    <label for="enderecoEntrega" class="top-text">Nova Morada</label>
+                    <input type="text" class="form-control" id="enderecoEntrega" @bind="morada" placeholder="@morada" />
+                </div>
+            }
+            <button @onclick="ProcessarCompra">Comprar</button>
+        </div>
+    </div>
+</div>
+}
 
+@code {
+    [Parameter]
+    public int ProductID { get; set; }
+
+    private Product? produto;
+    private string morada = string.Empty;
+    private string? codInstituicao;
+    private string message = string.Empty;
+
+    private List<PiecePerProduct> pecasNecessarias = new();
+    private List<Piece> pecas = new();
+
+    private bool usarMoradaAlternativa = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated ?? false)
+        {
+            codInstituicao = user.FindFirst("InstituicaoID")?.Value;
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/login");
+            return;
+        }
+
+        produto = await LusiumService.ObterProduto(ProductID.ToString());
+        if (produto == null)
+        {
+            message = "Produto não encontrado.";
+            return;
+        }
+
+        pecasNecessarias = await LusiumService.ObterPecasNecessariasPorProduto(produto.ID);
+        pecas = await LusiumService.ObterPecas();
+
+        if (!string.IsNullOrEmpty(codInstituicao))
+        {
+            var instituicao = await LusiumService.ObterInstituicao(codInstituicao);
+            if (instituicao != null && string.IsNullOrEmpty(morada))
+            {
+                morada = instituicao.Morada;
+            }
+        }
+    }
+
+    private async Task ProcessarCompra()
+    {
+        var instituicao = await LusiumService.ObterInstituicao(codInstituicao);
+        if (instituicao == null || instituicao.Creditos < produto.Custo)
+        {
+            message = "Créditos insuficientes para realizar a compra.";
+            return;
+        }
+
+        var pecasDisponiveis = pecasNecessarias.All(pecaNecessaria =>
+        {
+            var pecaStock = pecas.FirstOrDefault(p => p.ID == pecaNecessaria.IDPeca);
+            return pecaStock != null && pecaStock.Quantidade >= pecaNecessaria.Quantidade;
+        });
+
+        if (!pecasDisponiveis)
+        {
+            message = "O produto não está disponível devido à falta de peças no estoque.";
+            return;
+        }
+
+        // Processar a compra
+        await LusiumService.ProcessaCompra(codInstituicao, produto.ID.ToString(), morada);
+    }
+
+    private void UsarMoradaAlternativa()
+    {
+        usarMoradaAlternativa = true;
+    }
+
+    private void UsarMoradaDeRegisto()
+    {
+        usarMoradaAlternativa = false;
+    }
+}
+
+@*
 @if (produto == null)
 {
     <p><em>Loading...</em></p>
@@ -87,76 +329,4 @@ else
         <p class="text-danger">O produto não pode ser comprado devido à indisponibilidade de peças.</p>
     }
 }
-
-@code {
-    [Parameter]
-    public int ProductID { get; set; }
-
-    private Product? produto;
-    private string morada = string.Empty;
-    private string? codInstituicao;
-    private string message = string.Empty;
-
-    private List<PiecePerProduct> pecasNecessarias = new();
-    private List<Piece> pecas = new();
-
-    protected override async Task OnInitializedAsync()
-    {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-
-        if (user.Identity?.IsAuthenticated ?? false)
-        {
-            codInstituicao = user.FindFirst("InstituicaoID")?.Value;
-        }
-        else
-        {
-            NavigationManager.NavigateTo("/login");
-            return;
-        }
-
-        produto = await LusiumService.ObterProduto(ProductID.ToString());
-        if (produto == null)
-        {
-            message = "Produto não encontrado.";
-            return;
-        }
-
-        pecasNecessarias = await LusiumService.ObterPecasNecessariasPorProduto(produto.ID);
-        pecas = await LusiumService.ObterPecas();
-
-        if (!string.IsNullOrEmpty(codInstituicao))
-        {
-            var instituicao = await LusiumService.ObterInstituicao(codInstituicao);
-            if (instituicao != null && string.IsNullOrEmpty(morada))
-            {
-                morada = instituicao.Morada;
-            }
-        }
-    }
-
-    private async Task ProcessarCompra()
-    {
-        var instituicao = await LusiumService.ObterInstituicao(codInstituicao);
-        if (instituicao == null || instituicao.Creditos < produto.Custo)
-        {
-            message = "Créditos insuficientes para realizar a compra.";
-            return;
-        }
-
-        var pecasDisponiveis = pecasNecessarias.All(pecaNecessaria =>
-        {
-            var pecaStock = pecas.FirstOrDefault(p => p.ID == pecaNecessaria.IDPeca);
-            return pecaStock != null && pecaStock.Quantidade >= pecaNecessaria.Quantidade;
-        });
-
-        if (!pecasDisponiveis)
-        {
-            message = "O produto não está disponível devido à falta de peças no estoque.";
-            return;
-        }
-
-        // Processar a compra
-        await LusiumService.ProcessaCompra(codInstituicao, produto.ID.ToString(), morada);
-    }
-}
+*@
