@@ -146,5 +146,12 @@ else
         }
 
         purchasesList = await LusiumService.ListaComprasEfetuadas(userID);
+
+        foreach (var purchase in purchasesList)
+        {
+            purchase.Value.Produto = await LusiumService.ObterProduto(purchase.Value.ProdutoAssociado.ToString());
+        }
+
+        Console.WriteLine(purchasesList);
     }
 }
