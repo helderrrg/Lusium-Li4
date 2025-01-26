@@ -161,6 +161,19 @@ else
             }
             <button @onclick="ProcessarCompra">Comprar</button>
         </div>
+            @if (!string.IsNullOrEmpty(message))
+            {
+                <div class="info-message-wrapper">
+                    <div class="info-message">@message</div>
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(successMessage))
+            {
+                <div class="info-message-wrapper">
+                    @* [TODO] Estilizar mensagem sucesso *@
+                    <div class="info-message">@successMessage</div>
+                </div>
+            }
     </div>
 </div>
 }
@@ -173,6 +186,7 @@ else
     private string morada = string.Empty;
     private string? codInstituicao;
     private string message = string.Empty;
+    private string successMessage = string.Empty;
 
     private List<PiecePerProduct> pecasNecessarias = new();
     private List<Piece> pecas = new();
@@ -186,7 +200,7 @@ else
 
         if (user.Identity?.IsAuthenticated ?? false)
         {
-            codInstituicao = user.FindFirst("InstituicaoID")?.Value;
+            codInstituicao = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
         }
         else
         {
@@ -231,12 +245,20 @@ else
 
         if (!pecasDisponiveis)
         {
-            message = "O produto não está disponível devido à falta de peças no estoque.";
+            message = "O produto não está disponível devido à falta de peças no stock.";
+            return;
+        }
+
+        if (string.IsNullOrEmpty(morada))
+        {
+            message = "Por favor, indique uma morada para entrega.";
             return;
         }
 
         // Processar a compra
         await LusiumService.ProcessaCompra(codInstituicao, produto.ID.ToString(), morada);
+
+        successMessage = "Compra realizada com sucesso!";
     }
 
     private void UsarMoradaAlternativa()
