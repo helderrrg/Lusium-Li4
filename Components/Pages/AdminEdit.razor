@@ -5,7 +5,6 @@
 @inject NavigationManager navigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject LusiumService LusiumService
-@inject SessionService Session
 @rendermode InteractiveServer
 @attribute [Authorize(Roles = "Admin")]
 
@@ -158,6 +157,8 @@
     private string currentPassword { get; set; } = string.Empty;
     private string message { get; set; } = string.Empty;
 
+    Administrator? result;
+
     private bool isModalOpen { get; set; } = false;
 
     protected override async Task OnInitializedAsync()
@@ -168,8 +169,14 @@
         if (user.Identity?.IsAuthenticated ?? false)
         {
             userID = user.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
-            userName = Session.Name;
-            userEmail = Session.Email;
+            userEmail = user.FindFirst(ClaimTypes.Email)?.Value ?? "Email não encontrado";
+
+            result = await LusiumService.ObterAdministrador(userID);
+
+            if (result != null)
+            {
+                userName = result.Nome;
+            }
         }
         else
         {
@@ -240,8 +247,6 @@
         {
             await LusiumService.AtualizaDadosAdministrador(userID, tempName, tempPass);
             message = "Administrador editado com sucesso.";
-            
-            Session.Name = tempName;
         }
         else
         {

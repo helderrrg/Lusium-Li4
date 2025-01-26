@@ -3,7 +3,6 @@ using Services;
 using Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Lusium.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,7 +16,6 @@ builder.Services.AddDbContext<LusiumDbContext>(options =>
 
 // Register services.
 builder.Services.AddScoped<LusiumService>();
-builder.Services.AddSingleton<SessionService>();
 
 //Login Service
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

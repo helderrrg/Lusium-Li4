@@ -59,9 +59,6 @@
     [Inject]
     public required LusiumService LusiumService { get; set; }
 
-    [Inject]
-    public required SessionService Session { get; set; }
-
     private async Task AutenticarUtilizador()
     {
         if (string.IsNullOrEmpty(Model.Email) || string.IsNullOrEmpty(Model.Password))
@@ -102,10 +99,6 @@
 
     private async Task FinalizarLogin(string id, string name, string email, string role)
     {
-        Session.UserId = id;
-        Session.Name = name;
-        Session.Email = email;
-
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, id),

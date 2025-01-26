@@ -1,10 +1,8 @@
-using Models.Entities;
+﻿using Models.Entities;
 using Microsoft.EntityFrameworkCore;
 using Data;
 using Microsoft.Data.SqlClient;
 using System.Data;
-using Lusium.Components.Pages;
-
 
 namespace Services
 {
@@ -114,7 +112,7 @@ namespace Services
 
             return inst;
         }
-        
+
         public async Task<bool> ValidaDadosColaborador(string nome, string email, DateOnly dataDeNascimento, string codInstituicaoAssociada, string pp)
         {
             // institution code validation
@@ -154,7 +152,7 @@ namespace Services
 
             return await _context.Instituicao.AnyAsync(i => i.ID == int.Parse(codInstituicaoAssociada));
         }
-        
+
         public async Task<Collaborator> RegistaColaborador(string nome, string email, DateOnly dataDeNascimento, string codInstituicaoAssociada, string pp)
         {
             var colab = new Collaborator
@@ -181,8 +179,15 @@ namespace Services
         public async Task<Instituition?> ObterInstituicao(string codInstituicao)
         {
             var id = int.Parse(codInstituicao);
-            
+
             return await _context.Instituicao.FirstOrDefaultAsync(i => i.ID == id);
+        }
+
+        public async Task<Administrator?> ObterAdministrador(string codAdministrador)
+        {
+            var id = int.Parse(codAdministrador);
+
+            return await _context.Administrador.FirstOrDefaultAsync(a => a.ID == id);
         }
 
         public async Task<Product?> ObterProduto(string codProduto)
@@ -285,7 +290,7 @@ namespace Services
             {
                 return;
             }
-            
+
             admin.PalavraPasse = novaPP;
             await _context.SaveChangesAsync();
         }
@@ -293,7 +298,7 @@ namespace Services
         public async Task<bool> ValidaNovosDadosAdministrador(string codAdministrador, string novoNome, string novaPP)
         {
             var administrador = await _context.Administrador.FirstOrDefaultAsync(a => a.ID == int.Parse(codAdministrador));
-            
+
             // no administrator found
             if (administrador == null)
             {
@@ -303,7 +308,7 @@ namespace Services
             if (administrador.Nome != novoNome && !Utils.IsNameValid(novoNome))
             {
                 return false;
-            
+
             }
 
             if (administrador.PalavraPasse != novaPP && !Utils.IsPasswordValid(novaPP))
@@ -345,12 +350,12 @@ namespace Services
             {
                 return;
             }
-            
+
             if (admin.Nome != novoNome)
             {
                 admin.Nome = novoNome;
             }
-            
+
             if (admin.PalavraPasse != novaPP)
             {
                 admin.PalavraPasse = novaPP;
@@ -383,7 +388,7 @@ namespace Services
                 return false;
             }
 
-            if(novoCreditos < 0)
+            if (novoCreditos < 0)
             {
                 return false;
             }
@@ -575,7 +580,7 @@ namespace Services
             return new Dictionary<string, IUser>();
         }
 
-        public async Task<Dictionary<string, IUser>> FiltraUtilizadores(string nome, string tipoUtilizador) 
+        public async Task<Dictionary<string, IUser>> FiltraUtilizadores(string nome, string tipoUtilizador)
         {
             if (tipoUtilizador == "Admin")
             {
@@ -591,7 +596,7 @@ namespace Services
             {
                 return await _context.Colaborador.Where(c => c.Nome.Contains(nome)).ToDictionaryAsync(c => c.ID.ToString(), c => (IUser)c);
             }
-            
+
             return new Dictionary<string, IUser>();
         }
 
@@ -619,7 +624,7 @@ namespace Services
 
             return new Dictionary<string, IUser>();
         }
-    
+
 
         public async Task<Dictionary<string, Product>> ListaProdutos()
         {
@@ -659,7 +664,8 @@ namespace Services
                 .ToListAsync();
         }
 
-        public async Task<bool> DisponibilidadeProduto(string codProduto) {
+        public async Task<bool> DisponibilidadeProduto(string codProduto)
+        {
             var codProdutoParam = new SqlParameter("@codProduto", SqlDbType.Int) { Value = int.Parse(codProduto) };
             var disponivelParam = new SqlParameter("@Disponivel", SqlDbType.Bit) { Direction = ParameterDirection.Output };
 
@@ -688,7 +694,8 @@ namespace Services
             return (bool)saldoSuficienteParam.Value;
         }
 
-        public async Task ProcessaCompra(string codInstituicao, string codProduto, string enderecoEntrega) {
+        public async Task ProcessaCompra(string codInstituicao, string codProduto, string enderecoEntrega)
+        {
             var codInstituicaoParam = new SqlParameter("@codInstituicao", SqlDbType.Int) { Value = int.Parse(codInstituicao) };
             var codProdutoParam = new SqlParameter("@codProduto", SqlDbType.Int) { Value = int.Parse(codProduto) };
             var enderecoEntregaParam = new SqlParameter("@EnderecoEntrega", SqlDbType.VarChar, 45) { Value = enderecoEntrega };
@@ -713,7 +720,7 @@ namespace Services
 
         public async Task<Purchase?> ExibeCompraEfetuada(string codCompra)
         {
-           return await _context.Compra.FirstOrDefaultAsync(c => c.NumeroCompra == int.Parse(codCompra));
+            return await _context.Compra.FirstOrDefaultAsync(c => c.NumeroCompra == int.Parse(codCompra));
         }
 
         public async Task<Dictionary<string, Administrator>> ListaAdministradores()
