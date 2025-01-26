@@ -98,7 +98,7 @@
             <div>
                 <div class="pair">
                     <label for="nome" class="top-text">Novo Nome</label>
-                    <input type="text" class="form-control" id="name" @bind="pendingName" placeholder="@userName" />
+                    <input type="text" class="form-control" id="name" @bind="pendingName" />
                 </div>
                 <div class="pair">
                     <label for="password" class="top-text">Nova Palavra-passe</label>
@@ -177,6 +177,8 @@
             {
                 userName = result.Nome;
             }
+
+            pendingName = userName;
         }
         else
         {
