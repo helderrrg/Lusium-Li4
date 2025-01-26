@@ -212,6 +212,8 @@
     private int institutionCredits { get; set; } = 0;
     private bool isAdmin { get; set; } = false;
 
+    private string actualUserEmail { get; set; } = string.Empty;
+
     private string pendingName { get; set; } = string.Empty;
     private string pendingAdress { get; set; } = string.Empty;
     private string password { get; set; } = string.Empty;
@@ -227,14 +229,24 @@
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         Instituition result;
+        IUser u;
 
         if (user.Identity?.IsAuthenticated ?? false)
         {
             userID = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             isAdmin = user.IsInRole("Admin");
 
-            result = await LusiumService.ObterInstituicao(userID)!;
-
+            result = await LusiumService.ObterInstituicao(institutionID.ToString())!;
+            
+            if (isAdmin)
+            {
+                u = await LusiumService.ObterUtilizador(userID, "Admin");
+            } else
+            {
+                u = await LusiumService.ObterUtilizador(userID, "Institution");
+            }
+            actualUserEmail = u.Email;
+            
             if (result != null)
             {
                 userName = result.Nome;
@@ -262,7 +274,7 @@
 
     private async Task ConfirmEdit()
     {
-        var confirmation = await LusiumService.ValidaPP(userEmail, currentPassword);
+        var confirmation = await LusiumService.ValidaPP(actualUserEmail, currentPassword);
 
         if (confirmation)
         {
