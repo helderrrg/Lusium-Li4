@@ -9,18 +9,18 @@ VALUES
 -- Tabela Instituição
 INSERT INTO Instituicao (Nome, NIF, NumeroAssociacao, Email, Morada, Creditos, PalavraPasse)
 VALUES
-('Instituicao A', '123456789', 101, 'contacto@insta.com', 'Rua 1', 1000, 'pass123'),
-('Instituicao B', '987654321', 102, 'contacto@instb.com', 'Rua 2', 2000, 'pass456'),
-('Instituicao C', '111222333', 103, 'contacto@instc.com', 'Rua 3', 3000, 'pass789'),
-('Instituicao D', '444555666', 104, 'contacto@instd.com', 'Rua 4', 4000, 'pass321');
+('Instituicao A', '123456789', 101, 'contacto@insta.com', 'Rua 1', 1000, 'password123#'),
+('Instituicao B', '987654321', 102, 'contacto@instb.com', 'Rua 2', 2000, 'password456#'),
+('Instituicao C', '111222333', 103, 'contacto@instc.com', 'Rua 3', 3000, 'password789#'),
+('Instituicao D', '444555666', 104, 'contacto@instd.com', 'Rua 4', 4000, 'password321#');
 
 -- Tabela Colaborador
 INSERT INTO Colaborador (Nome, Email, DataNascimento, InstituicaoID, PalavraPasse)
 VALUES
-('Colaborador A', 'colabA@example.com', '1980-01-01', 1, 'colab123'),
-('Colaborador B', 'colabB@example.com', '1990-01-01', 2, 'colab456'),
-('Colaborador C', 'colabC@example.com', '1985-06-15', 3, 'colab789'),
-('Colaborador D', 'colabD@example.com', '1992-09-10', 4, 'colab321');
+('Colaborador A', 'colabA@example.com', '1980-01-01', 1, 'password123#'),
+('Colaborador B', 'colabB@example.com', '1990-01-01', 2, 'password456#'),
+('Colaborador C', 'colabC@example.com', '1985-06-15', 3, 'password789#'),
+('Colaborador D', 'colabD@example.com', '1992-09-10', 4, 'password321#');
 
 -- Tabela Manual
 INSERT INTO Manual (Capa, Nome, Descricao)
