@@ -144,7 +144,7 @@
                     </div>
                     <div class="pair">
                         <label for="confirmPassword" class="top-text">Confirmar Nova Palavra-Passe</label>
-                        <input type="password" class="form-control" id="confirmPassword" />
+                        <input type="password" class="form-control" id="confirmPassword" @bind="confirmPassword" />
                     </div>
                 }
 
@@ -234,6 +234,12 @@
         if (user.Identity?.IsAuthenticated ?? false)
         {
             userID = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+
+            if (userID != institutionID.ToString())
+            {
+                navigationManager.NavigateTo("/login");
+            }
+
             isAdmin = user.IsInRole("Admin");
 
             result = await LusiumService.ObterInstituicao(institutionID.ToString())!;
