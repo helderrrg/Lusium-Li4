@@ -626,9 +626,28 @@ namespace Services
             return await _context.Produto.ToDictionaryAsync(p => p.ID.ToString(), p => p);
         }
 
-        // exibePaginaManual(codManual: String) : PaginaManual ???????????????????????????????
+        public async Task<IUser?> ObterUtilizador(string codUtilizador, string tipoUtilizador)
+        {
+            int userId = int.Parse(codUtilizador);
 
-        // iterarPaginaManual(codManual: String, comando: String) : PaginaManual ???????????????????????????????
+            switch (tipoUtilizador)
+            {
+            case "Admin":
+                return await _context.Administrador.FindAsync(userId) as IUser;
+
+            case "Institution":
+                return await _context.Instituicao
+                .Include(i => i.Colaboradores)
+                .Include(i => i.ManualInstituicoes)
+                .FirstOrDefaultAsync(i => i.ID == userId) as IUser;
+
+            case "Collaborator":
+                return await _context.Colaborador.FindAsync(userId) as IUser;
+
+            default:
+                throw new ArgumentException("Tipo de utilizador inválido.");
+            }
+        }
 
         public async Task<Manual?> ObterManualPorId(int id)
         {

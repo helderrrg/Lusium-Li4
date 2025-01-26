@@ -1,4 +1,4 @@
-@page "/collaborator/edit"
+@page "/collaborator/edit/{collaboratorID:int}"
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Authentication.Cookies
 @using Services
@@ -163,12 +163,17 @@
 }
 
 @code {
+    [Parameter]
+    public int collaboratorID { get; set; }
+
     private string userID { get; set; } = string.Empty;
     private string userName { get; set; } = string.Empty;
     private string userEmail { get; set; } = string.Empty;
     private DateOnly? birthDate;
     private string selectedInstitutionId = string.Empty;
     Dictionary<string, IUser> institutions = new();
+
+    private string actualUserEmail { get; set; } = string.Empty;
 
     private string pendingName { get; set; } = string.Empty;
     private DateOnly? pendingBirthDate;
@@ -181,17 +186,19 @@
 
     private bool isModalOpen { get; set; } = false;
     private bool isUserCollaborator { get; set; } = false;
+    private bool isUserAdmin { get; set; } = false;
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         Collaborator result;
+        IUser u;
 
         if (user.Identity?.IsAuthenticated ?? false)
         {
             userID = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
-            result = await LusiumService.ObterColaborador(userID)!;
+            result = await LusiumService.ObterColaborador(collaboratorID.ToString())!;
 
             if (result != null)
             {
@@ -202,6 +209,21 @@
             }
 
             isUserCollaborator = user.IsInRole("Collaborator");
+            isUserAdmin = user.IsInRole("Admin");
+
+            if (isUserAdmin)
+            {
+                u = await LusiumService.ObterUtilizador(userID, "Admin");
+            }
+            else if (isUserCollaborator)
+            {
+                u = await LusiumService.ObterUtilizador(userID, "Collaborator");
+            }
+            else
+            {
+                u = await LusiumService.ObterUtilizador(userID, "Institution");
+            }
+            actualUserEmail = u.Email;
         }
         else
         {
@@ -222,7 +244,7 @@
 
     private async Task ConfirmEdit()
     {
-        var confirmation = await LusiumService.ValidaPP(userEmail, currentPassword);
+        var confirmation = await LusiumService.ValidaPP(actualUserEmail, currentPassword);
 
         if (confirmation)
         {
@@ -282,7 +304,7 @@
 
         if (tempBirthDate.HasValue)
         {
-            valid = await LusiumService.ValidaNovosDadosColaborador(userID, tempName, tempBirthDate.Value, tempInstitutionId, tempPass);
+            valid = await LusiumService.ValidaNovosDadosColaborador(collaboratorID.ToString(), tempName, tempBirthDate.Value, tempInstitutionId, tempPass);
         }
         else
         { 
@@ -291,10 +313,8 @@
 
         if (valid)
         {
-            await LusiumService.AtualizaDadosColaborador(userID, tempName, tempBirthDate.Value, tempInstitutionId, tempPass);
+            await LusiumService.AtualizaDadosColaborador(collaboratorID.ToString(), tempName, tempBirthDate.Value, tempInstitutionId, tempPass);
             message = "Colaborador editado com sucesso, as alterações serão refletidas no próximo início de sessão.";
-
-            // [TODO] Update the user's name in the claims
         }
         else
         {
