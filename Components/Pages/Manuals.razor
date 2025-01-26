@@ -20,6 +20,16 @@
         width: 70%;
     }
 
+    .hero-title {
+        text-align: center;
+    }
+
+    .main-title {
+        font-weight: bold;
+        font-size: 3em;
+        color:#A6C36F;
+    }
+
     .product-list {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -64,23 +74,27 @@
 <div class="page">
     <div class="content">
         @if (manualList == null)
+        {
+            <div class="sub-title">Loading...</div>
+        }
+        else if (manualList.Count == 0)
+        {
+            <div class="main-title hero-title">Sem manuais</div>
+        }
+        else
+        {
+            <div class="product-list">
+            @foreach (var manual in manualList)
             {
-                <div class="sub-title">Loading...</div>
-            }
-            else
-            {
-                <div class="product-list">
-                    @foreach (var manual in manualList)
-                    {
-                        <div class="product-card">
-                            <div><img src="@manual.Value.Capa" alt="@manual.Value.Nome" width="100" /></div>
-                            <div class="sub-title">@manual.Value.Nome</div>
-                            <div class="description">@manual.Value.Descricao</div>
-                            <button>Ver</button>
-                        </div>
-                    }
+                <div class="product-card">
+                    <div><img src="@manual.Value.Capa" alt="@manual.Value.Nome" width="100" /></div>
+                    <div class="sub-title">@manual.Value.Nome</div>
+                    <div class="description">@manual.Value.Descricao</div>
+                    <button>Ver</button>
                 </div>
             }
+        </div>
+        }
     </div>
 </div>
 
