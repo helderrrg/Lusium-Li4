@@ -50,16 +50,40 @@
         border-radius: 5px;
         color: #A6C36F;
         transition: 0.2s;
+        cursor: pointer;
     }
 
     .listing-item:hover {
         background-color: #A6C36F;
         color: #1e352f;
     }
-    
-    .form-control {
-        width: 120px;
+
+    .popup-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
+
+    .popup {
+        background-color: #1e352f;
+        color: #A6C36F;
+        padding: 20px;
+        border-radius: 10px;
+        width: 300px;
+        text-align: left;
+        padding: 20px;
+    }
+
+    .popup h2 {
+        margin-bottom: 20px;
+    }
+    
 
 </style>
 
@@ -68,6 +92,10 @@
 @if (purchasesList == null)
 {
     <p><em>Loading...</em></p>
+}
+else if (purchasesList.Count == 0)
+{
+    <p style="color: #A6C36F; font-weight: bold;">Não foram encontradas compras efetuadas.</p>
 }
 else
 {
@@ -82,7 +110,7 @@ else
             <div class="listing-content">
                 @foreach (var purchase in purchasesList)
                 {
-                    <div class="listing-item">
+                    <div class="listing-item" @onclick="() => ShowPopup(purchase.Value)">
                         <img src="@purchase.Value.Produto?.ImagemAlusiva" alt="@purchase.Value.Produto?.Nome" height="90" width="90" style="margin-right: 20px;" />
                         <div class="listing-cell" style="font-weight: bold; font-size: 1.4em;">@purchase.Value.Produto?.Nome</div>
                         <div class="listing-cell">@purchase.Value.DataCompra</div>
@@ -93,36 +121,25 @@ else
             </div>
         </div>
     </div>
+}
 
-
-@*
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Número da Fatura</th>
-                <th>Data da Compra</th>
-                <th>Endereço de Entrega</th>
-                <th>Produto Associado</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var purchase in purchasesList)
-            {
-                <tr>
-                    <td>@purchase.Value.NumeroCompra</td>
-                    <td>@purchase.Value.DataCompra</td>
-                    <td>@purchase.Value.EnderecoEntrega</td>
-                    <td>@purchase.Value.ProdutoAssociado</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-*@
+@if (isPopupVisible)
+{
+    <div class="popup-overlay" @onclick="ClosePopup">
+        <div class="popup" @onclick:stopPropagation>
+            <h2><strong>Compra Nº: </strong>@selectedPurchase?.ProdutoAssociado</h2>
+            <p><strong>Produto: </strong>@selectedPurchase?.Produto?.Nome</p>
+            <p><strong>Data de compra: </strong>@selectedPurchase?.DataCompra</p>
+            <p><strong>Morada: </strong>@selectedPurchase?.EnderecoEntrega</p>
+        </div>
+    </div>
 }
 
 @code {
     private Dictionary<string, Purchase> purchasesList = new();
     private string filterText = string.Empty;
+    private bool isPopupVisible = false;
+    private Purchase? selectedPurchase;
 
     [Inject]
     public required LusiumService LusiumService { get; set; }
@@ -153,5 +170,17 @@ else
         }
 
         Console.WriteLine(purchasesList);
+    }
+
+    private void ShowPopup(Purchase purchase)
+    {
+        selectedPurchase = purchase;
+        isPopupVisible = true;
+    }
+
+    private void ClosePopup()
+    {
+        isPopupVisible = false;
+        selectedPurchase = null;
     }
 }
