@@ -98,7 +98,7 @@
             <div>
                 <div class="pair">
                     <label for="nome" class="top-text">Novo Nome</label>
-                    <input type="text" class="form-control" id="name" @bind="pendingName" placeholder="ex: Orlando Belo" />
+                    <input type="text" class="form-control" id="name" @bind="pendingName" />
                 </div>
                 <div class="pair">
                     <label for="password" class="top-text">Nova Palavra-passe</label>
@@ -157,6 +157,8 @@
     private string currentPassword { get; set; } = string.Empty;
     private string message { get; set; } = string.Empty;
 
+    Administrator? result;
+
     private bool isModalOpen { get; set; } = false;
 
     protected override async Task OnInitializedAsync()
@@ -166,9 +168,17 @@
 
         if (user.Identity?.IsAuthenticated ?? false)
         {
-            userID = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
-            userName = user.FindFirst(ClaimTypes.Name)?.Value ?? "Nome não encontrado";
+            userID = user.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
             userEmail = user.FindFirst(ClaimTypes.Email)?.Value ?? "Email não encontrado";
+
+            result = await LusiumService.ObterAdministrador(userID);
+
+            if (result != null)
+            {
+                userName = result.Nome;
+            }
+
+            pendingName = userName;
         }
         else
         {
@@ -238,9 +248,7 @@
         if (valid)
         {
             await LusiumService.AtualizaDadosAdministrador(userID, tempName, tempPass);
-            message = "Administrador editado com sucesso, as alterações serão refletidas no próximo início de sessão.";
-            
-            // [TODO] Update the user's name in the claims
+            message = "Administrador editado com sucesso.";
         }
         else
         {

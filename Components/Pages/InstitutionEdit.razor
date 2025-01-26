@@ -129,11 +129,11 @@
             <div>
                 <div class="pair">
                     <label for="nome" class="top-text">Novo Nome</label>
-                    <input type="text" class="form-control" id="name" @bind="pendingName" placeholder="ex: @userName" />
+                    <input type="text" class="form-control" id="name" @bind="pendingName"/>
                 </div>
                 <div class="pair">
                     <label for="morada" class="top-text">Nova Morada</label>
-                    <input type="text" class="form-control" id="adress" @bind="pendingAdress" placeholder="ex: @userAdress" />
+                    <input type="text" class="form-control" id="adress" @bind="pendingAdress"/>
                 </div>
 
                 @if(!isAdmin)
@@ -259,6 +259,9 @@
         {
             navigationManager.NavigateTo("/login");
         }
+
+        pendingName = userName;
+        pendingAdress = userAdress;
     }
 
     private void ShowPasswordModal()
@@ -307,7 +310,7 @@
         if (valid)
         {
             await LusiumService.AtualizaDadosInstituicao(institutionID.ToString(), tempName, tempAdress, tempPass, tempCredits);
-            message = "Instituição editada com sucesso, as alterações serão refletidas no próximo início de sessão.";
+            message = "Instituição editada com sucesso.";
         }
         else
         {

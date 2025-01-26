@@ -107,7 +107,7 @@ else
 
         if (user.Identity?.IsAuthenticated ?? false)
         {
-            codInstituicao = user.FindFirst("InstituicaoID")?.Value;
+            codInstituicao = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
         }
         else
         {
