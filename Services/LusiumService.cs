@@ -403,7 +403,7 @@ namespace Services
                 return;
             }
             // removes the need to call SaveChangesAsync on the DB
-            if (inst.Nome == novoNome && inst.Morada == novaMorada && inst.PalavraPasse == novaPP)
+            if (inst.Nome == novoNome && inst.Morada == novaMorada && inst.PalavraPasse == novaPP && inst.Creditos == novoCreditos)
             {
                 return;
             }

@@ -1,4 +1,4 @@
-@page "/institution/edit/{institutionID:int}"
+@page "/institutions/edit/{institutionID:int}"
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Authentication.Cookies
 @using Services
@@ -144,7 +144,7 @@
                     </div>
                     <div class="pair">
                         <label for="confirmPassword" class="top-text">Confirmar Nova Palavra-Passe</label>
-                        <input type="password" class="form-control" id="confirmPassword" />
+                        <input type="password" class="form-control" id="confirmPassword" @bind="confirmPassword" />
                     </div>
                 }
 
@@ -160,7 +160,7 @@
                         </div>
                         <div>
                             <label for="credits" class="top-text">Novos Créditos</label>
-                            <input type="number" class="form-control" id="credits" @bind="pendingCredits" min="0" placeholder="ex: @institutionCredits" />
+                            <input type="number" class="form-control" id="credits" @bind="pendingCredits" min="0" />
                         </div>
                     </div>
                 }
@@ -234,6 +234,12 @@
         if (user.Identity?.IsAuthenticated ?? false)
         {
             userID = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+
+            if (userID != institutionID.ToString() && user.IsInRole("Institution"))
+            {
+                navigationManager.NavigateTo("/login");
+            }
+
             isAdmin = user.IsInRole("Admin");
 
             result = await LusiumService.ObterInstituicao(institutionID.ToString())!;
@@ -262,6 +268,7 @@
 
         pendingName = userName;
         pendingAdress = userAdress;
+        pendingCredits = institutionCredits;
     }
 
     private void ShowPasswordModal()

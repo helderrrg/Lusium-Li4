@@ -229,8 +229,28 @@
                 u = await LusiumService.ObterUtilizador(userID, "Institution");
             }
             actualUserEmail = u.Email;
-                     
+
             institutions = await LusiumService.ListaUtilizadores("Institution");
+
+            if (user.IsInRole("Institution"))
+            {
+                var institution = (Instituition)u;
+                var collaborators = institution.Colaboradores;
+                var collaboratorIDs = collaborators.Select(c => c.ID.ToString()).ToList();
+
+                if (!collaboratorIDs.Contains(collaboratorID.ToString()))
+                {
+                    navigationManager.NavigateTo("/login");
+                }
+
+            } 
+            else if (user.IsInRole("Collaborator"))
+            {
+                if (collaboratorID.ToString() != userID)
+                {
+                    navigationManager.NavigateTo("/login");
+                }
+            }
         }
         else
         {
