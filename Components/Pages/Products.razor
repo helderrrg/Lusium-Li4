@@ -95,10 +95,24 @@
     }
 
     .necessary-pieces {
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        margin: 0.5em 0em 1.3em 0em;
+        display: flex; /* Mantém as imagens alinhadas horizontalmente */
+        gap: 5px; /* Espaçamento entre as imagens */
+    }
+
+    .necessary-pieces img {
+        width: 40px; /* Define uma largura fixa */
+        height: 40px; /* Define uma altura fixa */
+        object-fit: cover; /* Faz com que a imagem preencha o espaço definido */
+        border-radius: 10%; /* Adicional: deixa a imagem circular */
+        margin-right: 5px;
+        margin-bottom: 5px;
+    }
+
+    .necessary-piece-img {
+        width: 20px;
+        height: 20px;
+        object-fit: cover;
+        border-radius: 10%;
     }
 
     button {
@@ -115,6 +129,10 @@
 
     button:hover {
         transform: scale(1.1);
+    }
+
+    img {
+        border-radius: 10%;
     }
     
 </style>
@@ -154,7 +172,7 @@
                                 <div class="necessary-pieces">
                                     @foreach (var piecePerProduct in product.PecaProdutos)
                                     {
-                                        <img src="@piecePerProduct.Peca.ImagemAlusiva" witdh="20"/>
+                                        <img src="@piecePerProduct.Peca.ImagemAlusiva" alt="@piecePerProduct.Peca.Nome" class="necessary-piece-img" />
                                     }
                                 </div>
                                 <AuthorizeView Roles="Institution" Context="institutionContext">

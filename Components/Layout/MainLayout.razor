@@ -11,7 +11,7 @@
         justify-content: space-between;
         align-items: center;
         background-color: #A6C36F;
-        height: 60px;
+        height: 80px;
         width: 100vw;
         font-family: Arial, Helvetica, sans-serif;
         position: fixed;
@@ -113,6 +113,12 @@
         font-weight: bold;
     }
 
+    img {
+        max-width: 150px;
+        max-height: 50px;
+        margin-left: 20px;
+    }
+
 </style>
 
 <div class="page">
@@ -120,7 +126,7 @@
         <Authorized>
             <AuthorizeView Roles="Admin" Context="adminContext">
                 <div class="top-bar admin-bar">
-                    <a href="/">LOGÓTIPO [TODO]</a>
+                    <img src="/logo.png" alt="Lusium" />
                     <div class="admin-features">
                         <a href="/products" class="default-word">Loja</a>
                         <a href="/manuals" class="default-word">Manuais</a>
@@ -140,7 +146,7 @@
             </AuthorizeView>
             <AuthorizeView Roles="Institution" Context="institutionContext">
                 <div class="top-bar institution-bar">
-                    <a href="/">LOGÓTIPO [TODO]</a>
+                    <img src="/logo.png" alt="Lusium" />
                     <div class="institution-features">
                         <a href="/products" class="default-word">Loja</a>
                         <a href="/manuals" class="default-word">Manuais</a>
@@ -160,7 +166,7 @@
             </AuthorizeView>
             <AuthorizeView Roles="Collaborator" Context="collaboratorContext">
                 <div class="top-bar collaborator-bar">
-                    <a href="/">LOGÓTIPO [TODO]</a>
+                    <img src="/logo.png" alt="Lusium" />
                     <div class="collaborator-features">
                         <a href="/manuals" class="default-word">Manuais</a>
                         <div class="paira">
@@ -178,7 +184,7 @@
         </Authorized>
         <NotAuthorized>
             <div class="top-bar">
-                <a href="/">LOGÓTIPO [TODO]</a>
+                <img src="/logo.png" alt="Lusium" />
                 <a href="/" class="default-word">Página Principal</a>
             </div>
         </NotAuthorized>

@@ -87,8 +87,20 @@
     .popup h2 {
         margin-bottom: 20px;
     }
-    
 
+    .hero-title {
+        text-align: center;
+    }
+
+    .main-title {
+        font-weight: bold;
+        font-size: 2em;
+        color: #A6C36F;
+    }
+
+    img {
+        border-radius: 10%;
+    }
 </style>
 
 <PageTitle>Compras</PageTitle>
@@ -99,7 +111,7 @@
 }
 else if (purchasesList.Count == 0)
 {
-    <p style="color: #A6C36F; font-weight: bold;">Não foram encontradas compras efetuadas.</p>
+    <div class="main-title hero-title">Não foram encontradas compras efetuadas</div>
 }
 else
 {

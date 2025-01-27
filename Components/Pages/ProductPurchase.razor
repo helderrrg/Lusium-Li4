@@ -159,7 +159,7 @@ else
                     <input type="text" class="form-control" id="enderecoEntrega" @bind="morada" placeholder="@morada" />
                 </div>
             }
-            <button @onclick="ProcessarCompra">Comprar</button>
+            <button @onclick="ProcessaCompra">Comprar</button>
         </div>
             @if (!string.IsNullOrEmpty(message))
             {
@@ -228,7 +228,7 @@ else
         }
     }
 
-    private async Task ProcessarCompra()
+    private async Task ProcessaCompra()
     {
         var instituicao = await LusiumService.ObterInstituicao(codInstituicao);
         if (instituicao == null || instituicao.Creditos < produto.Custo)
