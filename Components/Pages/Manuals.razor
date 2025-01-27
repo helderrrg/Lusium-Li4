@@ -27,7 +27,7 @@
 
     .main-title {
         font-weight: bold;
-        font-size: 3em;
+        font-size: 2em;
         color:#A6C36F;
     }
 
@@ -70,7 +70,10 @@
     button:hover {
         transform: scale(1.1);
     }
-    
+
+    img {
+        border-radius: 10%;
+    }
 </style>
 <div class="page">
     <div class="content">
@@ -124,7 +127,16 @@
             navigationManager.NavigateTo("/login");
         }
 
-        manualList = await LusiumService.ListaManuais(userID, userRole);
+        try
+        {
+            manualList = await LusiumService.ListaManuais(userID, userRole);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+        }
     }
 
     private void OpenManual(int manualID)

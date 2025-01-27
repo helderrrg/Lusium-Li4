@@ -78,6 +78,10 @@
         stroke: #BEEF9E;
     }
 
+    img {
+        border-radius: 10%;
+    }
+
 </style>
 
 <PageTitle>Peças</PageTitle>
@@ -139,7 +143,16 @@ else
             navigationManager.NavigateTo("/login");
         }
 
-        piecesList = await LusiumService.ListaPecas();
+        try
+        {
+            piecesList = await LusiumService.ListaPecas();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+        }
     }
 
     private async Task AtualizaQuantidade(string codPeca, int quantidade)

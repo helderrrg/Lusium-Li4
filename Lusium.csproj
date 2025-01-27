@@ -15,4 +15,35 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\Products\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\Products\Blast\blast-capa.png" />
+    <None Include="wwwroot\Products\Blast\Manual\blast-manual-1.png" />
+    <None Include="wwwroot\Products\Blast\Manual\blast-manual-10.png" />
+    <None Include="wwwroot\Products\Blast\Manual\blast-manual-11.png" />
+    <None Include="wwwroot\Products\Blast\Manual\blast-manual-12.png" />
+    <None Include="wwwroot\Products\Blast\Manual\blast-manual-13.png" />
+    <None Include="wwwroot\Products\Blast\Manual\blast-manual-14.png" />
+    <None Include="wwwroot\Products\Blast\Manual\blast-manual-15.png" />
+    <None Include="wwwroot\Products\Blast\Manual\blast-manual-16.png" />
+    <None Include="wwwroot\Products\Blast\Manual\blast-manual-17.png" />
+    <None Include="wwwroot\Products\Blast\Manual\blast-manual-2.png" />
+    <None Include="wwwroot\Products\Blast\Manual\blast-manual-3.png" />
+    <None Include="wwwroot\Products\Blast\Manual\blast-manual-4.png" />
+    <None Include="wwwroot\Products\Blast\Manual\blast-manual-5.png" />
+    <None Include="wwwroot\Products\Blast\Manual\blast-manual-6.png" />
+    <None Include="wwwroot\Products\Blast\Manual\blast-manual-7.png" />
+    <None Include="wwwroot\Products\Blast\Manual\blast-manual-8.png" />
+    <None Include="wwwroot\Products\Blast\Manual\blast-manual-9.png" />
+    <None Include="wwwroot\Products\Blast\Pecas\blast-peca-1.png" />
+    <None Include="wwwroot\Products\Blast\Pecas\blast-peca-2.png" />
+    <None Include="wwwroot\Products\Blast\Pecas\blast-peca-3.png" />
+    <None Include="wwwroot\Products\Blast\Pecas\blast-peca-4.png" />
+    <None Include="wwwroot\Products\Blast\Pecas\blast-peca-5.png" />
+    <None Include="wwwroot\Products\Blast\Pecas\blast-peca-6.png" />
+  </ItemGroup>
+
 </Project>

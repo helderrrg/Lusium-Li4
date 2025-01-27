@@ -87,8 +87,20 @@
     .popup h2 {
         margin-bottom: 20px;
     }
-    
 
+    .hero-title {
+        text-align: center;
+    }
+
+    .main-title {
+        font-weight: bold;
+        font-size: 2em;
+        color: #A6C36F;
+    }
+
+    img {
+        border-radius: 10%;
+    }
 </style>
 
 <PageTitle>Compras</PageTitle>
@@ -99,7 +111,7 @@
 }
 else if (purchasesList.Count == 0)
 {
-    <p style="color: #A6C36F; font-weight: bold;">Não foram encontradas compras efetuadas.</p>
+    <div class="main-title hero-title">Não foram encontradas compras efetuadas</div>
 }
 else
 {
@@ -166,11 +178,20 @@ else
             navigationManager.NavigateTo("/login");
         }
 
-        purchasesList = await LusiumService.ListaComprasEfetuadas(userID);
-
-        foreach (var purchase in purchasesList)
+        try
         {
-            purchase.Value.Produto = await LusiumService.ObterProduto(purchase.Value.ProdutoAssociado.ToString());
+            purchasesList = await LusiumService.ListaComprasEfetuadas(userID);
+
+            foreach (var purchase in purchasesList)
+            {
+                purchase.Value.Produto = await LusiumService.ObterProduto(purchase.Value.ProdutoAssociado.ToString());
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
         }
 
         Console.WriteLine(purchasesList);

@@ -628,7 +628,10 @@ namespace Services
 
         public async Task<Dictionary<string, Product>> ListaProdutos()
         {
-            return await _context.Produto.ToDictionaryAsync(p => p.ID.ToString(), p => p);
+            return await _context.Produto
+                                 .Include(p => p.PecaProdutos)
+                                 .ThenInclude(pp => pp.Peca)
+                                 .ToDictionaryAsync(p => p.ID.ToString(), p => p);
         }
 
         public async Task<IUser?> ObterUtilizador(string codUtilizador, string tipoUtilizador)
