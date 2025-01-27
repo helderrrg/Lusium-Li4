@@ -4,9 +4,83 @@
 @rendermode InteractiveServer
 @attribute [Authorize(Roles = "Admin")]
 
-<PageTitle>Peças</PageTitle>
+<style>
+    .page {
+        font-family: Arial, Helvetica, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        width: 100vw;
+        background-color: #1e352f;
+    }
 
-<h1>Peças</h1>
+    .content {
+        width: 40%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .listing-header {
+        font-weight: bold;
+        color: #A6C36F;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        width: 100%;
+        padding-right: 15px;
+        padding-left: 95px;
+    }
+
+    .listing-cell {
+        flex: 1;
+        min-width: 100px;
+        padding:  8px;
+        text-align: left;
+    }
+
+    .listing-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3em;
+    }
+
+    .listing-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #A6C36F;
+        padding: 15px;
+        border-radius: 5px;
+    }
+    
+    .form-control {
+        width: 120px;
+    }
+
+    .edit-quantity {
+        display: flex;
+        align-items: center;
+    }
+
+    .edit-quantity svg {
+        width: 20px;
+        height: 20px;
+        margin-left: 10px;
+        cursor: pointer;
+        stroke: #1e352f;
+        transition: 0.2s;
+    }
+
+    .edit-quantity svg:hover {
+        stroke: #BEEF9E;
+    }
+
+</style>
+
+<PageTitle>Peças</PageTitle>
 
 @if (piecesList == null)
 {
@@ -14,34 +88,31 @@
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Nome</th>
-                <th>Imagem Alusiva</th>
-                <th>Quantidade</th>
-                <th>Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var piece in piecesList)
-            {
-                <tr>
-                    <td>@piece.Value.Nome</td>
-                    <td>@piece.Value.ImagemAlusiva</td>
-                    <td>
-                        <input type="number" min="0" class="form-control"
-                               @bind="piece.Value.Quantidade" />
-                    </td>
-                    <td>
-                        <button class="btn btn-primary" @onclick="() => AtualizaQuantidade(piece.Key, piece.Value.Quantidade)">
-                            Atualizar
-                        </button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div class="page">
+        <div class="content">
+            <div class="listing-header">
+                <div class="listing-cell">Nome</div>
+                <div class="listing-cell">Quantidade atual de peças</div>
+                <div class="listing-cell">Quantidade nova de peças</div>
+            </div>
+            <div class="listing-content">
+                @foreach (var piece in piecesList)
+                {
+                    <div class="listing-item">
+                        <img src="@piece.Value.ImagemAlusiva" alt="@piece.Value.Nome" height="60" width="60" style="margin-right: 20px;" />
+                        <div class="listing-cell" style="font-weight: bold; font-size: 1.2em;">@piece.Value.Nome</div>
+                        <div class="listing-cell">@piece.Value.Quantidade</div>
+                        <div class="listing-cell">
+                            <div class="edit-quantity">
+                                <input type="number" min="0" class="form-control" @bind="piece.Value.Quantidade" />
+                                <svg @onclick="() => AtualizaQuantidade(piece.Key, piece.Value.Quantidade)" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6.91437 1.95455L7.63415 1.23434C7.7842 1.0843 7.98771 1 8.1999 1C8.4121 1 8.61561 1.0843 8.76566 1.23434C8.9157 1.38439 9 1.5879 9 1.80009C9 2.01229 8.9157 2.2158 8.76566 2.36585L4.23494 6.89656C4.00938 7.12199 3.73121 7.28769 3.42557 7.37869L2.27998 7.72002L2.62131 6.57443C2.71231 6.26879 2.87801 5.99062 3.10344 5.76506L6.91437 1.95455ZM6.91437 1.95455L8.03991 3.08008M7.39992 6.01337V8.04001C7.39992 8.29462 7.29877 8.53879 7.11874 8.71883C6.93871 8.89886 6.69453 9 6.43993 9H1.95999C1.70538 9 1.46121 8.89886 1.28117 8.71883C1.10114 8.53879 1 8.29462 1 8.04001V3.56007C1 3.30547 1.10114 3.06129 1.28117 2.88126C1.46121 2.70123 1.70538 2.60008 1.95999 2.60008H3.98663" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
 }
 
 @code {
