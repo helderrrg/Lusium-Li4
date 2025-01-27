@@ -84,12 +84,20 @@
         align-items: left;
     }
 
-    .info-message {
+    .failed-message {
         background-color: #ea6565;
         padding: 10px;
         border-radius: 5px;
         color: white;
     }
+
+    .success-message {
+        background-color: #A6C36F;
+        padding: 10px;
+        border-radius: 5px;
+        color: white;
+    }
+
 </style>
 <div class="page">
     <div class="content">
@@ -134,7 +142,7 @@
         @if (!string.IsNullOrEmpty(message))
         {
             <div class="info-message-wrapper">
-                <div class="info-message">@message</div>
+                <div class="info-message @(registrationSuccess ? "success-message" : "failed-message")">@message</div>
             </div>
         }
     </div>
@@ -153,6 +161,7 @@
     private string confirmPassword = string.Empty;
 
     private string message = string.Empty;
+    private bool registrationSuccess = false;
 
     [Inject]
     public required LusiumService LusiumService { get; set; }
@@ -184,7 +193,8 @@
             Collaborator collaborator = await LusiumService.RegistaColaborador(name, email, birthDate.Value, selectedInstitutionId, password);
             if (collaborator != null)
             {
-                message = $"Colaborador registado com os campos: Nome - {collaborator.Nome}, Email - {collaborator.Email}, Data de Nascimento - {collaborator.DataNascimento:yyyy-MM-dd}, Instituição Associada - {collaborator.Instituicao?.Nome}.";
+                message = "Colaborador registado com sucesso!";
+                registrationSuccess = true;
             }
             else
             {
