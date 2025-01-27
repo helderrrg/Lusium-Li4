@@ -166,11 +166,20 @@ else
             navigationManager.NavigateTo("/login");
         }
 
-        purchasesList = await LusiumService.ListaComprasEfetuadas(userID);
-
-        foreach (var purchase in purchasesList)
+        try
         {
-            purchase.Value.Produto = await LusiumService.ObterProduto(purchase.Value.ProdutoAssociado.ToString());
+            purchasesList = await LusiumService.ListaComprasEfetuadas(userID);
+
+            foreach (var purchase in purchasesList)
+            {
+                purchase.Value.Produto = await LusiumService.ObterProduto(purchase.Value.ProdutoAssociado.ToString());
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
         }
 
         Console.WriteLine(purchasesList);

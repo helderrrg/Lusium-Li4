@@ -75,10 +75,6 @@
         margin-right: 5px;
     }
 
-    img {
-        margin: 1em;
-    }
-
     .description {
         font-size: 1em;
         color:#1e352f;
@@ -151,16 +147,15 @@
                             </div>
                         </div>
                         <div class="middle-info">
-                            <img src="@product.ImagemAlusiva" alt="@product.ImagemAlusiva" width="100" />
+                            <img src="@product.ImagemAlusiva" alt="@product.ImagemAlusiva" width="120" />
                             <div class="right-info">
                                 <div class="description">@product.Descricao</div>
                                 <div class="text">Peças necessárias:</div>
                                 <div class="necessary-pieces">
-                                    <!-- Renderização comentada -->
-                                    <!-- @foreach (var piecePerProduct in product.PecaProdutos)
+                                    @foreach (var piecePerProduct in product.PecaProdutos)
                                     {
-                                        <div class="img">@piecePerProduct.Peca.ImagemAlusiva</div>
-                                    } -->
+                                        <img src="@piecePerProduct.Peca.ImagemAlusiva" witdh="20"/>
+                                    }
                                 </div>
                                 <AuthorizeView Roles="Institution" Context="institutionContext">
                                     <button @onclick="() => navigateToProductPurchase(product.ID)">Comprar</button>
@@ -197,8 +192,18 @@
             navigationManager.NavigateTo("/login");
             return;
         }
-        var temp = await LusiumService.ListaProdutos();
-        productList = temp.Values.ToList();
+
+        try
+        {
+            var temp = await LusiumService.ListaProdutos();
+            productList = temp.Values.ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+        }
     }
 
     private void navigateToProductPurchase(int productID)

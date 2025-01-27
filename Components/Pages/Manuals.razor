@@ -124,7 +124,16 @@
             navigationManager.NavigateTo("/login");
         }
 
-        manualList = await LusiumService.ListaManuais(userID, userRole);
+        try
+        {
+            manualList = await LusiumService.ListaManuais(userID, userRole);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+        }
     }
 
     private void OpenManual(int manualID)

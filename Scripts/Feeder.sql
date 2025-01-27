@@ -25,7 +25,7 @@ VALUES
 -- Tabela Manual
 INSERT INTO Manual (Capa, Nome, Descricao)
 VALUES
-('manual1.jpg', 'Manual A', 'Descrição do Manual A'),
+('/Products/Blast/blast-capa.png', 'Blast', 'Criado para destruir, mantido para salvar.'),
 ('manual2.jpg', 'Manual B', 'Descrição do Manual B'),
 ('manual3.jpg', 'Manual C', 'Descrição do Manual C'),
 ('manual4.jpg', 'Manual D', 'Descrição do Manual D');
@@ -41,7 +41,23 @@ VALUES
 -- Tabela Página
 INSERT INTO Pagina (ImagemAlusiva, Numeracao, ManualAssociado)
 VALUES
-('pagina1.jpg', 1, 1),
+('/Products/Blast/Manual/blast-manual-1.png', 1, 1),
+('/Products/Blast/Manual/blast-manual-2.png', 2, 1),
+('/Products/Blast/Manual/blast-manual-3.png', 3, 1),
+('/Products/Blast/Manual/blast-manual-4.png', 4, 1),
+('/Products/Blast/Manual/blast-manual-5.png', 5, 1),
+('/Products/Blast/Manual/blast-manual-6.png', 6, 1),
+('/Products/Blast/Manual/blast-manual-7.png', 7, 1),
+('/Products/Blast/Manual/blast-manual-8.png', 8, 1),
+('/Products/Blast/Manual/blast-manual-9.png', 9, 1),
+('/Products/Blast/Manual/blast-manual-10.png', 10, 1),
+('/Products/Blast/Manual/blast-manual-11.png', 11, 1),
+('/Products/Blast/Manual/blast-manual-12.png', 12, 1),
+('/Products/Blast/Manual/blast-manual-13.png', 13, 1),
+('/Products/Blast/Manual/blast-manual-14.png', 14, 1),
+('/Products/Blast/Manual/blast-manual-15.png', 15, 1),
+('/Products/Blast/Manual/blast-manual-16.png', 16, 1),
+('/Products/Blast/Manual/blast-manual-17.png', 17, 1),
 ('pagina2.jpg', 2, 2),
 ('pagina3.jpg', 1, 3),
 ('pagina4.jpg', 2, 4);
@@ -49,7 +65,7 @@ VALUES
 -- Tabela Produto
 INSERT INTO Produto (Nome, Descricao, Custo, IdadeMinima, ImagemAlusiva, ManualAssociado)
 VALUES
-('Produto A', 'Descrição do Produto A', 50, 18, 'produtoA.jpg', 1),
+('Blast', 'Criado para destruir, mantido para salvar.', 50, 18, '/Products/Blast/blast-capa.png', 1),
 ('Produto B', 'Descrição do Produto B', 100, 21, 'produtoB.jpg', 2),
 ('Produto C', 'Descrição do Produto C', 150, 16, 'produtoC.jpg', 3),
 ('Produto D', 'Descrição do Produto D', 200, 25, 'produtoD.jpg', 4);
@@ -57,7 +73,12 @@ VALUES
 -- Tabela Peça
 INSERT INTO Peca (Nome, ImagemAlusiva, Quantidade)
 VALUES
-('Peça A', 'pecaA.jpg', 10),
+('Peça 1', '/Products/Blast/Pecas/blast-peca-1.png', 10),
+('Peça 2', '/Products/Blast/Pecas/blast-peca-2.png', 10),
+('Peça 3', '/Products/Blast/Pecas/blast-peca-3.png', 10),
+('Peça 4', '/Products/Blast/Pecas/blast-peca-4.png', 10),
+('Peça 5', '/Products/Blast/Pecas/blast-peca-5.png', 10),
+('Peça 6', '/Products/Blast/Pecas/blast-peca-6.png', 10),
 ('Peça B', 'pecaB.jpg', 5),
 ('Peça C', 'pecaC.jpg', 8),
 ('Peça D', 'pecaD.jpg', 12);
@@ -66,6 +87,8 @@ VALUES
 INSERT INTO PecaProduto (IDPeca, IDProduto, Quantidade)
 VALUES
 (1, 1, 2),
+(2, 1, 2),
+(3, 1, 2),
 (2, 2, 3),
 (3, 3, 4),
 (4, 4, 1);
