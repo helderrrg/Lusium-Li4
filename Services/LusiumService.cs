@@ -656,30 +656,15 @@ namespace Services
 
         public async Task<Manual?> ObterManualPorId(int id)
         {
-            return await _context.Set<Manual>()
-                .Where(m => m.ID == id)
-                .Select(m => new Manual
-                {
-                    ID = m.ID,
-                    Nome = m.Nome,
-                    Descricao = m.Descricao,
-                    Capa = m.Capa
-                })
-                .FirstOrDefaultAsync();
+            return await _context.Manual
+                .Include(m => m.Paginas) // Inclua as páginas se necessário
+                .FirstOrDefaultAsync(m => m.ID == id);
         }
 
         public async Task<List<Page>> ListarPaginasPorManual(int manualId)
         {
-            return await _context.Set<Page>()
+            return await _context.Pagina
                 .Where(p => p.ManualAssociado == manualId)
-                .OrderBy(p => p.Numeracao)
-                .Select(p => new Page
-                {
-                    ID = p.ID,
-                    ImagemAlusiva = p.ImagemAlusiva,
-                    Numeracao = p.Numeracao,
-                    ManualAssociado = p.ManualAssociado
-                })
                 .ToListAsync();
         }
 

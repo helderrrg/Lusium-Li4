@@ -50,9 +50,11 @@ namespace Data
             // Config Manual
             modelBuilder.Entity<Manual>()
                 .HasKey(m => m.ID);
-            
+
             modelBuilder.Entity<Manual>()
-                .HasMany(m => m.Paginas);
+                .HasMany(m => m.Paginas)
+                .WithOne()
+                .HasForeignKey(p => p.ManualAssociado);
 
             // Config Page
             modelBuilder.Entity<Page>()
