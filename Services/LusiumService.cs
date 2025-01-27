@@ -450,7 +450,7 @@ namespace Services
                 return false;
             }
 
-            if (colab.InstituicaoID != int.Parse(codNovaInstituicao) && !await _context.Instituicao.AnyAsync(i => i.NumeroAssociacao == int.Parse(codNovaInstituicao)))
+            if (colab.InstituicaoID != int.Parse(codNovaInstituicao) && !await _context.Instituicao.AnyAsync(i => i.ID == int.Parse(codNovaInstituicao)))
             {
                 return false;
             }
