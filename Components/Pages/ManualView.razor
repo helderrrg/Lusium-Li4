@@ -31,7 +31,7 @@
         position: relative;
     }
 
-    img {
+    .img-page {
         width: 100%;
         height: auto;
     }
@@ -96,7 +96,7 @@
         else
         {
             <div class="manual-wrapper">
-                <img src="@paginaAtualImagem" alt="Imagem da Página" width="1000" height="400" />
+                <img class="img-page" src="@paginaAtualImagem" alt="Imagem da Página" width="1000" height="400" />
                 <div class="control-wrapper">
                     <div class="pagination-control">
                         <button class="button" @onclick="PaginaAnterior" disabled="@(!PodeVoltar)">
