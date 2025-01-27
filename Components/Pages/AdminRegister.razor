@@ -84,8 +84,15 @@
         align-items: left;
     }
 
-    .info-message {
+    .failed-message {
         background-color: #ea6565;
+        padding: 10px;
+        border-radius: 5px;
+        color: white;
+    }
+
+    .success-message {
+        background-color: #A6C36F;
         padding: 10px;
         border-radius: 5px;
         color: white;
@@ -118,7 +125,7 @@
         @if (!string.IsNullOrEmpty(message))
         {
             <div class="info-message-wrapper">
-                <div class="info-message">@message</div>
+                <div class="info-message @(registrationSuccess ? "success-message" : "failed-message")">@message</div>
             </div>
         }
     </div>
@@ -130,7 +137,8 @@
     private string email = string.Empty;
     private string password = string.Empty;
     private string confirmPassword = string.Empty;
-    private string message = string.Empty; 
+    private string message = string.Empty;
+    private bool registrationSuccess = false;
 
     [Inject]
     public required LusiumService LusiumService { get; set; }
@@ -150,7 +158,8 @@
             Administrator administrator = await LusiumService.RegistaAdministrador(name, email, password);
             if (administrator != null)
             {
-                message = $"Administrador registado com os campos: Nome - {administrator.Nome}, Email - {administrator.Email}.";
+                message = $"Administrador registado com sucesso.";
+                registrationSuccess = true;
             }
             else
             {
