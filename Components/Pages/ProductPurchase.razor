@@ -119,8 +119,15 @@
         align-items: left;
     }
 
-    .info-message {
+    .failed-message {
         background-color: #ea6565;
+        padding: 10px;
+        border-radius: 5px;
+        color: white;
+    }
+
+    .success-message {
+        background-color: #A6C36F;
         padding: 10px;
         border-radius: 5px;
         color: white;
@@ -161,19 +168,12 @@ else
             }
             <button @onclick="ProcessaCompra">Comprar</button>
         </div>
-            @if (!string.IsNullOrEmpty(message))
-            {
-                <div class="info-message-wrapper">
-                    <div class="info-message">@message</div>
-                </div>
-            }
-            @if (!string.IsNullOrEmpty(successMessage))
-            {
-                <div class="info-message-wrapper">
-                    @* [TODO] Estilizar mensagem sucesso *@
-                    <div class="info-message">@successMessage</div>
-                </div>
-            }
+        @if (!string.IsNullOrEmpty(message))
+        {
+            <div class="info-message-wrapper">
+                <div class="info-message @(editSuccess ? "success-message" : "failed-message")">@message</div>
+            </div>
+        }
     </div>
 </div>
 }
@@ -186,7 +186,7 @@ else
     private string morada = string.Empty;
     private string? codInstituicao;
     private string message = string.Empty;
-    private string successMessage = string.Empty;
+    private bool editSuccess = false;
 
     private List<PiecePerProduct> pecasNecessarias = new();
     private List<Piece> pecas = new();
@@ -212,6 +212,7 @@ else
         if (produto == null)
         {
             message = "Produto não encontrado.";
+            editSuccess = false;
             return;
         }
 
@@ -234,6 +235,7 @@ else
         if (instituicao == null || instituicao.Creditos < produto.Custo)
         {
             message = "Créditos insuficientes para realizar a compra.";
+            editSuccess = false;
             return;
         }
 
@@ -246,19 +248,22 @@ else
         if (!pecasDisponiveis)
         {
             message = "O produto não está disponível devido à falta de peças no stock.";
+            editSuccess = false;
             return;
         }
 
         if (string.IsNullOrEmpty(morada))
         {
             message = "Por favor, indique uma morada para entrega.";
+            editSuccess = false;
             return;
         }
 
         // Processar a compra
         await LusiumService.ProcessaCompra(codInstituicao, produto.ID.ToString(), morada);
 
-        successMessage = "Compra realizada com sucesso!";
+        message = "Compra realizada com sucesso!";
+        editSuccess = true;
     }
 
     private void UsarMoradaAlternativa()

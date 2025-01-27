@@ -177,12 +177,14 @@
         if (!birthDate.HasValue)
         {
             message = "Por favor, selecione uma data válida.";
+            registrationSuccess = false;
             return;
         }
 
         if (password != confirmPassword)
         {
             message = "As palavras-passe não coincidem.";
+            registrationSuccess = false;
             return;
         }
 
@@ -199,11 +201,13 @@
             else
             {
                 message = "Não foi possível registar o colaborador.";
+                registrationSuccess = false;
             }
         }
         else
         {
             message = "Dados inválidos. Não foi possível registar.";
+            registrationSuccess = false;
         }
     }
 }
