@@ -106,9 +106,6 @@ BEGIN
 END;
 GO
 
-
-
--- POR TESTAR
 CREATE PROCEDURE VerificarDisponibilidadeProduto
     @codProduto INT,
     @Disponivel BIT OUTPUT
@@ -134,9 +131,6 @@ BEGIN
 END;
 GO
 
-
-
--- POR TESTAR
 CREATE PROCEDURE VerificarSaldoInstituicao
     @codInstituicao INT,
     @codProduto INT,
@@ -165,8 +159,6 @@ BEGIN
     END
 END;
 GO
-
-
 
 CREATE PROCEDURE ProcessaCompra
     @codInstituicao INT,

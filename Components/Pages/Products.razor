@@ -95,15 +95,15 @@
     }
 
     .necessary-pieces {
-        display: flex; /* Mantém as imagens alinhadas horizontalmente */
-        gap: 5px; /* Espaçamento entre as imagens */
+        display: flex;
+        gap: 5px;
     }
 
     .necessary-pieces img {
-        width: 40px; /* Define uma largura fixa */
-        height: 40px; /* Define uma altura fixa */
-        object-fit: cover; /* Faz com que a imagem preencha o espaço definido */
-        border-radius: 10%; /* Adicional: deixa a imagem circular */
+        width: 40px;
+        height: 40px;
+        object-fit: cover;
+        border-radius: 10%;
         margin-right: 5px;
         margin-bottom: 5px;
     }
@@ -170,7 +170,7 @@
                                 <div class="description">@product.Descricao</div>
                                 <div class="text">Peças necessárias:</div>
                                 <div class="necessary-pieces">
-                                    @foreach (var piecePerProduct in product.PecaProdutos)
+                                    @foreach (var piecePerProduct in product.PecaProdutos.Take(3))
                                     {
                                         <img src="@piecePerProduct.Peca.ImagemAlusiva" alt="@piecePerProduct.Peca.Nome" class="necessary-piece-img" />
                                     }
