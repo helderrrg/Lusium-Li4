@@ -10,8 +10,79 @@
 @inject LusiumDbContext lusiumDbContext
 @inject NavigationManager navigationManager
 
-<div class="d-flex justify-content-center align-items-center vh-100">
-    <div class="col-lg-4">
+
+<style>
+    .page {
+        font-family: Arial, Helvetica, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        width: 100vw;
+        background-color: #1e352f;
+    }
+
+    .content {
+        display: flex;
+        flex-direction: column;
+        width: 350px;
+    }
+
+    .content .main-title {
+        text-align: center;
+    }
+
+    .main-title {
+        font-weight: bold;
+        font-size: 3em;
+        color:#BEEF9E;
+        margin-bottom: 30px;
+    }
+
+    .top-text {
+        color: #A6C36F;
+        padding-left: 5px;
+        font-size: 1em;
+    }
+
+    .pair {
+        margin-top: 20px;
+    }
+
+    button {
+        margin-top: 25px;
+        font-size: 1em;
+        text-align: center;
+        color: #1e352f;
+        border: none;
+        padding: 0.5em 0px;
+        width: 8em;
+        background-color: #A6C36F;
+        border-radius: 5px;
+        transition: transform 0.2s ease-in-out;
+    }
+
+    button:hover {
+        transform: scale(1.1);
+    }
+
+    .info-message {
+        background-color: #ea6565;
+        padding-top: 2px;
+        padding-bottom: 2px;
+        padding-left: 10px;
+        padding-right: 10px;
+        border-radius: 5px;
+        margin-top: 2px;
+        color: white;
+    }
+
+</style>
+
+
+<div class="page">
+    <div class="content">
         @if (isAdminToChangePassword)
         {
             <AdminEditComponent userId="@userId" userName="@userName" />
@@ -20,24 +91,26 @@
         {
             <EditForm Model="@Model" OnValidSubmit="AutenticarUtilizador" FormName="LoginForm">
                 <DataAnnotationsValidator />
-                <div class="text-center mb-4">
-                    <h2 class="fw-bold">Iniciar Sessão</h2>
+                <div class="main-title">Iniciar Sessão</div>
+                <div class="mb-3">
+                    <div class="pair">
+                        <label for="email" class="top-text">Email</label>
+                        <InputText id="email" @bind-Value="Model.Email" class="form-control" placeholder="Email" />
+                    </div>
+                    <ValidationMessage class="info-message" For="() => Model.Email" />
                 </div>
                 <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <InputText id="email" @bind-Value="Model.Email" class="form-control" placeholder="Email" />
-                    <ValidationMessage For="() => Model.Email" />
-                </div>
-                <div class="mb-3">
-                    <label for="password" class="form-label">Palavra-passe</label>
-                    <InputText id="password" @bind-Value="Model.Password" class="form-control" placeholder="Palavra-passe" type="password" />
-                    <ValidationMessage For="() => Model.Password" />
+                    <div class="pair">
+                        <label for="password" class="top-text">Palavra-passe</label>
+                        <InputText id="password" @bind-Value="Model.Password" class="form-control" placeholder="Palavra-passe" type="password" />
+                    </div>
+                    <ValidationMessage class="info-message" For="() => Model.Password" />
                 </div>
                 <div class="mb-3 text-center">
                     <span class="text-danger">@errorMessage</span>
                 </div>
                 <div class="d-grid">
-                    <button type="submit" class="btn btn-primary btn-lg">Iniciar Sessão</button>
+                    <button type="submit">Iniciar Sessão</button>
                 </div>
             </EditForm>
         }
@@ -102,7 +175,6 @@
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, id),
-            new Claim(ClaimTypes.Name, name),
             new Claim(ClaimTypes.Email, email),
             new Claim(ClaimTypes.Role, role)
         };

@@ -1,4 +1,4 @@
-@page "/collaborator/edit"
+@page "/collaborator/edit/{collaboratorID:int}"
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Authentication.Cookies
 @using Services
@@ -98,15 +98,15 @@
             <div>
                 <div class="pair">
                     <label for="nome" class="top-text">Novo Nome</label>
-                    <input type="text" class="form-control" id="name" @bind="pendingName" placeholder="ex: Orlando Belo" />
+                    <input type="text" class="form-control" id="name" @bind="pendingName"/>
                 </div>
                 <div class="pair">
                     <label for="birthDate" class="top-text">Nova Data de Nascimento</label>
-                    <InputDate TValue="DateOnly?" class="form-control" id="birthDate" @bind-Value="birthDate" />
+                    <InputDate TValue="DateOnly?" class="form-control" id="birthDate" @bind-Value="@pendingBirthDate"/>
                 </div>
                 <div class="pair">
                     <label for="instituicao" class="top-text">Nova Instituição Associada</label>
-                    <select class="form-control" id="instituicao" @bind="selectedInstitutionId">
+                    <select class="form-control" id="instituicao" @bind="pendingInstitutionId">
                         <option value="">-- Selecione uma instituição --</option>
                         @foreach (var institution in institutions)
                         {
@@ -163,12 +163,17 @@
 }
 
 @code {
+    [Parameter]
+    public int collaboratorID { get; set; }
+
     private string userID { get; set; } = string.Empty;
     private string userName { get; set; } = string.Empty;
     private string userEmail { get; set; } = string.Empty;
     private DateOnly? birthDate;
     private string selectedInstitutionId = string.Empty;
     Dictionary<string, IUser> institutions = new();
+
+    private string actualUserEmail { get; set; } = string.Empty;
 
     private string pendingName { get; set; } = string.Empty;
     private DateOnly? pendingBirthDate;
@@ -181,17 +186,19 @@
 
     private bool isModalOpen { get; set; } = false;
     private bool isUserCollaborator { get; set; } = false;
+    private bool isUserAdmin { get; set; } = false;
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         Collaborator result;
+        IUser u;
 
         if (user.Identity?.IsAuthenticated ?? false)
         {
             userID = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
-            result = await LusiumService.ObterColaborador(userID)!;
+            result = await LusiumService.ObterColaborador(collaboratorID.ToString())!;
 
             if (result != null)
             {
@@ -199,9 +206,51 @@
                 userEmail = result.Email;
                 birthDate = result.DataNascimento;
                 selectedInstitutionId = result.InstituicaoID.ToString();
+
+                // Populate the form with the current values
+                pendingName = userName;
+                pendingBirthDate = birthDate;
+                pendingInstitutionId = selectedInstitutionId;
             }
 
             isUserCollaborator = user.IsInRole("Collaborator");
+            isUserAdmin = user.IsInRole("Admin");
+
+            if (isUserAdmin)
+            {
+                u = await LusiumService.ObterUtilizador(userID, "Admin");
+            }
+            else if (isUserCollaborator)
+            {
+                u = await LusiumService.ObterUtilizador(userID, "Collaborator");
+            }
+            else
+            {
+                u = await LusiumService.ObterUtilizador(userID, "Institution");
+            }
+            actualUserEmail = u.Email;
+
+            institutions = await LusiumService.ListaUtilizadores("Institution");
+
+            if (user.IsInRole("Institution"))
+            {
+                var institution = (Instituition)u;
+                var collaborators = institution.Colaboradores;
+                var collaboratorIDs = collaborators.Select(c => c.ID.ToString()).ToList();
+
+                if (!collaboratorIDs.Contains(collaboratorID.ToString()))
+                {
+                    navigationManager.NavigateTo("/login");
+                }
+
+            } 
+            else if (user.IsInRole("Collaborator"))
+            {
+                if (collaboratorID.ToString() != userID)
+                {
+                    navigationManager.NavigateTo("/login");
+                }
+            }
         }
         else
         {
@@ -222,7 +271,7 @@
 
     private async Task ConfirmEdit()
     {
-        var confirmation = await LusiumService.ValidaPP(userEmail, currentPassword);
+        var confirmation = await LusiumService.ValidaPP(actualUserEmail, currentPassword);
 
         if (confirmation)
         {
@@ -282,7 +331,7 @@
 
         if (tempBirthDate.HasValue)
         {
-            valid = await LusiumService.ValidaNovosDadosColaborador(userID, tempName, tempBirthDate.Value, tempInstitutionId, tempPass);
+            valid = await LusiumService.ValidaNovosDadosColaborador(collaboratorID.ToString(), tempName, tempBirthDate.Value, tempInstitutionId, tempPass);
         }
         else
         { 
@@ -291,10 +340,8 @@
 
         if (valid)
         {
-            await LusiumService.AtualizaDadosColaborador(userID, tempName, tempBirthDate.Value, tempInstitutionId, tempPass);
-            message = "Colaborador editado com sucesso, as alterações serão refletidas no próximo início de sessão.";
-
-            // [TODO] Update the user's name in the claims
+            await LusiumService.AtualizaDadosColaborador(collaboratorID.ToString(), tempName, tempBirthDate.Value, tempInstitutionId, tempPass);
+            message = "Colaborador editado com sucesso.";
         }
         else
         {

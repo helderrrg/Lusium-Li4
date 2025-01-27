@@ -1,4 +1,4 @@
-@page "/institution/edit/{institutionID:int}"
+@page "/institutions/edit/{institutionID:int}"
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Authentication.Cookies
 @using Services
@@ -129,11 +129,11 @@
             <div>
                 <div class="pair">
                     <label for="nome" class="top-text">Novo Nome</label>
-                    <input type="text" class="form-control" id="name" @bind="pendingName" placeholder="ex: @userName" />
+                    <input type="text" class="form-control" id="name" @bind="pendingName"/>
                 </div>
                 <div class="pair">
                     <label for="morada" class="top-text">Nova Morada</label>
-                    <input type="text" class="form-control" id="adress" @bind="pendingAdress" placeholder="ex: @userAdress" />
+                    <input type="text" class="form-control" id="adress" @bind="pendingAdress"/>
                 </div>
 
                 @if(!isAdmin)
@@ -144,7 +144,7 @@
                     </div>
                     <div class="pair">
                         <label for="confirmPassword" class="top-text">Confirmar Nova Palavra-Passe</label>
-                        <input type="password" class="form-control" id="confirmPassword" />
+                        <input type="password" class="form-control" id="confirmPassword" @bind="confirmPassword" />
                     </div>
                 }
 
@@ -160,7 +160,7 @@
                         </div>
                         <div>
                             <label for="credits" class="top-text">Novos Créditos</label>
-                            <input type="number" class="form-control" id="credits" @bind="pendingCredits" min="0" placeholder="ex: @institutionCredits" />
+                            <input type="number" class="form-control" id="credits" @bind="pendingCredits" min="0" />
                         </div>
                     </div>
                 }
@@ -212,6 +212,8 @@
     private int institutionCredits { get; set; } = 0;
     private bool isAdmin { get; set; } = false;
 
+    private string actualUserEmail { get; set; } = string.Empty;
+
     private string pendingName { get; set; } = string.Empty;
     private string pendingAdress { get; set; } = string.Empty;
     private string password { get; set; } = string.Empty;
@@ -227,14 +229,30 @@
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         Instituition result;
+        IUser u;
 
         if (user.Identity?.IsAuthenticated ?? false)
         {
             userID = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+
+            if (userID != institutionID.ToString() && user.IsInRole("Institution"))
+            {
+                navigationManager.NavigateTo("/login");
+            }
+
             isAdmin = user.IsInRole("Admin");
 
-            result = await LusiumService.ObterInstituicao(userID)!;
-
+            result = await LusiumService.ObterInstituicao(institutionID.ToString())!;
+            
+            if (isAdmin)
+            {
+                u = await LusiumService.ObterUtilizador(userID, "Admin");
+            } else
+            {
+                u = await LusiumService.ObterUtilizador(userID, "Institution");
+            }
+            actualUserEmail = u.Email;
+            
             if (result != null)
             {
                 userName = result.Nome;
@@ -247,6 +265,10 @@
         {
             navigationManager.NavigateTo("/login");
         }
+
+        pendingName = userName;
+        pendingAdress = userAdress;
+        pendingCredits = institutionCredits;
     }
 
     private void ShowPasswordModal()
@@ -262,7 +284,7 @@
 
     private async Task ConfirmEdit()
     {
-        var confirmation = await LusiumService.ValidaPP(userEmail, currentPassword);
+        var confirmation = await LusiumService.ValidaPP(actualUserEmail, currentPassword);
 
         if (confirmation)
         {
@@ -295,7 +317,7 @@
         if (valid)
         {
             await LusiumService.AtualizaDadosInstituicao(institutionID.ToString(), tempName, tempAdress, tempPass, tempCredits);
-            message = "Instituição editada com sucesso, as alterações serão refletidas no próximo início de sessão.";
+            message = "Instituição editada com sucesso.";
         }
         else
         {

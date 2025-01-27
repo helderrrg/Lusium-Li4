@@ -1,4 +1,6 @@
 ﻿@page "/products"
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @rendermode InteractiveServer
 @attribute [Authorize(Roles = "Admin,Institution")]
 
@@ -154,7 +156,12 @@
                                         <div class="img">@piecePerProduct.Peca.ImagemAlusiva</div>
                                     } -->
                                 </div>
-                                <button>Comprar</button>
+                                @if(userRole == "Admin")
+                                {
+                                    <button disabled>Comprar</button>
+                                }else{
+                                    <button @onclick="() => BuyProduct(product.ID)">Comprar</button>
+                                }
                             </div>
                         </div>
                     </div>
@@ -165,6 +172,8 @@
 </div>
 
 @code {
+    private string userRole = string.Empty;
+
     private List<Product> productList = new();
 
     [Inject]
@@ -172,7 +181,24 @@
 
     protected override async Task OnInitializedAsync()
     {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated ?? false)
+        {
+            userRole = user.FindFirst(ClaimTypes.Role)?.Value ?? string.Empty;
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/login");
+            return;
+        }
         var temp = await LusiumService.ListaProdutos();
         productList = temp.Values.ToList();
+    }
+
+    private void BuyProduct(int productID)
+    {
+        NavigationManager.NavigateTo($"/products/purchase/{productID}");
     }
 }
