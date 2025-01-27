@@ -1,7 +1,7 @@
 @page "/manuals/{manualId:int}"
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
-@inject LusiumService LusiumService
+@using Microsoft.Data.SqlClient;
 @rendermode InteractiveServer
 @attribute [Authorize(Roles = "Admin, Collaborator, Institution")]
 
@@ -116,15 +116,15 @@
     </div>
 </div>
 
-
-
-
 @code {
     [Parameter]
     public int ManualId { get; set; }
 
+    [Inject]
+    public required LusiumService LusiumService { get; set; }
+
     private Manual? manual;
-    private List<Page> paginas = new();
+    private List<Page>? paginas;
     private int paginaAtual = 1;
 
     private string? paginaAtualImagem => paginas.Any() ? paginas[paginaAtual - 1].ImagemAlusiva : null;
@@ -133,6 +133,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        Console.WriteLine($"OnInitializedAsync chamado: ManualId = {ManualId}");
+
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
@@ -142,10 +144,10 @@
             return;
         }
 
-        manual = await LusiumService.ObterManualPorId(ManualId);
-        paginas = await LusiumService.ListarPaginasPorManual(ManualId);
+        manual = await GetManual(ManualId);
+        paginas = manual.Paginas.ToList();
 
-        if (!paginas.Any())
+        if (!paginas.Any() || paginas == null)
         {
             NavigationManager.NavigateTo("/manuals");
         }
@@ -164,6 +166,72 @@
         if (PodeAvancar)
         {
             paginaAtual++;
+        }
+    }
+
+    // Not supposed to be this way
+    public async Task<Manual> GetManual(int id)
+    {
+        string ConnectionString = "Server=tcp:sqldatabaselusium.database.windows.net,1433;Initial Catalog=LusiumDB;Persist Security Info=False;User ID=lusium;Password=Belo=2025;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
+
+        string sql = @"
+            SELECT m.ID, m.Capa, m.Nome, m.Descricao, p.ID AS PaginaID, p.ImagemAlusiva, p.Numeracao
+            FROM Manual m
+            LEFT JOIN Pagina p ON m.ID = p.ManualAssociado
+            WHERE m.ID = @ID;";
+
+        try
+        {
+            using (var connection = new SqlConnection(ConnectionString))
+            {
+                await connection.OpenAsync();
+
+                using (var command = new SqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@ID", id);
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            var manual = new Manual
+                                {
+                                    ID = reader.GetInt32(reader.GetOrdinal("ID")),
+                                    Capa = reader.GetString(reader.GetOrdinal("Capa")),
+                                    Nome = reader.GetString(reader.GetOrdinal("Nome")),
+                                    Descricao = reader.GetString(reader.GetOrdinal("Descricao")),
+                                    Paginas = new List<Page>()
+                                };
+
+                            do
+                            {
+                                if (!reader.IsDBNull(reader.GetOrdinal("PaginaID")))
+                                {
+                                    var pagina = new Page
+                                        {
+                                            ID = reader.GetInt32(reader.GetOrdinal("PaginaID")),
+                                            ImagemAlusiva = reader.GetString(reader.GetOrdinal("ImagemAlusiva")),
+                                            Numeracao = reader.GetInt32(reader.GetOrdinal("Numeracao")),
+                                            ManualAssociado = manual.ID
+                                        };
+                                    manual.Paginas.Add(pagina);
+                                }
+                            } while (await reader.ReadAsync());
+
+                            return manual;
+                        }
+                        else
+                        {
+                            return null;
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao executar consulta SQL: {ex.Message}");
+            throw;
         }
     }
 }
