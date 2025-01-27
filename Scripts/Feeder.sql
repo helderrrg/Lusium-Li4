@@ -9,10 +9,10 @@ VALUES
 -- Tabela Instituição
 INSERT INTO Instituicao (Nome, NIF, NumeroAssociacao, Email, Morada, Creditos, PalavraPasse)
 VALUES
-('Instituicao A', '123456789', 101, 'contacto@insta.com', 'Rua 1', 1000, 'password123#'),
-('Instituicao B', '987654321', 102, 'contacto@instb.com', 'Rua 2', 2000, 'password456#'),
-('Instituicao C', '111222333', 103, 'contacto@instc.com', 'Rua 3', 3000, 'password789#'),
-('Instituicao D', '444555666', 104, 'contacto@instd.com', 'Rua 4', 4000, 'password321#');
+('Instituicao A', '123456789', 101101, 'contacto@insta.com', 'Rua 1', 1000, 'password123#'),
+('Instituicao B', '987654321', 102102, 'contacto@instb.com', 'Rua 2', 2000, 'password456#'),
+('Instituicao C', '111222333', 103103, 'contacto@instc.com', 'Rua 3', 3000, 'password789#'),
+('Instituicao D', '444555666', 104104, 'contacto@instd.com', 'Rua 4', 4000, 'password321#');
 
 -- Tabela Colaborador
 INSERT INTO Colaborador (Nome, Email, DataNascimento, InstituicaoID, PalavraPasse)
