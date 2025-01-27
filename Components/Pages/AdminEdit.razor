@@ -79,8 +79,15 @@
         align-items: left;
     }
 
-    .info-message {
+    .failed-message {
         background-color: #ea6565;
+        padding: 10px;
+        border-radius: 5px;
+        color: white;
+    }
+
+    .success-message {
+        background-color: #A6C36F;
         padding: 10px;
         border-radius: 5px;
         color: white;
@@ -115,7 +122,7 @@
             @if (!string.IsNullOrEmpty(message))
             {
                 <div class="info-message-wrapper">
-                    <div class="info-message">@message</div>
+                    <div class="info-message @(editSuccess ? "success-message" : "failed-message")">@message</div>
                 </div>
             }
         </div>
@@ -156,6 +163,7 @@
 
     private string currentPassword { get; set; } = string.Empty;
     private string message { get; set; } = string.Empty;
+    private bool editSuccess { get; set; } = false;
 
     Administrator? result;
 
@@ -209,6 +217,7 @@
         else
         {
             message = "Palavra-passe atual inválida.";
+            editSuccess = false;
             CloseModal();
         }
     }
@@ -218,6 +227,7 @@
         if (password != confirmPassword)
         {
             message = "As palavras-passe não coincidem.";
+            editSuccess = false;
             CloseModal();
             return;
         }
@@ -249,10 +259,12 @@
         {
             await LusiumService.AtualizaDadosAdministrador(userID, tempName, tempPass);
             message = "Administrador editado com sucesso.";
+            editSuccess = true;
         }
         else
         {
             message = "Dados inválidos. Não foi possível editar.";
+            editSuccess = false;
         }
     }
 }
