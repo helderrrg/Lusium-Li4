@@ -254,16 +254,35 @@
 
     protected override async Task OnInitializedAsync()
     {
-        institutionList = await LusiumService.ListaInstituicoes();
+        try
+        {
+            institutionList = await LusiumService.ListaInstituicoes();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+        }
+        
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         isAdmin = user.IsInRole("Admin");
 
         foreach (var institution in institutionList.Values)
         {
-            var totalCreditos = await LusiumService.CalcularCreditosDispendidos(institution.ID);
+            try
+            {
+                var totalCreditos = await LusiumService.CalcularCreditosDispendidos(institution.ID);
 
-            totalCreditosDispendidos[institution.ID.ToString()] = totalCreditos;
+                totalCreditosDispendidos[institution.ID.ToString()] = totalCreditos;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex.Message);
+
+                navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+            }
         }
     }
 
@@ -302,7 +321,17 @@
 
     private async Task RemoveInstitution(string institutionId)
     {
-        await LusiumService.RemoveUtilizador(institutionId.ToString(), "Institution");
+        try
+        {
+            await LusiumService.RemoveUtilizador(institutionId.ToString(), "Institution");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+        }
+       
         institutionList.Remove(institutionId);
     }
 

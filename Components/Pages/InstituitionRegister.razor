@@ -1,4 +1,5 @@
 ﻿@page "/register/institution"
+@inject NavigationManager navigationManager
 @rendermode InteractiveServer
 
 <PageTitle>Registar Instituição</PageTitle>
@@ -150,34 +151,58 @@
 
 @code {
     private string name = string.Empty;
-        private string email = string.Empty;
-        private string nif = string.Empty;
-        private string numInst = string.Empty;
-        private string address = string.Empty;
-        private string password = string.Empty;
-        private string confirmPassword = string.Empty;
-    
-        private string message = string.Empty;
-        private bool registrationSuccess = false;
-    
-        [Inject]
-        public required LusiumService LusiumService { get; set; }
-    
-        public async Task RegisterInstitution()
-        {
+    private string email = string.Empty;
+    private string nif = string.Empty;
+    private string numInst = string.Empty;
+    private string address = string.Empty;
+    private string password = string.Empty;
+    private string confirmPassword = string.Empty;
 
-            if (password != confirmPassword)
+    private string message = string.Empty;
+    private bool registrationSuccess = false;
+
+    [Inject]
+    public required LusiumService LusiumService { get; set; }
+
+    public async Task RegisterInstitution()
+    {
+
+        if (password != confirmPassword)
+        {
+            message = "As palavras-passe não coincidem.";
+            registrationSuccess = false;
+            return;
+        }
+
+        bool valid = false;
+
+        try
+        {
+            valid = await LusiumService.ValidaDadosInstituicao(name, nif, numInst, email, address, password);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+        }
+
+        if (valid)
+        {
+            Instituition institution = null;
+            try
             {
-                message = "As palavras-passe não coincidem.";
-                registrationSuccess = false;
-                return;
+                institution = await LusiumService.RegistaInstituicao(name, nif, numInst, email, address, password);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex.Message);
+
+                navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
             }
 
-            var valid = await LusiumService.ValidaDadosInstituicao(name, nif, numInst, email, address, password);
-    
-            if (valid)
+            if (institution != null)
             {
-                Instituition institution = await LusiumService.RegistaInstituicao(name, nif, numInst, email, address, password);
                 if (institution != null)
                 {
                     message = "Instituição registada com sucesso.";
@@ -195,4 +220,9 @@
                 registrationSuccess = false;
             }
         }
+        else
+        {
+            message = "Dados inválidos. Não foi possível registar.";
+        }
+    }
 }

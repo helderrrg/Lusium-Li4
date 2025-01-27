@@ -179,7 +179,16 @@
             userID = user.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
             userEmail = user.FindFirst(ClaimTypes.Email)?.Value ?? "Email não encontrado";
 
-            result = await LusiumService.ObterAdministrador(userID);
+            try
+            {
+                result = await LusiumService.ObterAdministrador(userID);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex.Message);
+
+                navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+            }
 
             if (result != null)
             {
@@ -207,7 +216,18 @@
 
     private async Task ConfirmEdit()
     {
-        var confirmation = await LusiumService.ValidaPP(userEmail, currentPassword);
+        bool confirmation = false;
+
+        try
+        {
+            confirmation = await LusiumService.ValidaPP(userEmail, currentPassword);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+        }
 
         if (confirmation)
         {
@@ -253,11 +273,33 @@
             tempName = userName;
         }
 
-        var valid = await LusiumService.ValidaNovosDadosAdministrador(userID, tempName, tempPass);
+        bool valid = false;
+
+        try
+        {
+            valid = await LusiumService.ValidaNovosDadosAdministrador(userID, tempName, tempPass);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+        }
 
         if (valid)
         {
-            await LusiumService.AtualizaDadosAdministrador(userID, tempName, tempPass);
+
+            try
+            {
+                await LusiumService.AtualizaDadosAdministrador(userID, tempName, tempPass);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex.Message);
+
+                navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+            }
+
             message = "Administrador editado com sucesso.";
             editSuccess = true;
         }

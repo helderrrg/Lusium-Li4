@@ -217,7 +217,17 @@
         if (user.Identity?.IsAuthenticated ?? false)
         {
             currentUserId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
-            adminList = await LusiumService.ListaAdministradores();
+
+            try
+            {
+                adminList = await LusiumService.ListaAdministradores();
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex.Message);
+
+                navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+            }
         }
         else
         {
@@ -231,8 +241,19 @@
 
     private async Task RemoveAdmin(string adminId)
     {
+
+        try
+        {
             await LusiumService.RemoveUtilizador(adminId.ToString(), "Admin");
-            adminList.Remove(adminId);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+        }
+            
+         adminList.Remove(adminId);
     }
 
     private void navigateToCreateAdmin()

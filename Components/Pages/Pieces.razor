@@ -145,7 +145,16 @@ else
 
         try
         {
-            piecesList = await LusiumService.ListaPecas();
+            try
+            {
+                piecesList = await LusiumService.ListaPecas();
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex.Message);
+
+                navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+            }
         }
         catch (Exception ex)
         {
@@ -157,7 +166,17 @@ else
 
     private async Task AtualizaQuantidade(string codPeca, int quantidade)
     {
+        try
+        {
             await LusiumService.AtualizaQuantidadePecas(codPeca, quantidade);
-            piecesList[codPeca].Quantidade = quantidade;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+        }
+            
+        piecesList[codPeca].Quantidade = quantidade;
     }
 }

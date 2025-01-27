@@ -212,30 +212,53 @@ else
             return;
         }
 
-        produto = await LusiumService.ObterProduto(ProductID.ToString());
-        if (produto == null)
+        try
         {
-            message = "Produto não encontrado.";
-            editSuccess = false;
-            return;
-        }
+            produto = await LusiumService.ObterProduto(ProductID.ToString());
 
-        pecasNecessarias = await LusiumService.ObterPecasNecessariasPorProduto(produto.ID);
-        pecas = await LusiumService.ObterPecas();
 
-        if (!string.IsNullOrEmpty(codInstituicao))
-        {
-            var instituicao = await LusiumService.ObterInstituicao(codInstituicao);
-            if (instituicao != null && string.IsNullOrEmpty(morada))
+            if (produto == null)
             {
-                morada = instituicao.Morada;
+                message = "Produto não encontrado.";
+                editSuccess = false;
+                return;
             }
+
+            pecasNecessarias = await LusiumService.ObterPecasNecessariasPorProduto(produto.ID);
+            pecas = await LusiumService.ObterPecas();
+
+            if (!string.IsNullOrEmpty(codInstituicao))
+            {
+                var instituicao = await LusiumService.ObterInstituicao(codInstituicao);
+                if (instituicao != null && string.IsNullOrEmpty(morada))
+                {
+                    morada = instituicao.Morada;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
         }
     }
 
     private async Task ProcessaCompra()
     {
-        var instituicao = await LusiumService.ObterInstituicao(codInstituicao);
+        Instituition instituicao = null;
+
+        try
+        {
+            instituicao = await LusiumService.ObterInstituicao(codInstituicao);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+        }
+
         if (instituicao == null || instituicao.Creditos < produto.Custo)
         {
             message = "Créditos insuficientes para realizar a compra.";
@@ -263,8 +286,16 @@ else
             return;
         }
 
-        // Processar a compra
-        await LusiumService.ProcessaCompra(codInstituicao, produto.ID.ToString(), morada);
+        try
+        {
+            await LusiumService.ProcessaCompra(codInstituicao, produto.ID.ToString(), morada);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+        }
 
         message = "Compra realizada com sucesso!";
         editSuccess = true;

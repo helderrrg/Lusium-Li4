@@ -206,58 +206,88 @@
         if (user.Identity?.IsAuthenticated ?? false)
         {
             userID = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
-            result = await LusiumService.ObterColaborador(collaboratorID.ToString())!;
 
-            if (result != null)
+            try
             {
-                userName = result.Nome;
-                userEmail = result.Email;
-                birthDate = result.DataNascimento;
-                selectedInstitutionId = result.InstituicaoID.ToString();
+                result = await LusiumService.ObterColaborador(collaboratorID.ToString())!;
 
-                // Populate the form with the current values
-                pendingName = userName;
-                pendingBirthDate = birthDate;
-                pendingInstitutionId = selectedInstitutionId;
+
+                if (result != null)
+                {
+                    userName = result.Nome;
+                    userEmail = result.Email;
+                    birthDate = result.DataNascimento;
+                    selectedInstitutionId = result.InstituicaoID.ToString();
+
+                    // Populate the form with the current values
+                    pendingName = userName;
+                    pendingBirthDate = birthDate;
+                    pendingInstitutionId = selectedInstitutionId;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex.Message);
+
+                navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
             }
 
             isUserCollaborator = user.IsInRole("Collaborator");
             isUserAdmin = user.IsInRole("Admin");
 
-            if (isUserAdmin)
+            try
             {
-                u = await LusiumService.ObterUtilizador(userID, "Admin");
-            }
-            else if (isUserCollaborator)
-            {
-                u = await LusiumService.ObterUtilizador(userID, "Collaborator");
-            }
-            else
-            {
-                u = await LusiumService.ObterUtilizador(userID, "Institution");
-            }
-            actualUserEmail = u.Email;
 
-            institutions = await LusiumService.ListaUtilizadores("Institution");
-
-            if (user.IsInRole("Institution"))
-            {
-                var institution = (Instituition)u;
-                var collaborators = institution.Colaboradores;
-                var collaboratorIDs = collaborators.Select(c => c.ID.ToString()).ToList();
-
-                if (!collaboratorIDs.Contains(collaboratorID.ToString()))
+                if (isUserAdmin)
                 {
-                    navigationManager.NavigateTo("/login");
+                    u = await LusiumService.ObterUtilizador(userID, "Admin");
+                }
+                else if (isUserCollaborator)
+                {
+                    u = await LusiumService.ObterUtilizador(userID, "Collaborator");
+                }
+                else
+                {
+                    u = await LusiumService.ObterUtilizador(userID, "Institution");
+                }
+                actualUserEmail = u.Email;
+
+                try
+                {
+                    institutions = await LusiumService.ListaUtilizadores("Institution");
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine(ex.Message);
+
+                    navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
                 }
 
-            } 
-            else if (user.IsInRole("Collaborator"))
-            {
-                if (collaboratorID.ToString() != userID)
+                if (user.IsInRole("Institution"))
                 {
-                    navigationManager.NavigateTo("/login");
+                    var institution = (Instituition)u;
+                    var collaborators = institution.Colaboradores;
+                    var collaboratorIDs = collaborators.Select(c => c.ID.ToString()).ToList();
+
+                    if (!collaboratorIDs.Contains(collaboratorID.ToString()))
+                    {
+                        navigationManager.NavigateTo("/login");
+                    }
+
                 }
+                else if (user.IsInRole("Collaborator"))
+                {
+                    if (collaboratorID.ToString() != userID)
+                    {
+                        navigationManager.NavigateTo("/login");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex.Message);
+
+                navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
             }
         }
         else
@@ -279,7 +309,18 @@
 
     private async Task ConfirmEdit()
     {
-        var confirmation = await LusiumService.ValidaPP(actualUserEmail, currentPassword);
+        bool confirmation = false;
+
+        try
+        {
+            confirmation = await LusiumService.ValidaPP(actualUserEmail, currentPassword);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+        }
 
         if (confirmation)
         {
@@ -341,17 +382,35 @@
 
         if (tempBirthDate.HasValue)
         {
-            valid = await LusiumService.ValidaNovosDadosColaborador(collaboratorID.ToString(), tempName, tempBirthDate.Value, tempInstitutionId, tempPass);
+            try
+            {
+                valid = await LusiumService.ValidaNovosDadosColaborador(collaboratorID.ToString(), tempName, tempBirthDate.Value, tempInstitutionId, tempPass);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex.Message);
+
+                navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+            }
         }
         else
         { 
-			message = "Data de nascimento inválida.";
+            message = "Data de nascimento inválida.";
             editSuccess = false;
         }
 
         if (valid)
         {
-            await LusiumService.AtualizaDadosColaborador(collaboratorID.ToString(), tempName, tempBirthDate.Value, tempInstitutionId, tempPass);
+            try
+            {
+                await LusiumService.AtualizaDadosColaborador(collaboratorID.ToString(), tempName, tempBirthDate.Value, tempInstitutionId, tempPass);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex.Message);
+
+                navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+            }
             message = "Colaborador editado com sucesso.";
             editSuccess = true;
         }

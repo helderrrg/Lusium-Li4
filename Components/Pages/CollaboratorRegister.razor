@@ -1,4 +1,5 @@
 ﻿@page "/register/collaborator"
+@inject NavigationManager navigationManager
 @rendermode InteractiveServer
 
 
@@ -168,8 +169,16 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // Obtém a lista de instituições
-        institutions = await LusiumService.ListaUtilizadores("Institution");
+        try
+        {
+            institutions = await LusiumService.ListaUtilizadores("Institution");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+        }  
     }
 
     public async Task RegisterCollaborator()
@@ -188,11 +197,34 @@
             return;
         }
 
-        var valid = await LusiumService.ValidaDadosColaborador(name, email, birthDate.Value, selectedInstitutionId, password);
+        bool valid = false;
+
+        try
+        {
+            institutions = await LusiumService.ListaUtilizadores("Institution");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+        }
 
         if (valid)
         {
-            Collaborator collaborator = await LusiumService.RegistaColaborador(name, email, birthDate.Value, selectedInstitutionId, password);
+            Collaborator collaborator = null;
+
+            try
+            {
+                collaborator = await LusiumService.RegistaColaborador(name, email, birthDate.Value, selectedInstitutionId, password);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex.Message);
+
+                navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+            }
+
             if (collaborator != null)
             {
                 message = "Colaborador registado com sucesso!";

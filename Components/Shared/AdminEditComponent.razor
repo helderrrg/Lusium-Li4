@@ -1,5 +1,6 @@
 ﻿@inject LusiumService LusiumService
-@inject NavigationManager NavigationManager
+@inject NavigationManager navigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @rendermode InteractiveServer
 
 <style>
@@ -141,16 +142,46 @@
             return;
         }
 
-        var valid = await LusiumService.ValidaNovosDadosAdministrador(userId, userName, password);
+        bool valid = false;
+
+        try
+        {
+            valid = await LusiumService.ValidaNovosDadosAdministrador(userId, userName, password);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+        }
 
         if (valid)
         {
-            await LusiumService.AtualizaDadosAdministrador(userId, userName, password);
+            try
+            {
+                await LusiumService.AtualizaDadosAdministrador(userId, userName, password);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex.Message);
+
+                navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+            }
+            
             message = "Senha alterada com sucesso.";
 
-            await LusiumService.validateAdmin(userId);
+            try
+            {
+                await LusiumService.validateAdmin(userId);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex.Message);
 
-            NavigationManager.NavigateTo("/login");
+                navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+            }
+
+            navigationManager.NavigateTo("/login");
         }
         else
         {
