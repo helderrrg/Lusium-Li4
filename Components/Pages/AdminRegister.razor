@@ -1,4 +1,5 @@
 @page "/admins/create"
+@inject NavigationManager navigationManager
 @rendermode InteractiveServer
 @attribute [Authorize(Roles = "Admin")]
 
@@ -151,11 +152,34 @@
             return;
         }
 
-        var valid = await LusiumService.ValidaDadosAdministrador(name, email, password);
+        bool valid = false;
+
+        try
+        {
+            valid = await LusiumService.ValidaDadosAdministrador(name, email, password);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+        }
 
         if (valid)
         {
-            Administrator administrator = await LusiumService.RegistaAdministrador(name, email, password);
+            Administrator administrator = null;
+
+            try
+            {
+                administrator = await LusiumService.RegistaAdministrador(name, email, password);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex.Message);
+
+                navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+            }
+
             if (administrator != null)
             {
                 message = $"Administrador registado com sucesso.";

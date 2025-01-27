@@ -250,23 +250,34 @@
 
             isAdmin = user.IsInRole("Admin");
 
-            result = await LusiumService.ObterInstituicao(institutionID.ToString())!;
-            
-            if (isAdmin)
+            try
             {
-                u = await LusiumService.ObterUtilizador(userID, "Admin");
-            } else
-            {
-                u = await LusiumService.ObterUtilizador(userID, "Institution");
+                result = await LusiumService.ObterInstituicao(institutionID.ToString())!;
+
+                if (isAdmin)
+                {
+                    u = await LusiumService.ObterUtilizador(userID, "Admin");
+                }
+                else
+                {
+                    u = await LusiumService.ObterUtilizador(userID, "Institution");
+                }
+                actualUserEmail = u.Email;
+
+
+                if (result != null)
+                {
+                    userName = result.Nome;
+                    userEmail = result.Email;
+                    userAdress = result.Morada;
+                    institutionCredits = result.Creditos;
+                }
             }
-            actualUserEmail = u.Email;
-            
-            if (result != null)
+            catch (Exception ex)
             {
-                userName = result.Nome;
-                userEmail = result.Email;
-                userAdress = result.Morada;
-                institutionCredits = result.Creditos;
+                Console.Error.WriteLine(ex.Message);
+
+                navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
             }
         }
         else
@@ -292,7 +303,18 @@
 
     private async Task ConfirmEdit()
     {
-        var confirmation = await LusiumService.ValidaPP(actualUserEmail, currentPassword);
+        bool confirmation = false;
+
+        try
+        {
+            confirmation = await LusiumService.ValidaPP(actualUserEmail, currentPassword);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+        }
 
         if (confirmation)
         {
@@ -322,11 +344,32 @@
         string tempAdress = string.IsNullOrEmpty(pendingAdress) ? userAdress : pendingAdress;
         int tempCredits = isAdmin && pendingCredits >= 0 ? pendingCredits : institutionCredits;
 
-        var valid = await LusiumService.ValidaNovosDadosInstituicao(institutionID.ToString(), tempName, tempAdress, tempPass, tempCredits);
+        bool valid = false;
+
+        try
+        {
+            valid = await LusiumService.ValidaNovosDadosInstituicao(institutionID.ToString(), tempName, tempAdress, tempPass, tempCredits);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+        }
 
         if (valid)
         {
-            await LusiumService.AtualizaDadosInstituicao(institutionID.ToString(), tempName, tempAdress, tempPass, tempCredits);
+            try
+            {
+                await LusiumService.AtualizaDadosInstituicao(institutionID.ToString(), tempName, tempAdress, tempPass, tempCredits);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex.Message);
+
+                navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+            }
+            
             message = "Instituição editada com sucesso.";
             editSuccess = true;
         }

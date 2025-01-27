@@ -86,8 +86,17 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var res = await lusiumService.ListaInstituicoes();
-        institutions = res.Select(item => item.Value).ToList();
+        try
+        {
+            var res = await lusiumService.ListaInstituicoes();
+            institutions = res.Select(item => item.Value).ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+        }
     }
 
     private void NavigateToCollaborators(int institutionId)

@@ -278,7 +278,16 @@
             navigationManager.NavigateTo("/login");
         }
 
-        collaboratorList = await LusiumService.ListaColaboradores(institutionID);
+        try
+        {
+            collaboratorList = await LusiumService.ListaColaboradores(institutionID);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+        }
     }
 
     private IEnumerable<KeyValuePair<string, Collaborator>> filteredCollaboratorList
@@ -308,7 +317,16 @@
 
     private async Task RemoveCollaborator(string collaboratorId)
     {
-        await LusiumService.RemoveUtilizador(collaboratorId, "Collaborator");
+        try
+        {
+            await LusiumService.RemoveUtilizador(collaboratorId, "Collaborator");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
+        }
         collaboratorList.Remove(collaboratorId);
     }
 
