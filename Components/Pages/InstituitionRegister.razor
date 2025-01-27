@@ -9,7 +9,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        height: 100vh;
+        height: 120vh;
         width: 100vw;
         background-color: #1e352f;
     }
@@ -43,6 +43,10 @@
         display: flex;
         justify-content: space-between;
         width: 100%;
+    }
+
+    .double-form-entry .form-entry {
+        width: 48%;
     }
 
     .form-control {
@@ -83,8 +87,15 @@
         align-items: left;
     }
 
-    .info-message {
+    .failed-message {
         background-color: #ea6565;
+        padding: 10px;
+        border-radius: 5px;
+        color: white;
+    }
+
+    .success-message {
+        background-color: #A6C36F;
         padding: 10px;
         border-radius: 5px;
         color: white;
@@ -118,7 +129,7 @@
             </div>
             <div class="form-entry">
                 <label for="password">Palavra-passe</label>
-                <input type="text" class="form-control" id="password" @bind="password" />
+                <input type="password" class="form-control" id="password" @bind="password" />
             </div>
             <div class="form-entry">
                 <label for="confirmPassword">Confirmar Palavra-passe</label>
@@ -131,7 +142,7 @@
         @if (!string.IsNullOrEmpty(message))
         {
             <div class="info-message-wrapper">
-                <div class="info-message">@message</div>
+                <div class="info-message @(registrationSuccess ? "success-message" : "failed-message")">@message</div>
             </div>
         }
     </div>
@@ -147,6 +158,7 @@
         private string confirmPassword = string.Empty;
     
         private string message = string.Empty;
+        private bool registrationSuccess = false;
     
         [Inject]
         public required LusiumService LusiumService { get; set; }
@@ -157,6 +169,7 @@
             if (password != confirmPassword)
             {
                 message = "As palavras-passe não coincidem.";
+                registrationSuccess = false;
                 return;
             }
 
@@ -167,16 +180,19 @@
                 Instituition institution = await LusiumService.RegistaInstituicao(name, nif, numInst, email, address, password);
                 if (institution != null)
                 {
-                    message = $"Instituição registada com os campos: Nome - {institution.Nome}, Email - {institution.Email}, Nif - {institution.NIF}, Número de Associação - {institution.NumeroAssociacao}, Morada - {institution.Morada}.";
+                    message = "Instituição registada com sucesso.";
+                    registrationSuccess = true;
                 }
                 else
                 {
                     message = "Não foi possível registar a instituição.";
+                    registrationSuccess = false;
                 }
             }
             else
             {
                 message = "Dados inválidos. Não foi possível registar.";
+                registrationSuccess = false;
             }
         }
 }
