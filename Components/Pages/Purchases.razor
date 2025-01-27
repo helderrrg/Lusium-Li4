@@ -15,6 +15,10 @@
         width: 100vw;
         background-color: #1e352f;
     }
+    .page.blurred {
+        filter: blur(5px);
+        pointer-events: none;
+    }
     .content {
         width: 60%;
         display: flex;
@@ -99,7 +103,7 @@ else if (purchasesList.Count == 0)
 }
 else
 {
-    <div class="page">
+    <div class="page @(isPopupVisible ? "blurred" : "")">
         <div class="content">
             <div class="listing-header">
                 <div class="listing-cell">Nome</div>
