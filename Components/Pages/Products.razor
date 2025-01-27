@@ -1,5 +1,6 @@
 ﻿@page "/products"
 @rendermode InteractiveServer
+@inject NavigationManager navigationManager
 @attribute [Authorize(Roles = "Admin,Institution")]
 
 <PageTitle>Produtos</PageTitle>
@@ -154,7 +155,9 @@
                                         <div class="img">@piecePerProduct.Peca.ImagemAlusiva</div>
                                     } -->
                                 </div>
-                                <button>Comprar</button>
+                                <AuthorizeView Roles="Institution" Context="institutionContext">
+                                    <button @onclick="() => navigateToProductPurchase(product.ID)">Comprar</button>
+                                </AuthorizeView>
                             </div>
                         </div>
                     </div>
@@ -174,5 +177,10 @@
     {
         var temp = await LusiumService.ListaProdutos();
         productList = temp.Values.ToList();
+    }
+
+    private void navigateToProductPurchase(int productID)
+    {
+        navigationManager.NavigateTo($"/products/purchase/{productID}");
     }
 }
