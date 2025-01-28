@@ -201,7 +201,7 @@
 
         try
         {
-            institutions = await LusiumService.ListaUtilizadores("Institution");
+            valid = await LusiumService.ValidaDadosColaborador(name, email, birthDate.Value, selectedInstitutionId, password);
         }
         catch (Exception ex)
         {
